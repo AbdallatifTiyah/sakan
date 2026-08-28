@@ -47,6 +47,8 @@
 **الـmigrations المسجّلة**
 - `20260828161300_remote_schema`
 - `20260828203602_restore_service_role_grants`
+- `20260828222908_revoke_rls_auto_enable`
+- `20260829120000_revoke_public_execute_grants`
 
 **من يقرأ ماذا**
 - `anon` → `v_listings_public`, `v_requests_public`, `areas`, `cities` — لا غير
