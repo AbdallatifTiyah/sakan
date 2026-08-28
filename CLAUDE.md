@@ -3,7 +3,7 @@
 منصة تأجير غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت.
 واجهة عربية RTL. باك إند Supabase. نشر على Cloudflare Workers.
 
-**آخر تحديث: ٢٩ آب ٢٠٢٦ — نهاية conv6**
+**آخر تحديث: ٢٩ آب ٢٠٢٦ — conv7 (إغلاق منحة PUBLIC)**
 
 ---
 
@@ -74,6 +74,7 @@
 8. **`robots.txt` ما بيذكر `/admin` إطلاقاً.** كتابة `Disallow: /admin` بتدلّ على مكان اللوحة بدل ما تخفيها. الحماية = `401` + `X-Robots-Tag: noindex`.
 9. المنصة **مش** أداة مراقبة. صفحة طمأنة الأهل بتوصف السكن، مش بتتبّع الساكن.
 10. بدون dependencies جديدة. صفحة واحدة، vanilla JS.
+11. **أي `function` جديدة بتنكتب: `revoke execute on function ... from public;` وبعدها `grant execute ... to` الأدوار المقصودة صراحةً.** الافتراضي بـPostgres بيمنح التنفيذ لـ`PUBLIC` — يعني الدالة مكشوفة على `/rest/v1/rpc/` من لحظة إنشائها. سحبها من `anon` لحاله ما بينفع. التحقق الوحيد المعتبر: `has_function_privilege('anon', '<signature>', 'execute')` = `false`.
 
 ---
 
@@ -85,6 +86,7 @@
 | `403` من Supabase | **المفتاح سليم** — الدور ناقصه GRANT على الجدول |
 | `404` من Supabase | اسم جدول/واجهة غلط، أو الschema مش مكشوف |
 | `/admin` بيفتح بدون سؤال | الـWorker مش شغّال — افحص `main` بـ`wrangler.toml` |
+| `revoke` نجح بس الصلاحية باقية | المنحة من `PUBLIC` مش من الدور. Postgres بيمنح `EXECUTE to PUBLIC` تلقائياً على كل function جديدة — لازم `revoke ... from public` صراحةً، وبعدها `grant` للأدوار المقصودة. تحقق دايماً بـ`has_function_privilege`، مش بنجاح الأمر. |
 
 ---
 
