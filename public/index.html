@@ -454,9 +454,26 @@ async function subRequest(){
 function closeAll(){ ov.classList.remove("on"); modal.innerHTML=""; }
 document.addEventListener("keydown",e=>{ if(e.key==="Escape")closeAll(); });
 
+/* ===== تأكيد توفّر الإعلان (رابط المندوب) ===== */
+async function checkConfirmLink(){
+  const p=new URLSearchParams(location.search);
+  const ref=p.get("c"), token=p.get("t");
+  if(!ref||!token) return;
+  history.replaceState(null,"",location.pathname);
+  let ok=false;
+  try{ ok=await rpc("confirm_listing_available",{p_ref:ref,p_token:token}); }catch(e){ ok=false; }
+  modal.innerHTML=`
+    <div class="mh"><h2>تأكيد الإعلان</h2><button class="x" onclick="closeAll()">×</button></div>
+    <div class="mb">${ok
+      ? '<div class="done">تم تمديد إعلانك ٢١ يوم ✓</div>'
+      : '<div class="err">الرابط غير صالح أو منتهي.</div>'}</div>`;
+  ov.classList.add("on");
+}
+
 /* ===== التحميل ===== */
 (async()=>{
   renderFilters();
+  await checkConfirmLink();
   try{
     [L,R]=await Promise.all([
       api("v_listings_public?select=*&order=published_at.desc"),
