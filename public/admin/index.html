@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سكن — لوحة الإدارة</title>
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --card: #ffffff;
+    --border: #e2e4e9;
+    --text: #1c1f26;
+    --muted: #6b7280;
+    --brand: #0f766e;
+    --brand-dark: #0d5f58;
+    --danger: #b91c1c;
+    --danger-bg: #fee2e2;
+    --warn: #92400e;
+    --warn-bg: #fef3c7;
+    --ok: #166534;
+    --ok-bg: #dcfce7;
+    --blue: #1e3a8a;
+    --blue-bg: #dbeafe;
+    --gray-bg: #e5e7eb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px;
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  h2 { font-size: 16px; margin: 32px 0 12px; }
+  .sub { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+
+  #gate {
+    max-width: 480px;
+    margin: 80px auto;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+  }
+  #gate p { color: var(--muted); font-size: 13px; line-height: 1.7; }
+  #gate input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 13px;
+    margin: 12px 0;
+  }
+  #gate button, .topbar button {
+    background: var(--brand);
+    color: #fff;
+    border: none;
+    padding: 9px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  #gate button:hover, .topbar button:hover { background: var(--brand-dark); }
+  #gateError { color: var(--danger); font-size: 13px; margin-top: 8px; min-height: 18px; }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .topbar .actions { display: flex; gap: 8px; }
+  .topbar button.secondary {
+    background: #fff;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .topbar button.secondary:hover { background: var(--gray-bg); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 13px;
+  }
+  th, td {
+    padding: 10px 12px;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  th {
+    background: #fafafa;
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 12px;
+  }
+  tr:last-child td { border-bottom: none; }
+  td.muted, .empty { color: var(--muted); }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge.pending { background: var(--warn-bg); color: var(--warn); }
+  .badge.published { background: var(--ok-bg); color: var(--ok); }
+  .badge.rejected { background: var(--danger-bg); color: var(--danger); }
+  .badge.rented { background: var(--blue-bg); color: var(--blue); }
+  .badge.reserved { background: var(--blue-bg); color: var(--blue); }
+  .badge.expired, .badge.draft { background: var(--gray-bg); color: var(--muted); }
+  .badge.new { background: var(--warn-bg); color: var(--warn); }
+  .badge.forwarded, .badge.owner_responded, .badge.viewing_set { background: var(--blue-bg); color: var(--blue); }
+  .badge.dead { background: var(--gray-bg); color: var(--muted); }
+
+  .row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  .row-actions button {
+    border: 1px solid var(--border);
+    background: #fff;
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .row-actions button:hover { background: var(--gray-bg); }
+  .row-actions button.copy { border-color: var(--brand); color: var(--brand); }
+  .row-actions button.copy:hover { background: #ecfdf5; }
+  .row-actions button.publish { color: var(--ok); }
+  .row-actions button.reject { color: var(--danger); }
+  .row-actions button.rent { color: var(--blue); }
+  .row-actions button:disabled { opacity: 0.5; cursor: default; }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; }
+
+  code.ref { font-family: monospace; font-size: 12px; color: var(--muted); }
+  #err { color: var(--danger); font-size: 13px; margin: 8px 0; }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <h1>سكن — لوحة الإدارة</h1>
+  <p>
+    الصق مفتاح <code>service_role</code> من إعدادات Supabase (Project Settings → API).
+    المفتاح بينحفظ بالمتصفح مؤقتاً (sessionStorage) وبينمسح لما تسكّر التبويب — ما بينخزّن بأي مكان تاني.
+  </p>
+  <input id="keyInput" type="password" placeholder="service_role key" autocomplete="off" spellcheck="false">
+  <button id="enterBtn">دخول</button>
+  <div id="gateError"></div>
+</div>
+
+<div id="app" style="display:none; max-width: 1100px; margin: 0 auto;">
+  <div class="topbar">
+    <div>
+      <h1>سكن — لوحة الإدارة</h1>
+      <div class="sub">إدارة الإعلانات وطلبات التواصل</div>
+    </div>
+    <div class="actions">
+      <button class="secondary" id="refreshBtn">تحديث</button>
+      <button class="secondary" id="logoutBtn">تسجيل خروج</button>
+    </div>
+  </div>
+
+  <div id="err"></div>
+
+  <h2>الإعلانات</h2>
+  <table id="listingsTable">
+    <thead>
+      <tr>
+        <th>المرجع</th>
+        <th>العنوان</th>
+        <th>الحالة</th>
+        <th>التوثيق</th>
+        <th>ينتهي</th>
+        <th>رمز التأكيد</th>
+        <th>إجراءات</th>
+      </tr>
+    </thead>
+    <tbody id="listingsBody">
+      <tr><td colspan="7" class="empty">جارٍ التحميل…</td></tr>
+    </tbody>
+  </table>
+
+  <h2>طلبات التواصل</h2>
+  <table id="contactsTable">
+    <thead>
+      <tr>
+        <th>التاريخ</th>
+        <th>الاسم</th>
+        <th>الهاتف</th>
+        <th>الحالة</th>
+        <th>الإعلان المرتبط</th>
+      </tr>
+    </thead>
+    <tbody id="contactsBody">
+      <tr><td colspan="5" class="empty">جارٍ التحميل…</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var SUPABASE_URL = "https://yckteijitcqjtedoyoyv.supabase.co";
+  var SITE_URL = "https://sakan.abdallatif-tiyah.workers.dev";
+  var STORAGE_KEY = "sakan_admin_service_key";
+
+  var LISTING_STATUS_LABELS = {
+    draft: "مسودة", pending: "قيد المراجعة", published: "منشور",
+    rejected: "مرفوض", reserved: "محجوز", rented: "مؤجّر", expired: "منتهي"
+  };
+  var VERIFICATION_LABELS = { none: "بدون", desk: "مكتبي", field: "ميداني" };
+  var CONTACT_STATUS_LABELS = {
+    new: "جديد", forwarded: "محوّل", owner_responded: "ردّ المالك",
+    viewing_set: "موعد معاينة", rented: "تم التأجير", dead: "منتهي"
+  };
+
+  var gate = document.getElementById("gate");
+  var app = document.getElementById("app");
+  var keyInput = document.getElementById("keyInput");
+  var enterBtn = document.getElementById("enterBtn");
+  var gateError = document.getElementById("gateError");
+  var errBox = document.getElementById("err");
+  var toastEl = document.getElementById("toast");
+
+  var apiKey = null;
+
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    setTimeout(function () { toastEl.classList.remove("show"); }, 1600);
+  }
+
+  function escapeHtml(s) {
+    if (s === null || s === undefined) return "";
+    return String(s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return "—";
+    var d = new Date(iso);
+    return d.toLocaleDateString("ar-EG", { year: "numeric", month: "2-digit", day: "2-digit" }) +
+      " " + d.toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext !== false) {
+      return navigator.clipboard.writeText(text).catch(function () { return fallbackCopy(text); });
+    }
+    return fallbackCopy(text);
+  }
+
+  function fallbackCopy(text) {
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy");
+        resolve();
+      } catch (e) {
+        reject(e);
+      } finally {
+        document.body.removeChild(ta);
+      }
+    });
+  }
+
+  function api(path, opts) {
+    opts = opts || {};
+    var headers = {
+      "apikey": apiKey,
+      "Authorization": "Bearer " + apiKey,
+      "Content-Type": "application/json"
+    };
+    if (opts.prefer) headers["Prefer"] = opts.prefer;
+    return fetch(SUPABASE_URL + "/rest/v1/" + path, {
+      method: opts.method || "GET",
+      headers: headers,
+      body: opts.body ? JSON.stringify(opts.body) : undefined
+    }).then(function (res) {
+      if (!res.ok) {
+        return res.text().then(function (t) {
+          throw new Error("HTTP " + res.status + " — " + t);
+        });
+      }
+      if (res.status === 204) return null;
+      return res.json();
+    });
+  }
+
+  function showGate(message) {
+    app.style.display = "none";
+    gate.style.display = "block";
+    gateError.textContent = message || "";
+  }
+
+  function showApp() {
+    gate.style.display = "none";
+    app.style.display = "block";
+  }
+
+  function enter() {
+    var v = keyInput.value.trim();
+    if (!v) return;
+    apiKey = v;
+    sessionStorage.setItem(STORAGE_KEY, v);
+    showApp();
+    loadAll();
+  }
+
+  function logout() {
+    apiKey = null;
+    sessionStorage.removeItem(STORAGE_KEY);
+    keyInput.value = "";
+    showGate();
+  }
+
+  enterBtn.addEventListener("click", enter);
+  keyInput.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") enter();
+  });
+  document.getElementById("logoutBtn").addEventListener("click", logout);
+  document.getElementById("refreshBtn").addEventListener("click", loadAll);
+
+  function renderListings(rows) {
+    var body = document.getElementById("listingsBody");
+    if (!rows || !rows.length) {
+      body.innerHTML = '<tr><td colspan="7" class="empty">لا توجد إعلانات</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(function (l) {
+      var link = SITE_URL + "/?c=" + encodeURIComponent(l.ref) + "&t=" + encodeURIComponent(l.confirm_token);
+      return (
+        "<tr data-id=\"" + l.id + "\">" +
+        "<td><code class=\"ref\">" + escapeHtml(l.ref) + "</code></td>" +
+        "<td>" + escapeHtml(l.title) + "</td>" +
+        "<td><span class=\"badge " + l.status + "\">" + (LISTING_STATUS_LABELS[l.status] || l.status) + "</span></td>" +
+        "<td>" + (VERIFICATION_LABELS[l.verification] || l.verification) + "</td>" +
+        "<td class=\"muted\">" + fmtDate(l.expires_at) + "</td>" +
+        "<td><code class=\"ref\" title=\"" + escapeHtml(l.confirm_token) + "\">" + escapeHtml(String(l.confirm_token).slice(0, 8)) + "…</code></td>" +
+        "<td><div class=\"row-actions\">" +
+        "<button class=\"copy\" data-link=\"" + escapeHtml(link) + "\">نسخ رابط التأكيد</button>" +
+        "<button class=\"publish\" data-action=\"published\">نشر</button>" +
+        "<button class=\"reject\" data-action=\"rejected\">رفض</button>" +
+        "<button class=\"rent\" data-action=\"rented\">مؤجّر</button>" +
+        "</div></td>" +
+        "</tr>"
+      );
+    }).join("");
+  }
+
+  function renderContacts(rows) {
+    var body = document.getElementById("contactsBody");
+    if (!rows || !rows.length) {
+      body.innerHTML = '<tr><td colspan="5" class="empty">لا توجد طلبات تواصل</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(function (c) {
+      var listing = c.listings ? (c.listings.ref + " — " + c.listings.title) : "—";
+      return (
+        "<tr>" +
+        "<td class=\"muted\">" + fmtDate(c.created_at) + "</td>" +
+        "<td>" + escapeHtml(c.seeker_name) + "</td>" +
+        "<td>" + escapeHtml(c.seeker_phone) + "</td>" +
+        "<td><span class=\"badge " + c.status + "\">" + (CONTACT_STATUS_LABELS[c.status] || c.status) + "</span></td>" +
+        "<td>" + escapeHtml(listing) + "</td>" +
+        "</tr>"
+      );
+    }).join("");
+  }
+
+  function loadListings() {
+    return api("listings?select=id,ref,title,status,verification,expires_at,confirm_token&order=created_at.desc&limit=200")
+      .then(renderListings);
+  }
+
+  function loadContacts() {
+    return api("contact_requests?select=id,created_at,seeker_name,seeker_phone,status,listings(ref,title)&order=created_at.desc&limit=200")
+      .then(renderContacts);
+  }
+
+  function loadAll() {
+    errBox.textContent = "";
+    Promise.all([loadListings(), loadContacts()]).catch(function (e) {
+      handleApiError(e);
+    });
+  }
+
+  function handleApiError(e) {
+    var msg = e && e.message ? e.message : String(e);
+    if (/HTTP 401|HTTP 403|Invalid API key|JWT/i.test(msg)) {
+      logout();
+      showGate("المفتاح غير صحيح أو منتهي — جرّب مرة تانية.");
+    } else {
+      errBox.textContent = "صار خطأ: " + msg;
+    }
+  }
+
+  function setListingStatus(id, status, row) {
+    var body = { status: status };
+    if (status === "rejected") {
+      var reason = window.prompt("سبب الرفض (اختياري):", "");
+      if (reason === null) return;
+      body.reject_reason = reason.trim() || null;
+    }
+    var buttons = row.querySelectorAll("button");
+    buttons.forEach(function (b) { b.disabled = true; });
+    api("listings?id=eq." + encodeURIComponent(id), {
+      method: "PATCH",
+      body: body,
+      prefer: "return=minimal"
+    }).then(function () {
+      toast("تم التحديث");
+      loadListings();
+    }).catch(function (e) {
+      buttons.forEach(function (b) { b.disabled = false; });
+      handleApiError(e);
+    });
+  }
+
+  document.getElementById("listingsBody").addEventListener("click", function (e) {
+    var copyBtn = e.target.closest("button.copy");
+    if (copyBtn) {
+      var link = copyBtn.getAttribute("data-link");
+      copyText(link).then(function () {
+        var original = copyBtn.textContent;
+        copyBtn.textContent = "✓ انتسخ";
+        toast("انتسخ الرابط للحافظة");
+        setTimeout(function () { copyBtn.textContent = original; }, 1500);
+      }).catch(function () {
+        toast("تعذّر النسخ — انسخه يدوياً: " + link);
+      });
+      return;
+    }
+    var actionBtn = e.target.closest("button[data-action]");
+    if (actionBtn) {
+      var row = actionBtn.closest("tr");
+      var id = row.getAttribute("data-id");
+      setListingStatus(id, actionBtn.getAttribute("data-action"), row);
+    }
+  });
+
+  var saved = sessionStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    apiKey = saved;
+    showApp();
+    loadAll();
+  } else {
+    showGate();
+  }
+})();
+</script>
+
+</body>
+</html>
