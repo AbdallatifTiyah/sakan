@@ -1,7 +1,7 @@
 # سكن (Sakan) — دليل المشروع
 
 منصة تأجير غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت.
-واجهة عربية RTL. باك إند Supabase. نشر على Cloudflare Pages.
+واجهة عربية RTL. باك إند Supabase. نشر على Cloudflare Workers من GitHub.
 
 ---
 
@@ -9,10 +9,15 @@
 
 | ملف | الوصف |
 |---|---|
-| `index.html` | الموقع العام. صفحة واحدة، بدون build step، بدون npm |
-| `admin.html` | لوحة الإدارة. **service_role — محلي فقط، ممنوع رفعه** |
+| `public/index.html` | الموقع العام. صفحة واحدة، بدون build step، بدون npm. **هاد الملف الوحيد اللي بينشر** |
+| `wrangler.toml` | إعدادات النشر. `[assets] directory = "./public"` |
+| `admin.html` | لوحة الإدارة. **service_role — محلي فقط، بالـ.gitignore، ممنوع رفعه** |
 | `supabase/migrations/` | كل تعديل على قاعدة البيانات يصير هنا |
 | `SETUP.md` | دليل النشر والتشغيل اليومي |
+
+أي ملف برّا `public/` ما بينشر على الإنترنت. هاد مقصود — `CLAUDE.md` وملفات الـmigrations ما لازم تكون عامة.
+
+**الريبو:** `github.com/AbdallatifTiyah/sakan` (خاص). الفرع الأساسي `main`. كل push على `main` بينشر تلقائياً.
 
 **Supabase**
 - ref: `yckteijitcqjtedoyoyv`
@@ -29,10 +34,25 @@
 1. **الخصوصية:** أرقام الهواتف، العناوين الدقيقة، وجهة العمل **ما بتظهر أبداً** بأي واجهة عامة.
 2. الموقع بيقرأ من `v_listings_public` و `v_requests_public` **فقط**. أي استعلام مباشر على `listings` أو `profiles` من الواجهة = خطأ.
 3. `v_reverse_matches` و `v_kpi_*` أدوات داخلية. ممنوع منح `anon` صلاحية عليها إطلاقاً.
-4. أي تعديل schema بيصير كملف migration. **ممنوع SQL Editor.**
-5. `admin.html` ما بينرفع على Cloudflare ولا بينعمله commit بدون `.gitignore`.
+4. أي تعديل schema بيصير كملف migration + `supabase db push`. **ممنوع SQL Editor.**
+5. `admin.html` بالـ`.gitignore`. ممنوع إزالته منه، وممنوع نقله لـ`public/`.
 6. المنصة **مش** أداة مراقبة. صفحة طمأنة الأهل بتوصف السكن، مش بتتبّع الساكن.
 7. بدون dependencies جديدة. صفحة واحدة، vanilla JS.
+8. ولا ملف حسّاس جوّا `public/`.
+
+---
+
+## طريقة الشغل مع قاعدة البيانات
+
+```
+supabase/migrations/YYYYMMDDHHMMSS_وصف.sql   ← اكتب التعديل
+supabase db push                              ← طبّقه على السيرفر
+git add -A && git commit && git push          ← احفظه وانشر
+```
+
+- `db push` **ما بيحتاج Docker**.
+- `db pull` و `db diff` بيحتاجوا Docker Desktop شغّال.
+- قبل أي migration جديد: اقرأ `supabase/migrations/20260828161300_remote_schema.sql` — هاد الأساس.
 
 ---
 
@@ -52,13 +72,23 @@
 
 ---
 
+## خلصت ✅
+
+- الريبو مربوط بـGitHub، `.gitignore` شغّال، `admin.html` ما انرفع ولا مرة
+- الـschema مسحوب كأساس، سجل الـmigrations متطابق بين المحلي والسيرفر
+- `index.html` مربوط بالمفاتيح وبيعرض الإعلانين، وطلب التواصل بيوصل للقاعدة فعلاً
+- **ثغرة `confirm_token` انسكرت:** عمود `confirm_token uuid` بكل إعلان، والدالة صارت `confirm_listing_available(p_ref text, p_token uuid)` وبتتحقق من الاتنين
+- **ثغرة تانية انسكرت:** سياسة `anon_insert_contact` كانت `with_check = true` — أي حدا كان بيقدر يزرع `status='rented'` ويولّد عمولة وهمية بـ`owner_fees`. صارت مضيّقة على `status='new'` وحقول المندوب فاضية
+
+---
+
 ## مهام مفتوحة
 
-- [ ] ربط `index.html` بالمفاتيح أعلاه والتأكد إنه بيعرض الإعلانين التجريبيين
-- [ ] النشر على Cloudflare Pages من الريبو (build فاضي، output `/`)
-- [ ] **ثغرة أمنية:** `confirm_listing_available` بتاخد وسيط نصّي متوقّع (`SK-0001`) وأي حدا بالمفتاح العام بيقدر يمدّد كل الإعلانات ويعطّل الانتهاء بعد ٢١ يوم. الحل: عمود `confirm_token` عشوائي بكل إعلان + الدالة تتحقق منه + رابط الواتساب يحمله
-- [ ] حذف القسم ١٨ (بيانات تجريبية) قبل أول إعلان حقيقي
-- [ ] `.gitignore` يشمل `admin.html`
+- [ ] `public/index.html`: يقرأ `?c=<ref>&t=<token>` من الرابط ويمرّرهم لـ`confirm_listing_available`
+- [ ] `admin.html`: يعرض `confirm_token` وزر نسخ يبني الرابط كامل للمندوب
+- [ ] حذف القسم ١٨ (بيانات تجريبية) قبل أول إعلان حقيقي — وحذف طلب التواصل التجريبي من `contact_requests`
+- [ ] التأكد إنه `/CLAUDE.md` و `/supabase/...` بيرجّعوا 404 على الرابط المنشور
+- [ ] التسجيل بوزارة الاقتصاد الوطني
 
 ---
 
