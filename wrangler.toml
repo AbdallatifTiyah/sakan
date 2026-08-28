@@ -1,0 +1,6 @@
+name = "sakan"
+compatibility_date = "2026-08-28"
+
+[assets]
+directory = "./public"
+not_found_handling = "single-page-application"
