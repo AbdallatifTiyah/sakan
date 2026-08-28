@@ -1,29 +1,3 @@
-# مهمة: توثيق بيانات المدن والمناطق كـmigration
-
-## الخلفية
-
-بحث الخطوة ١ بمهمة المسح غطّى البيانات التجريبية بس.
-`cities` و `areas` ما انفحصوا — وهدول بيانات مرجعية حقيقية،
-مش بذرة. لو مش بأي migration، فهم موجودين على القاعدة الحية فقط.
-
-النتيجة لو ضاعوا: كل القوائم المنسدلة بالموقع بتطلع فاضية،
-وأي نموذج بيعتمد على `area_id` بينكسر — بدون أي رسالة خطأ
-واضحة، لأن الـmigrations كلها بتكون "نجحت".
-
-## الخطوة ١ — تأكّد
-
-```bash
-grep -rn "الماصيون\|ramallah\|insert into public.cities\|insert into cities" supabase/
-```
-
-- **لو طلعوا بملف migration موجود:** خلص، ما في مهمة. بلّغني وقف.
-- **لو ما طلعوا:** كمّل للخطوة ٢.
-
-## الخطوة ٢ — الملف
-
-`supabase/migrations/20260829150000_seed_reference_data.sql`
-
-```sql
 -- Reference data: cities and areas. Not test data — the site is
 -- unusable without these. Idempotent so it is safe on an existing db.
 
@@ -62,18 +36,3 @@ on conflict (id) do update
 -- or the next auto-generated id collides with an existing row.
 select setval('cities_id_seq', (select max(id) from public.cities));
 select setval('areas_id_seq',  (select max(id) from public.areas));
-```
-
-## الخطوة ٣ — التطبيق والتحقق
-
-```bash
-npx supabase db push
-```
-
-```sql
-select
-  (select count(*) from cities) as cities,
-  (select count(*) from areas)  as areas,
-  (select count(*) from cities where is_active) as active_cities,
-  pg_sequence_last_value('cities_id_seq'::regclass) as cities_seq,
-  pg_sequence_last_value('areas_id_seq'::regcl
