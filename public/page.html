@@ -59,6 +59,7 @@ footer a{color:#CFE0DA}
 
 <div class="wrap">
   <div class="tabs" style="margin-top:18px">
+    <a href="?p=how-it-works" id="tHow">كيف بشتغل سكن</a>
     <a href="?p=privacy" id="tPrivacy">سياسة الخصوصية</a>
     <a href="?p=terms" id="tTerms">شروط الاستخدام</a>
   </div>
@@ -125,11 +126,11 @@ function md(src){
   return out;
 }
 
-const KEYS = {privacy:"tPrivacy", terms:"tTerms"};
+const KEYS = {"how-it-works":"tHow", privacy:"tPrivacy", terms:"tTerms"};
 
 (async () => {
   const p = new URLSearchParams(location.search).get("p");
-  const key = KEYS[p] ? p : "privacy";
+  const key = KEYS[p] ? p : "how-it-works";
   const el = document.getElementById(KEYS[key]);
   if(el) el.classList.add("on");
 
