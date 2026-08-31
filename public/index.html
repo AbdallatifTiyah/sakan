@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>سكن — غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت</title>
-<meta name="description" content="غرف وسكن مشترك موثّق ميدانياً في رام الله والبيرة وبيرزيت. كل إعلان منزور ومفحوص. أرقام الهواتف محمية.">
+<meta name="description" content="غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت. كل إعلان موثّق هاتفياً، وقسم كبير منها زارها مندوبنا شخصياً. أرقام الهواتف محمية.">
 <meta property="og:title" content="سكن — غرف وسكن مشترك موثّق">
-<meta property="og:description" content="غرف موثّقة ميدانياً في رام الله والبيرة وبيرزيت.">
+<meta property="og:description" content="غرف موثّقة في رام الله والبيرة وبيرزيت.">
 <meta property="og:locale" content="ar_PS">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -57,6 +57,23 @@ select,input,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);
 textarea{min-height:80px;resize:vertical}
 label{display:block;font-size:13px;color:var(--mut);margin-bottom:4px;font-weight:500}
 
+/* ── حقل الهاتف: رمز الدولة + الرقم ── */
+.tel{display:flex;gap:8px}
+.tel select{flex:0 0 128px;padding-inline:8px}
+.tel input{flex:1;direction:ltr;text-align:right}
+
+/* ── شرائح الاختيار (مناطق / مواصفات / صفات) ── */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
+.chip{position:relative;display:inline-flex}
+.chip input{position:absolute;opacity:0;width:0;height:0}
+.chip span{display:inline-block;padding:7px 13px;border:1px solid var(--line);border-radius:99px;
+  background:#fff;font-size:13.5px;cursor:pointer;user-select:none;transition:.12s;line-height:1.5}
+.chip input:checked + span{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:600}
+.chip input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+.chips-box{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff;
+  max-height:190px;overflow-y:auto}
+.hint{font-size:12.5px;color:var(--mut);margin-top:6px}
+
 .count{padding:16px 0 8px;color:var(--mut);font-size:14px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px;padding-bottom:40px}
 .card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;
@@ -88,12 +105,13 @@ label{display:block;font-size:13px;color:var(--mut);margin-bottom:4px;font-weigh
 .mb{padding:20px}
 .sec{background:var(--card);border-radius:var(--r);padding:16px;margin-bottom:14px;box-shadow:var(--sh)}
 .sec h4{margin:0 0 10px;font-size:15px}
-.row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line);font-size:14px;gap:10px}
 .row:last-child{border:0}
-.row span:first-child{color:var(--mut)}
+.row span:first-child{color:var(--mut);flex:none}
+.row span:last-child{text-align:left}
 .chk{display:flex;align-items:center;gap:8px;font-size:14px;padding:4px 0}
-.chk i{font-style:normal;width:20px}
-.yes{color:var(--ok)} .no{color:#B00020}
+.chk i{font-style:normal;width:20px;flex:none}
+.yes{color:var(--ok)} .no{color:#B00020} .unk{color:var(--mut)}
 .note{background:#FBF6EE;border-right:3px solid var(--accent);padding:10px 12px;border-radius:8px;
   font-size:13px;color:#6B4A2C;margin-top:10px}
 .err{background:#FDECEC;border-right:3px solid #B00020;padding:10px 12px;border-radius:8px;
@@ -102,9 +120,11 @@ label{display:block;font-size:13px;color:var(--mut);margin-bottom:4px;font-weigh
   font-size:14px;color:#0E5C36;margin-top:10px}
 .f2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .fg{margin-bottom:12px}
+.linkish{background:none;border:0;color:var(--brand);font:inherit;font-weight:600;
+  cursor:pointer;padding:0;text-decoration:underline}
 footer{background:#101B18;color:#9FB2AC;padding:26px 0;font-size:13px;margin-top:20px}
-footer a{color:#CFE0DA}
-@media(max-width:640px){.f2{grid-template-columns:1fr}.hero h1{font-size:22px}}
+footer a,footer .linkish{color:#CFE0DA}
+@media(max-width:640px){.f2{grid-template-columns:1fr}.hero h1{font-size:22px}.tel select{flex:0 0 108px}}
 </style>
 </head>
 <body>
@@ -122,9 +142,9 @@ footer a{color:#CFE0DA}
 <section class="hero">
   <div class="wrap">
     <h1>غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت</h1>
-    <p>كل إعلان بينزوره مندوبنا قبل النشر. الإعلان بينتهي تلقائياً بعد ٢١ يوم إذا ما أكّد المالك إنه لسا متاح.</p>
+    <p>كل إعلان موثّق هاتفياً، وقسم كبير منها زارها مندوبنا شخصياً. الإعلان بينتهي تلقائياً بعد ٢١ يوم إذا ما أكّد المالك إنه لسا متاح.</p>
     <div class="trust">
-      <div>✓ <b>زيارة ميدانية</b> قبل النشر</div>
+      <div>✓ <b>توثيق هاتفي</b> لكل إعلان</div>
       <div>✓ <b>رقمك محمي</b> — ما بينعرض لحدا</div>
       <div>✓ <b>بدون إعلانات ميتة</b></div>
     </div>
@@ -150,340 +170,711 @@ footer a{color:#CFE0DA}
   <div class="wrap">
     <b style="color:#fff">سكن</b> — منصة تأجير غرف وسكن مشترك موثّق.<br>
     الخصوصية أولاً: ما بننشر أرقام هواتف ولا عناوين دقيقة ولا جهات عمل على الموقع أبداً.<br>
-    للتواصل والشكاوى: <a id="waFoot" href="#">واتساب</a>
+    <button class="linkish" onclick="openReport(null,null)">تواصل معنا أو قدّم شكوى</button>
+    &nbsp;·&nbsp; <a href="/page.html?p=privacy">سياسة الخصوصية</a>
+    &nbsp;·&nbsp; <a href="/page.html?p=terms">شروط الاستخدام</a>
   </div>
 </footer>
 
 <script>
-/* ===== الإعدادات ===== */
+/* ═══════════════ الإعدادات ═══════════════ */
 const SUPABASE_URL = "https://yckteijitcqjtedoyoyv.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlja3RlaWppdGNxanRlZG95b3l2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MjA3MTksImV4cCI6MjEwMzQ5NjcxOX0.mAY5A6ROvtxN4kkD8g1s_tsDlSjGfy4TCNkgbYHeRvo";
-const WHATSAPP = "972597020998";   // ← بدّله برقم واتساب سكن (بدون + وبدون أصفار البداية)
 
-/* ===== ثوابت ===== */
-const AREAS = [
-  {id:1,c:"رام الله والبيرة",n:"الماصيون"},{id:2,c:"رام الله والبيرة",n:"الطيرة"},
-  {id:3,c:"رام الله والبيرة",n:"أم الشرايط"},{id:4,c:"رام الله والبيرة",n:"عين مصباح"},
-  {id:5,c:"رام الله والبيرة",n:"البالوع"},{id:6,c:"رام الله والبيرة",n:"بيتونيا"},
-  {id:7,c:"رام الله والبيرة",n:"الإرسال"},{id:8,c:"رام الله والبيرة",n:"رام الله التحتا"},
-  {id:9,c:"رام الله والبيرة",n:"البيرة — المنطقة الصناعية"},{id:10,c:"رام الله والبيرة",n:"سردا"},
-  {id:11,c:"بيرزيت",n:"وسط بيرزيت"},{id:12,c:"بيرزيت",n:"قرب الجامعة"},{id:13,c:"بيرزيت",n:"أبو قش"}
+/* ═══════════════ ثوابت ═══════════════ */
+/* المدن والمناطق بتنقرأ من القاعدة عند التحميل — ممنوع تثبيتها هون.
+   أي إضافة من مركز التحكم بتظهر هون تلقائياً. */
+let CITIES = [], AREAS = [];
+
+/* رمز الدولة + عدد الخانات المسموح للرقم المحلي (بدون صفر البداية) */
+const DIAL = [
+  {c:"PS", d:"970", n:"فلسطين",   min:9,  max:9,  ex:"599123456"},
+  {c:"IL", d:"972", n:"+972",     min:9,  max:9,  ex:"599123456"},
+  {c:"JO", d:"962", n:"الأردن",   min:9,  max:9,  ex:"791234567"},
+  {c:"SA", d:"966", n:"السعودية", min:9,  max:9,  ex:"512345678"},
+  {c:"AE", d:"971", n:"الإمارات", min:9,  max:9,  ex:"501234567"},
+  {c:"QA", d:"974", n:"قطر",      min:8,  max:8,  ex:"33123456"},
+  {c:"KW", d:"965", n:"الكويت",   min:8,  max:8,  ex:"51234567"},
+  {c:"EG", d:"20",  n:"مصر",      min:10, max:10, ex:"1012345678"},
+  {c:"TR", d:"90",  n:"تركيا",    min:10, max:10, ex:"5321234567"},
+  {c:"DE", d:"49",  n:"ألمانيا",  min:10, max:11, ex:"15112345678"},
+  {c:"US", d:"1",   n:"أمريكا",   min:10, max:10, ex:"2025550123"}
 ];
-const KIND={room_shared:"غرفة بسكن مشترك",studio:"استوديو",apartment:"شقة"};
-const POL={female:"إناث فقط",male:"ذكور فقط",mixed:"مختلط"};
-const OCC={student:"طالب/ة",employee:"موظف/ة",other:"غير ذلك"};
-const VER={field:"موثّق ميدانياً",desk:"توثيق مكتبي",none:"غير موثّق"};
-const ICON={room_shared:"🛏",studio:"🏠",apartment:"🏢"};
+
+const KIND = {room_shared:"غرفة بسكن مشترك", bed_shared:"سرير بغرفة مشتركة",
+              studio:"استوديو", apartment:"شقة", family:"سكن عائلي"};
+const ICON = {room_shared:"🛏", bed_shared:"🛌", studio:"🏠", apartment:"🏢", family:"👨‍👩‍👧"};
+const POL  = {female:"إناث فقط", male:"ذكور فقط", mixed:"مختلط"};
+const OCC  = {student:"طالب/ة", employee:"موظف/ة", other:"غير ذلك"};
+const VER  = {field:"موثّق ميدانياً", desk:"موثّق هاتفياً", none:"غير موثّق"};
+
+/* مواصفات الغرفة — بتنحفظ بعمود listings.features */
+const FEATURES = ["واي فاي","مطبخ","حمام خاص","غسالة","تدفئة","مكيّف","ماء ساخن",
+                  "بلكونة","موقف سيارة","مصعد","قريب مواصلات","مسموح الطبخ",
+                  "مدخل مستقل","قفل على باب الغرفة"];
+
+/* صفات الباحث — بتنحفظ بعمود seeker_requests.lifestyle_tags */
+const TAGS = ["هادئ/ة","غير مدخّن/ة","بشتغل من البيت","دوام جامعي","بحب النظام",
+              "ملتزم/ة دينياً","ما بستقبل ضيوف","صاحي/ة بكير"];
+
+const REPORT_CATS = {
+  fake_listing:"إعلان وهمي أو معلومات غير صحيحة",
+  already_rented:"الغرفة مؤجّرة أصلاً",
+  harassment:"تحرش أو سلوك غير لائق",
+  entered_room:"دخول الغرفة بدون إذن",
+  deposit:"مشكلة بالتأمين",
+  camera:"كاميرا داخل السكن",
+  other:"استفسار عام أو شكوى أخرى"
+};
 
 let TAB="L", L=[], R=[], F={};
 
-/* ===== الشبكة ===== */
-const H={apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY,"Content-Type":"application/json"};
-async function api(path,opt={}){
-  const r=await fetch(SUPABASE_URL+"/rest/v1/"+path,{...opt,headers:{...H,...(opt.headers||{})}});
-  const txt=await r.text();
-  let data=null; try{data=txt?JSON.parse(txt):null}catch(e){}
-  if(!r.ok) throw {status:r.status,data,txt};
+/* ═══════════════ الشبكة ═══════════════ */
+const H = {apikey:SUPABASE_ANON_KEY, Authorization:"Bearer "+SUPABASE_ANON_KEY,
+           "Content-Type":"application/json"};
+async function api(path, opt={}){
+  const r = await fetch(SUPABASE_URL+"/rest/v1/"+path, {...opt, headers:{...H, ...(opt.headers||{})}});
+  const txt = await r.text();
+  let data=null; try{ data = txt ? JSON.parse(txt) : null; }catch(e){}
+  if(!r.ok) throw {status:r.status, data, txt};
   return data;
 }
-const rpc=(fn,body)=>api("rpc/"+fn,{method:"POST",body:JSON.stringify(body)});
+const rpc = (fn, body) => api("rpc/"+fn, {method:"POST", body:JSON.stringify(body)});
 
-/* ===== الأدوات ===== */
-const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const nis=n=>Number(n).toLocaleString("ar-EG")+" ₪";
-const dt=d=>d?new Date(d).toLocaleDateString("ar-EG",{day:"numeric",month:"long"}):"—";
-const areaName=id=>(AREAS.find(a=>a.id===id)||{}).n||"—";
-const wa=t=>"https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(t);
-document.getElementById("waFoot").href=wa("مرحبا، بدي أستفسر عن سكن");
+/* ═══════════════ الأدوات ═══════════════ */
+const esc = s => String(s??"").replace(/[&<>"']/g,
+  c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const nis = n => Number(n).toLocaleString("ar-EG")+" ₪";
+const dt  = d => d ? new Date(d).toLocaleDateString("ar-EG",{day:"numeric",month:"long"}) : "—";
+const $   = id => document.getElementById(id);
 
-/* ===== التبويبات والفلاتر ===== */
+/* تحويل الأرقام العربية والفارسية لإنجليزية — بتنطبّق على كل حقل رقمي */
+const AR_D="٠١٢٣٤٥٦٧٨٩", FA_D="۰۱۲۳۴۵۶۷۸۹";
+const toEN = s => String(s??"").replace(/[٠-٩۰-۹]/g,
+  d => { const i = AR_D.indexOf(d); return i>-1 ? i : FA_D.indexOf(d); });
+
+/* بيربط التحويل التلقائي على أي حقل جوّا العنصر */
+function wireDigits(root){
+  (root||document).querySelectorAll("[data-num]").forEach(el=>{
+    if(el.dataset.wired) return;
+    el.dataset.wired = "1";
+    el.addEventListener("input", ()=>{
+      const p = el.selectionStart, v = toEN(el.value).replace(/[^\d.]/g,"");
+      if(v !== el.value){ el.value = v; try{ el.setSelectionRange(p,p); }catch(e){} }
+    });
+  });
+}
+
+const areaName = id => (AREAS.find(a=>a.id===Number(id))||{}).name_ar || "—";
+const areaCity = id => (AREAS.find(a=>a.id===Number(id))||{}).city_id || null;
+const cityName = id => (CITIES.find(c=>c.id===Number(id))||{}).name_ar || "—";
+
+/* ═══════════════ الهاتف ═══════════════ */
+function telHTML(idSel, idNum){
+  const opts = DIAL.map(d=>`<option value="${d.c}"${d.c==="PS"?" selected":""}>${d.n} +${d.d}</option>`).join("");
+  const ps = DIAL[0];
+  return `<div class="tel">
+    <select id="${idSel}" onchange="telSync('${idSel}','${idNum}')">${opts}</select>
+    <input id="${idNum}" data-num inputmode="tel" maxlength="${ps.max}" placeholder="${ps.ex}">
+  </div>`;
+}
+function telSync(idSel, idNum){
+  const d = DIAL.find(x=>x.c===$(idSel).value) || DIAL[0];
+  const n = $(idNum);
+  n.maxLength = d.max; n.placeholder = d.ex;
+  n.value = n.value.slice(0, d.max);
+}
+/* بترجع الرقم بصيغة دولية موحّدة +970599123456، أو null إذا غلط */
+function telValue(idSel, idNum){
+  const d = DIAL.find(x=>x.c===$(idSel).value) || DIAL[0];
+  let n = toEN($(idNum).value).replace(/\D/g,"").replace(/^0+/,"");
+  if(n.length < d.min || n.length > d.max) return null;
+  return "+"+d.d+n;
+}
+function telError(idSel){
+  const d = DIAL.find(x=>x.c===$(idSel).value) || DIAL[0];
+  return d.min===d.max
+    ? `رقم ${d.n} لازم يكون ${d.min} خانات. مثال: ${d.ex}`
+    : `رقم ${d.n} لازم يكون بين ${d.min} و${d.max} خانة. مثال: ${d.ex}`;
+}
+
+/* ═══════════════ شرائح الاختيار ═══════════════ */
+function chipsHTML(name, items, opt={}){
+  return `<div class="chips${opt.box?" chips-box":""}" id="${name}">` +
+    items.map((it,i)=>{
+      const val = opt.val ? opt.val(it) : it;
+      const lbl = opt.lbl ? opt.lbl(it) : it;
+      return `<label class="chip"><input type="checkbox" name="${name}" value="${esc(val)}"
+        ${opt.onchange?`onchange="${opt.onchange}"`:""}><span>${esc(lbl)}</span></label>`;
+    }).join("") + `</div>`;
+}
+const chipsValue = name =>
+  [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(i=>i.value);
+
+/* ═══════════════ التبويبات والفلاتر ═══════════════ */
 function setTab(t){
   TAB=t; F={};
-  tabL.classList.toggle("on",t==="L"); tabR.classList.toggle("on",t==="R");
+  $("tabL").classList.toggle("on", t==="L");
+  $("tabR").classList.toggle("on", t==="R");
   renderFilters(); render();
 }
+function cityOpts(sel){
+  return `<option value="">كل المدن</option>` +
+    CITIES.map(c=>`<option value="${c.id}"${String(sel)===String(c.id)?" selected":""}>${esc(c.name_ar)}</option>`).join("");
+}
+/* المنطقة بتتفلتر حسب المدينة المختارة — فصل كامل بين الخانتين */
+function areaOptsFor(cityId, sel){
+  const list = AREAS.filter(a => !cityId || String(a.city_id)===String(cityId));
+  return `<option value="">${cityId?"كل مناطق المدينة":"كل المناطق"}</option>` +
+    list.map(a=>`<option value="${a.id}"${String(sel)===String(a.id)?" selected":""}>${esc(a.name_ar)}</option>`).join("");
+}
+function onCityFilter(v){
+  F.city = v || "";
+  F.area = "";                                  // تصفير المنطقة عند تغيير المدينة
+  $("fArea").innerHTML = areaOptsFor(F.city, "");
+  render();
+}
 function renderFilters(){
-  const cities=[...new Set(AREAS.map(a=>a.c))];
-  const areaOpts=AREAS.map(a=>`<option value="${a.id}">${a.n} — ${a.c}</option>`).join("");
-  filters.innerHTML = TAB==="L" ? `
-    <div><label>المنطقة</label><select onchange="F.area=this.value;render()">
-      <option value="">كل المناطق</option>${areaOpts}</select></div>
+  const common = `
+    <div><label>المدينة</label>
+      <select id="fCity" onchange="onCityFilter(this.value)">${cityOpts(F.city)}</select></div>
+    <div><label>المنطقة</label>
+      <select id="fArea" onchange="F.area=this.value;render()">${areaOptsFor(F.city,F.area)}</select></div>`;
+
+  $("filters").innerHTML = TAB==="L" ? common + `
     <div><label>النوع</label><select onchange="F.kind=this.value;render()">
-      <option value="">الكل</option><option value="room_shared">غرفة بسكن مشترك</option>
-      <option value="studio">استوديو</option><option value="apartment">شقة</option></select></div>
+      <option value="">الكل</option>
+      ${Object.entries(KIND).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}
+    </select></div>
     <div><label>السكن لـ</label><select onchange="F.pol=this.value;render()">
       <option value="">الكل</option><option value="female">إناث</option>
       <option value="male">ذكور</option><option value="mixed">مختلط</option></select></div>
-    <div><label>أعلى سعر (₪)</label><input type="number" min="0" step="50" placeholder="مثلاً ٨٠٠"
-      oninput="F.max=this.value;render()"></div>` : `
-    <div><label>المنطقة المطلوبة</label><select onchange="F.area=this.value;render()">
-      <option value="">كل المناطق</option>${areaOpts}</select></div>
+    <div><label>أعلى سعر (₪)</label>
+      <input data-num inputmode="numeric" placeholder="مثلاً ٨٠٠"
+        oninput="F.max=this.value;render()"></div>` : common + `
     <div><label>الجنس</label><select onchange="F.g=this.value;render()">
-      <option value="">الكل</option><option value="female">إناث</option><option value="male">ذكور</option></select></div>
+      <option value="">الكل</option><option value="female">إناث</option>
+      <option value="male">ذكور</option></select></div>
     <div><label>الحالة</label><select onchange="F.occ=this.value;render()">
       <option value="">الكل</option><option value="student">طالب/ة</option>
-      <option value="employee">موظف/ة</option></select></div>`;
+      <option value="employee">موظف/ة</option><option value="other">غير ذلك</option></select></div>`;
+  wireDigits($("filters"));
 }
 
-/* ===== العرض ===== */
+/* ═══════════════ العرض ═══════════════ */
 function render(){
+  const grid = $("grid"), count = $("count");
   if(TAB==="L"){
-    let d=L.filter(x=>
-      (!F.area||x.area_id==F.area)&&(!F.kind||x.kind===F.kind)&&
-      (!F.pol||x.gender_pol===F.pol)&&(!F.max||Number(x.price)<=Number(F.max)));
-    count.textContent = d.length?`${d.length} غرفة متاحة`:"";
+    const d = L.filter(x =>
+      (!F.city || String(x.city_id)===String(F.city)) &&
+      (!F.area || String(x.area_id)===String(F.area)) &&
+      (!F.kind || x.kind===F.kind) &&
+      (!F.pol  || x.gender_pol===F.pol) &&
+      (!F.max  || Number(x.price) <= Number(toEN(F.max))));
+    count.textContent = d.length ? `${d.length} غرفة متاحة` : "";
     grid.innerHTML = d.length ? d.map(cardL).join("") :
       `<div class="empty">ما في غرف بتطابق البحث حالياً.<br><br>
        <button class="btn" onclick="openForm('request')">سجّل طلبك وبنخبرك أول ما تنزل</button></div>`;
   }else{
-    let d=R.filter(x=>
-      (!F.area||(x.area_ids||[]).includes(Number(F.area)))&&
-      (!F.g||x.gender===F.g)&&(!F.occ||x.occupation===F.occ));
-    count.textContent = d.length?`${d.length} باحث عن سكن`:"";
+    const d = R.filter(x =>
+      (!F.city || String(x.city_id)===String(F.city)) &&
+      (!F.area || (x.area_ids||[]).includes(Number(F.area))) &&
+      (!F.g    || x.gender===F.g) &&
+      (!F.occ  || x.occupation===F.occ));
+    count.textContent = d.length ? `${d.length} باحث عن سكن` : "";
     grid.innerHTML = d.length ? d.map(cardR).join("") :
       `<div class="empty">ما في طلبات بتطابق البحث حالياً.</div>`;
   }
 }
 function cardL(x){
   const v = x.verification==="field" ? `<span class="t v">✓ ${VER.field}</span>`
-          : x.verification==="desk"  ? `<span class="t d">${VER.desk}</span>` : "";
+          : x.verification==="desk"  ? `<span class="t d">✓ ${VER.desk}</span>` : "";
   return `<div class="card" onclick="openL('${x.id}')">
     <div class="thumb">${ICON[x.kind]||"🏠"}</div>
     <div class="b">
       <h3>${esc(x.title)}</h3>
-      <div class="meta">${esc(x.area)} · ${esc(x.city)}${x.landmark?" · "+esc(x.landmark):""}</div>
+      <div class="meta">${esc(x.city)} · ${esc(x.area)}${x.landmark?" · "+esc(x.landmark):""}</div>
       <div class="price">${nis(x.price)}<small> / شهر${x.bills_included?" — شامل الفواتير":""}</small></div>
-      <div class="tags">${v}<span class="t">${KIND[x.kind]}</span>
-        <span class="t">${POL[x.gender_pol]}</span>
+      <div class="tags">${v}<span class="t">${KIND[x.kind]||""}</span>
+        <span class="t">${POL[x.gender_pol]||""}</span>
         ${x.furnished?'<span class="t">مفروش</span>':""}
         <span class="t">متاح ${dt(x.available_from)}</span></div>
     </div></div>`;
 }
 function cardR(x){
+  const areas = (x.area_ids||[]).map(areaName).filter(a=>a!=="—");
   return `<div class="card" onclick="openR('${x.id}')">
     <div class="b">
       <h3>${esc(x.first_name||"باحث/ة")} — ${OCC[x.occupation]||""}</h3>
-      <div class="meta">${(x.area_ids||[]).map(areaName).join(" · ")||esc(x.city||"")}</div>
+      <div class="meta">${esc(x.city||"")}${areas.length?" · "+areas.join(" · "):""}</div>
       <div class="price">حتى ${nis(x.budget_max)}<small> / شهر</small></div>
       <div class="tags">
         <span class="t">${POL[x.gender]||""}</span>
         ${x.kind_pref?`<span class="t">${KIND[x.kind_pref]}</span>`:""}
         ${x.smoker===false?'<span class="t">غير مدخّن/ة</span>':""}
-        ${(x.lifestyle_tags||[]).map(t=>`<span class="t">${esc(t)}</span>`).join("")}
+        ${(x.lifestyle_tags||[]).slice(0,3).map(t=>`<span class="t">${esc(t)}</span>`).join("")}
         <span class="t">من ${dt(x.move_in_date)}</span></div>
     </div></div>`;
 }
 
-/* ===== تفاصيل الغرفة ===== */
+/* ═══════════════ عدّاد المشاهدات ═══════════════ */
+/* بينحسب مرة وحدة لكل إعلان بكل جلسة تصفّح — يعني «كم زائر فتح
+   تفاصيل الإعلان»، مش كم مرة انضغط. الفشل صامت: العدّاد ما بيستاهل
+   يوقف عرض الإعلان. */
+function countView(id){
+  try{
+    const seen = JSON.parse(sessionStorage.getItem("sakan_seen") || "[]");
+    if(seen.includes(id)) return;
+    seen.push(id);
+    sessionStorage.setItem("sakan_seen", JSON.stringify(seen));
+  }catch(e){ /* التخزين معطّل — بنكمّل وبنعدّ */ }
+  rpc("bump_listing_view", {p_id:id}).catch(()=>{});
+}
+
+/* ═══════════════ تفاصيل الغرفة ═══════════════ */
+/* ثلاث حالات: نعم / لا / ما انفحص — لأن القيمة بتيجي null إذا المندوب
+   ما فحص البند، وعرضها ✕ حمرا كان بيوصل معلومة غلط للباحث */
+function chk3(v, txt){
+  if(v === true)  return `<div class="chk"><i class="yes">✓</i>${txt}</div>`;
+  if(v === false) return `<div class="chk"><i class="no">✕</i>${txt}</div>`;
+  return `<div class="chk"><i class="unk">–</i><span style="color:var(--mut)">${txt} — ما انفحص</span></div>`;
+}
 function openL(id){
-  const x=L.find(a=>a.id===id); if(!x)return;
-  const c=(ok,txt)=>`<div class="chk"><i class="${ok?"yes":"no"}">${ok?"✓":"✕"}</i>${txt}</div>`;
-  const checked = x.visit_date ? `<div class="sec"><h4>فحص المندوب الميداني — زيارة ${dt(x.visit_date)}</h4>
-      ${c(x.room_exists,"الغرفة موجودة فعلياً كما بالوصف")}
-      ${c(x.photos_match,"الصور مطابقة للواقع")}
-      ${c(x.door_lock,"باب الغرفة عليه قفل")}
-      ${c(x.no_indoor_cameras,"ما في كاميرات داخل السكن")}
-      ${c(x.occupants_verified,"تم التحقق من الساكنين الحاليين")}
-      ${c(x.exterior_lighting,"إنارة خارجية كافية")}
-      ${c(x.gas_detector,"كاشف غاز")}</div>` : "";
-  modal.innerHTML=`
+  const x = L.find(a=>a.id===id); if(!x) return;
+  countView(id);
+  const visit = x.visit_date ? `<div class="sec">
+      <h4>فحص المندوب الميداني — زيارة ${dt(x.visit_date)}</h4>
+      ${chk3(x.room_exists,"الغرفة موجودة فعلياً كما بالوصف")}
+      ${chk3(x.photos_match,"الصور مطابقة للواقع")}
+      ${chk3(x.door_lock,"باب الغرفة عليه قفل")}
+      ${chk3(x.occupants_verified,"تم التحقق من الساكنين الحاليين")}
+      ${chk3(x.no_indoor_cameras,"ما شفنا كاميرات داخل السكن وقت الزيارة")}
+      ${chk3(x.private_bathroom,"حمام خاص")}
+      ${chk3(x.kitchen_access,"وصول للمطبخ")}
+      ${chk3(x.hot_water,"ماء ساخن")}
+      ${chk3(x.heating,"تدفئة")}
+      ${chk3(x.internet,"إنترنت")}
+      ${chk3(x.exterior_lighting,"إنارة خارجية كافية")}
+      ${chk3(x.emergency_exit,"مخرج طوارئ")}
+      ${chk3(x.street_access,"وصول الشارع للمبنى")}
+      ${chk3(x.gas_detector,"كاشف غاز")}
+      <div class="note">هاي ملاحظات مندوبنا وقت الزيارة، مش ضمانة دائمة.
+        إذا لاحظت إشي مخالف بلّغنا فوراً.</div>
+    </div>` : "";
+
+  const feats = (x.features||[]).length ? `<div class="sec"><h4>مواصفات الغرفة</h4>
+      <div class="tags">${x.features.map(f=>`<span class="t">${esc(f)}</span>`).join("")}</div></div>` : "";
+
+  $("modal").innerHTML = `
     <div class="mh"><h2>${esc(x.title)}</h2><button class="x" onclick="closeAll()">×</button></div>
     <div class="mb">
       <div class="sec">
         <div class="price" style="font-size:26px">${nis(x.price)}<small> / شهر</small></div>
         <div class="tags" style="margin:10px 0 14px">
-          ${x.verification==="field"?'<span class="t v">✓ موثّق ميدانياً</span>':""}
-          <span class="t">${KIND[x.kind]}</span><span class="t">${POL[x.gender_pol]}</span>
+          ${x.verification==="field"?`<span class="t v">✓ ${VER.field}</span>`:""}
+          ${x.verification==="desk"?`<span class="t d">✓ ${VER.desk}</span>`:""}
+          <span class="t">${KIND[x.kind]||""}</span><span class="t">${POL[x.gender_pol]||""}</span>
           ${x.furnished?'<span class="t">مفروش</span>':""}</div>
         <p style="margin:0 0 12px">${esc(x.description||"")}</p>
-        <div class="row"><span>المنطقة</span><span>${esc(x.area)} — ${esc(x.city)}</span></div>
+        <div class="row"><span>المدينة</span><span>${esc(x.city)}</span></div>
+        <div class="row"><span>المنطقة</span><span>${esc(x.area)}</span></div>
         ${x.landmark?`<div class="row"><span>علامة مميزة</span><span>${esc(x.landmark)}</span></div>`:""}
         <div class="row"><span>متاح من</span><span>${dt(x.available_from)}</span></div>
-        <div class="row"><span>أقل مدة</span><span>${x.min_stay_months||"—"} شهر</span></div>
+        <div class="row"><span>أقل مدة</span><span>${x.min_stay_months?x.min_stay_months+" شهر":"—"}</span></div>
         <div class="row"><span>عدد الغرف بالسكن</span><span>${x.rooms_total||"—"}</span></div>
         <div class="row"><span>الساكنون حالياً</span><span>${x.occupants_now??"—"}</span></div>
-        ${x.bills_included?'<div class="row"><span>الفواتير</span><span>مشمولة بالسعر</span></div>':""}
-        ${x.deposit?`<div class="row"><span>التأمين</span><span>${nis(x.deposit)}</span></div>`:""}
+        <div class="row"><span>الفواتير</span><span>${x.bills_included?"مشمولة بالسعر":"مش محسوبة بالسعر"}</span></div>
+        ${x.deposit?`<div class="row"><span>التأمين (مسترد)</span><span>${nis(x.deposit)}</span></div>`:""}
         ${x.occupants_note?`<div class="note">${esc(x.occupants_note)}</div>`:""}
       </div>
-      ${checked}
+      ${feats}
+      ${visit}
       <div class="sec">
         <h4>تواصل مع المالك</h4>
         <p style="font-size:14px;color:var(--mut);margin:0 0 12px">
           ما بنعرض أرقام هواتف على الموقع. اترك اسمك ورقمك وبنوصله للمالك، وبنتابع معك خلال ٢٤ ساعة.</p>
         <div id="cWrap">
-          <div class="f2">
-            <div><label>الاسم</label><input id="cName" placeholder="اسمك"></div>
-            <div><label>رقم الواتساب</label><input id="cPhone" placeholder="05xxxxxxxx" inputmode="tel"></div>
-          </div>
+          <div class="fg"><label>الاسم</label><input id="cName" placeholder="اسمك"></div>
+          <div class="fg"><label>رقم الواتساب</label>${telHTML("cDial","cPhone")}</div>
           <div id="cErr"></div>
-          <button class="btn acc" style="margin-top:12px;width:100%" onclick="sendContact('${x.id}','${esc(x.ref)}')">
-            أرسل طلب تواصل</button>
+          <button class="btn acc" style="margin-top:4px;width:100%"
+            onclick="sendContact('${x.id}','${esc(x.ref)}')">أرسل طلب تواصل</button>
         </div>
       </div>
-      <div class="note">الإبلاغ عن مشكلة أو إعلان غير صحيح:
-        <a href="${wa("بدي أبلّغ عن الإعلان "+x.ref)}" target="_blank">راسلنا على واتساب</a></div>
+      <div class="note">إعلان غير صحيح أو في مشكلة؟
+        <button class="linkish" onclick="openReport('${x.id}','${esc(x.ref)}')">قدّم بلاغ</button></div>
     </div>`;
-  ov.classList.add("on");
+  wireDigits($("modal"));
+  $("ov").classList.add("on");
 }
-async function sendContact(id,ref){
-  const n=cName.value.trim(), p=cPhone.value.trim();
-  cErr.innerHTML="";
-  if(n.length<2) return cErr.innerHTML='<div class="err">اكتب اسمك.</div>';
-  if(!/^0?5\d{8}$/.test(p.replace(/[\s-]/g,"")))
-    return cErr.innerHTML='<div class="err">رقم غير صحيح. اكتبه هيك: 0599123456</div>';
+
+async function sendContact(id, ref){
+  const n = $("cName").value.trim();
+  const p = telValue("cDial","cPhone");
+  $("cErr").innerHTML = "";
+  if(n.length < 2) return $("cErr").innerHTML = '<div class="err">اكتب اسمك.</div>';
+  if(!p) return $("cErr").innerHTML = `<div class="err">${telError("cDial")}</div>`;
   try{
-    await api("contact_requests",{method:"POST",headers:{Prefer:"return=minimal"},
-      body:JSON.stringify({listing_id:id,seeker_name:n,seeker_phone:p})});
-    cWrap.innerHTML=`<div class="done">وصلنا طلبك ✓<br>بنتواصل معك خلال ٢٤ ساعة بخصوص الإعلان ${ref}.
-      <br><br><a class="btn" style="display:inline-block" target="_blank"
-      href="${wa("مرحبا، أرسلت طلب تواصل للإعلان "+ref)}">تابع معنا على واتساب</a></div>`;
+    await api("contact_requests", {method:"POST", headers:{Prefer:"return=minimal"},
+      body: JSON.stringify({listing_id:id, seeker_name:n, seeker_phone:p})});
+    $("cWrap").innerHTML = `<div class="done">وصلنا طلبك ✓<br>
+      بنتواصل معك خلال ٢٤ ساعة بخصوص الإعلان ${esc(ref)}.</div>`;
   }catch(e){
-    cWrap.innerHTML = e.status===409
+    $("cWrap").innerHTML = e.status===409
       ? '<div class="done">سبق وأرسلت طلب لهذا الإعلان. بنتواصل معك قريباً.</div>'
-      : '<div class="err">صار خطأ. جرّب مرة ثانية أو راسلنا على واتساب.</div>';
+      : '<div class="err">صار خطأ. جرّب مرة ثانية بعد شوي.</div>';
   }
 }
 
-/* ===== تفاصيل الباحث ===== */
+/* ═══════════════ تفاصيل الباحث ═══════════════ */
 function openR(id){
-  const x=R.find(a=>a.id===id); if(!x)return;
-  modal.innerHTML=`
+  const x = R.find(a=>a.id===id); if(!x) return;
+  const areas = (x.area_ids||[]).map(areaName).filter(a=>a!=="—");
+  $("modal").innerHTML = `
     <div class="mh"><h2>${esc(x.first_name||"باحث/ة")} — ${OCC[x.occupation]||""}</h2>
       <button class="x" onclick="closeAll()">×</button></div>
     <div class="mb"><div class="sec">
       <div class="row"><span>الميزانية</span><span>حتى ${nis(x.budget_max)} / شهر</span></div>
-      <div class="row"><span>المناطق المفضّلة</span><span>${(x.area_ids||[]).map(areaName).join(" · ")||"—"}</span></div>
+      <div class="row"><span>المدينة</span><span>${esc(x.city||"—")}</span></div>
+      <div class="row"><span>المناطق المفضّلة</span><span>${areas.join(" · ")||"مرن — أي منطقة"}</span></div>
       <div class="row"><span>نوع السكن</span><span>${KIND[x.kind_pref]||"مرن"}</span></div>
+      <div class="row"><span>مفروش؟</span><span>${x.furnished_pref===null||x.furnished_pref===undefined?"مرن":(x.furnished_pref?"يفضّل مفروش":"مش ضروري")}</span></div>
       <div class="row"><span>تاريخ الانتقال</span><span>${dt(x.move_in_date)}</span></div>
-      <div class="row"><span>أقل مدة</span><span>${x.min_stay_months||"—"} شهر</span></div>
-      <div class="row"><span>التدخين</span><span>${x.smoker?"مدخّن/ة":"غير مدخّن/ة"}</span></div>
+      <div class="row"><span>أقل مدة</span><span>${x.min_stay_months?x.min_stay_months+" شهر":"—"}</span></div>
+      <div class="row"><span>التدخين</span><span>${x.smoker===null||x.smoker===undefined?"—":(x.smoker?"مدخّن/ة":"غير مدخّن/ة")}</span></div>
+      ${(x.lifestyle_tags||[]).length?`<div class="tags" style="margin-top:10px">
+        ${x.lifestyle_tags.map(t=>`<span class="t">${esc(t)}</span>`).join("")}</div>`:""}
       ${x.note?`<div class="note">${esc(x.note)}</div>`:""}
       <p style="font-size:14px;color:var(--mut);margin-top:14px">
-        عندك غرفة بتناسبه/ا؟ راسلنا وبنوصلك فيه/ا مباشرة.</p>
-      <a class="btn acc" style="display:block;text-align:center;text-decoration:none" target="_blank"
-         href="${wa("عندي غرفة بتناسب الطلب "+x.ref)}">عندي غرفة مناسبة</a>
+        عندك غرفة بتناسبه/ا؟ اترك بياناتك وبنوصلك فيه/ا مباشرة.</p>
+      <div id="cWrap">
+        <div class="fg"><label>اسمك</label><input id="cName" placeholder="اسمك"></div>
+        <div class="fg"><label>رقم الواتساب</label>${telHTML("cDial","cPhone")}</div>
+        <div id="cErr"></div>
+        <button class="btn acc" style="width:100%" onclick="sendMatch('${x.id}','${esc(x.ref)}')">
+          عندي غرفة مناسبة</button>
+      </div>
     </div></div>`;
-  ov.classList.add("on");
+  wireDigits($("modal"));
+  $("ov").classList.add("on");
+}
+async function sendMatch(reqId, ref){
+  const n = $("cName").value.trim();
+  const p = telValue("cDial","cPhone");
+  $("cErr").innerHTML = "";
+  if(n.length < 2) return $("cErr").innerHTML = '<div class="err">اكتب اسمك.</div>';
+  if(!p) return $("cErr").innerHTML = `<div class="err">${telError("cDial")}</div>`;
+  try{
+    await api("contact_requests", {method:"POST", headers:{Prefer:"return=minimal"},
+      body: JSON.stringify({request_id:reqId, seeker_name:n, seeker_phone:p})});
+    $("cWrap").innerHTML = `<div class="done">وصلنا ✓<br>
+      بنتواصل معك خلال ٢٤ ساعة بخصوص الطلب ${esc(ref)}.</div>`;
+  }catch(e){
+    $("cWrap").innerHTML = '<div class="err">صار خطأ. جرّب مرة ثانية بعد شوي.</div>';
+  }
 }
 
-/* ===== نماذج الإضافة ===== */
+/* ═══════════════ البلاغات والشكاوى (بدل الواتساب) ═══════════════ */
+function openReport(listingId, ref){
+  const cats = Object.entries(REPORT_CATS)
+    .map(([k,v])=>`<option value="${k}">${v}</option>`).join("");
+  $("modal").innerHTML = `
+    <div class="mh"><h2>${listingId ? "بلاغ عن إعلان "+esc(ref) : "تواصل معنا"}</h2>
+      <button class="x" onclick="closeAll()">×</button></div>
+    <div class="mb"><div class="sec" id="rpWrap">
+      <div class="note">كل بلاغ بيوصلنا مباشرة وبينفحص. ما بنعطي المالك أي معلومة عنك.</div>
+      <div class="fg" style="margin-top:12px"><label>نوع البلاغ</label>
+        <select id="rpCat">${listingId?cats:'<option value="other">استفسار عام أو شكوى</option>'+cats}</select></div>
+      <div class="fg"><label>التفاصيل</label>
+        <textarea id="rpDet" placeholder="احكيلنا شو صار بالتفصيل — إيمتى، ووين، ومين كان موجود."></textarea></div>
+      <div class="fg"><label>رقمك للتواصل (اختياري)</label>${telHTML("rpDial","rpPhone")}
+        <div class="hint">إذا ما تركت رقم بنستلم البلاغ بس ما بنقدر نرجعلك بالنتيجة.</div></div>
+      <div id="rpErr"></div>
+      <button class="btn acc" style="width:100%"
+        onclick="sendReport(${listingId?`'${listingId}'`:"null"})">أرسل البلاغ</button>
+    </div></div>`;
+  wireDigits($("modal"));
+  $("ov").classList.add("on");
+}
+async function sendReport(listingId){
+  const det = $("rpDet").value.trim();
+  $("rpErr").innerHTML = "";
+  if(det.length < 5)
+    return $("rpErr").innerHTML = '<div class="err">اكتب تفاصيل البلاغ — خمس حروف على الأقل.</div>';
+  /* الرقم اختياري، بس إذا انكتب لازم يكون صحيح */
+  let phone = null;
+  if($("rpPhone").value.trim()){
+    phone = telValue("rpDial","rpPhone");
+    if(!phone) return $("rpErr").innerHTML = `<div class="err">${telError("rpDial")}</div>`;
+  }
+  try{
+    await api("reports", {method:"POST", headers:{Prefer:"return=minimal"},
+      body: JSON.stringify({listing_id:listingId, category:$("rpCat").value,
+                            details:det, reporter_phone:phone, status:"open"})});
+    $("rpWrap").innerHTML = `<div class="done">وصلنا بلاغك ✓<br>
+      بنراجعه خلال ٢٤ ساعة. شكراً إنك حميت غيرك.</div>`;
+  }catch(e){
+    $("rpErr").innerHTML = '<div class="err">صار خطأ بالإرسال. جرّب مرة ثانية بعد شوي.</div>';
+  }
+}
+
+/* ═══════════════ نماذج الإضافة ═══════════════ */
+function citySelect(id, onchange){
+  return `<select id="${id}" onchange="${onchange}">
+    <option value="">اختر المدينة</option>
+    ${CITIES.map(c=>`<option value="${c.id}">${esc(c.name_ar)}</option>`).join("")}</select>`;
+}
+/* نموذج الإعلان: مدينة ← منطقة واحدة */
+function onFormCity(){
+  const cid = $("lCity").value;
+  const list = AREAS.filter(a=>String(a.city_id)===String(cid));
+  $("lArea").innerHTML = cid
+    ? `<option value="">اختر المنطقة</option>` +
+      list.map(a=>`<option value="${a.id}">${esc(a.name_ar)}</option>`).join("")
+    : `<option value="">اختر المدينة أولاً</option>`;
+}
+/* نموذج الباحث: مدينة ← شرائح مناطق (بدل الـmultiple select و«0 item») */
+function onReqCity(){
+  const cid = $("rCity").value;
+  const list = AREAS.filter(a=>String(a.city_id)===String(cid));
+  $("rAreasBox").innerHTML = cid
+    ? (list.length
+        ? chipsHTML("rAreas", list, {val:a=>a.id, lbl:a=>a.name_ar})
+        : `<div class="hint">ما في مناطق مسجّلة لهاي المدينة بعد.</div>`)
+    : `<div class="hint">قم باختيار المدينة أولاً.</div>`;
+}
+
 function openForm(kind){
-  const areaOpts=AREAS.map(a=>`<option value="${a.id}">${a.n} — ${a.c}</option>`).join("");
-  modal.innerHTML = kind==="listing" ? `
+  $("modal").innerHTML = kind==="listing" ? `
     <div class="mh"><h2>أضف غرفة للإيجار</h2><button class="x" onclick="closeAll()">×</button></div>
     <div class="mb"><div class="sec">
-      <div class="note">رقمك ما بينعرض على الموقع أبداً. بنستخدمه للتواصل معك وترتيب زيارة التوثيق فقط.</div>
-      <div class="f2" style="margin-top:12px">
-        <div class="fg"><label>اسمك</label><input id="lName"></div>
-        <div class="fg"><label>رقم الواتساب</label><input id="lPhone" placeholder="05xxxxxxxx" inputmode="tel"></div>
-      </div>
-      <div class="fg"><label>عنوان الإعلان</label><input id="lTitle" placeholder="مثلاً: غرفة في شقة طالبات — الطيرة"></div>
+      <div class="note">رقمك ما بينعرض على الموقع أبداً. بنستخدمه للتواصل معك وترتيب التوثيق فقط.</div>
+
+      <div class="fg" style="margin-top:12px"><label>اسمك</label><input id="lName"></div>
+      <div class="fg"><label>رقم الواتساب</label>${telHTML("lDial","lPhone")}</div>
+      <div class="fg"><label>عنوان الإعلان</label>
+        <input id="lTitle" placeholder="مثلاً: غرفة في شقة طالبات — الطيرة"></div>
+
       <div class="f2">
-        <div class="fg"><label>المنطقة</label><select id="lArea">${areaOpts}</select></div>
-        <div class="fg"><label>السعر الشهري (₪)</label><input id="lPrice" type="number" min="0" step="50"></div>
+        <div class="fg"><label>المدينة</label>${citySelect("lCity","onFormCity()")}</div>
+        <div class="fg"><label>المنطقة</label>
+          <select id="lArea"><option value="">اختر المدينة أولاً</option></select></div>
+        <div class="fg"><label>السعر الشهري (₪)</label>
+          <input id="lPrice" data-num inputmode="numeric" placeholder="مثلاً ٨٠٠"></div>
+        <div class="fg"><label>التأمين (₪ — اختياري)</label>
+          <input id="lDep" data-num inputmode="numeric" placeholder="مبلغ مسترد"></div>
         <div class="fg"><label>النوع</label><select id="lKind">
-          <option value="room_shared">غرفة بسكن مشترك</option><option value="studio">استوديو</option>
-          <option value="apartment">شقة</option></select></div>
+          ${Object.entries(KIND).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}
+        </select></div>
         <div class="fg"><label>السكن لـ</label><select id="lPol">
           <option value="female">إناث فقط</option><option value="male">ذكور فقط</option>
           <option value="mixed">مختلط</option></select></div>
         <div class="fg"><label>مفروش؟</label><select id="lFurn">
           <option value="true">مفروش</option><option value="false">غير مفروش</option></select></div>
+        <div class="fg"><label>الفواتير</label><select id="lBills">
+          <option value="false">مش محسوبة بالسعر</option>
+          <option value="true">مشمولة بالسعر</option></select></div>
+        <div class="fg"><label>عدد الغرف بالسكن (اختياري)</label>
+          <input id="lRooms" data-num inputmode="numeric" placeholder="مثلاً ٣"></div>
+        <div class="fg"><label>أقل مدة إيجار بالشهور (اختياري)</label>
+          <input id="lMin" data-num inputmode="numeric" placeholder="مثلاً ٦"></div>
         <div class="fg"><label>متاح من</label><input id="lFrom" type="date"></div>
       </div>
-      <div class="fg"><label>علامة مميزة قريبة (اختياري)</label><input id="lLand" placeholder="قرب دوار الماصيون"></div>
-      <div class="fg"><label>الساكنون حالياً (اختياري)</label><input id="lOcc" placeholder="طالبتان في جامعة بيرزيت"></div>
-      <div class="fg"><label>وصف الغرفة</label><textarea id="lDesc" placeholder="المساحة، القفل، المطبخ، المواصلات…"></textarea></div>
+
+      <div class="fg"><label>مواصفات الغرفة والسكن</label>
+        ${chipsHTML("lFeat", FEATURES)}
+        <div class="hint">أشّر على كل اللي متوفر. هاد أكتر إشي بيسأل عنه الباحثون.</div></div>
+
+      <div class="fg"><label>علامة مميزة قريبة (اختياري)</label>
+        <input id="lLand" placeholder="قرب دوار الماصيون"></div>
+      <div class="fg"><label>الساكنون حالياً (اختياري)</label>
+        <input id="lOcc" placeholder="طالبتان في جامعة بيرزيت"></div>
+      <div class="fg"><label>وصف الغرفة</label>
+        <textarea id="lDesc" placeholder="المساحة، القفل، المطبخ، المواصلات…"></textarea></div>
+
       <div id="lErr"></div>
-      <div id="lWrap"><button class="btn acc" style="width:100%" onclick="subListing()">أرسل الإعلان للمراجعة</button></div>
+      <div id="lWrap"><button class="btn acc" style="width:100%" onclick="subListing()">
+        أرسل الإعلان للمراجعة</button></div>
       <p style="font-size:13px;color:var(--mut);margin:10px 0 0">
-        بنراجع الإعلان وبنرتب زيارة توثيق قبل النشر. الإعلان بينتهي تلقائياً بعد ٢١ يوم إلا إذا أكّدت إنه لسا متاح.</p>
+        بنراجع الإعلان وبنتواصل معك للتوثيق قبل النشر.
+        الإعلان بينتهي تلقائياً بعد ٢١ يوم إلا إذا أكّدت إنه لسا متاح.</p>
     </div></div>` : `
     <div class="mh"><h2>سجّل طلبك للسكن</h2><button class="x" onclick="closeAll()">×</button></div>
     <div class="mb"><div class="sec">
       <div class="note">بينعرض اسمك الأول فقط. رقمك وجهة عملك أو دراستك ما بينعرضوا لحدا.</div>
-      <div class="f2" style="margin-top:12px">
-        <div class="fg"><label>اسمك</label><input id="rName"></div>
-        <div class="fg"><label>رقم الواتساب</label><input id="rPhone" placeholder="05xxxxxxxx" inputmode="tel"></div>
+
+      <div class="fg" style="margin-top:12px"><label>اسمك</label><input id="rName"></div>
+      <div class="fg"><label>رقم الواتساب</label>${telHTML("rDial","rPhone")}</div>
+
+      <div class="f2">
         <div class="fg"><label>الجنس</label><select id="rG">
           <option value="female">أنثى</option><option value="male">ذكر</option></select></div>
         <div class="fg"><label>الحالة</label><select id="rOcc">
           <option value="student">طالب/ة</option><option value="employee">موظف/ة</option>
           <option value="other">غير ذلك</option></select></div>
-        <div class="fg"><label>أعلى ميزانية (₪)</label><input id="rBud" type="number" min="0" step="50"></div>
+        <div class="fg"><label>أعلى ميزانية (₪)</label>
+          <input id="rBud" data-num inputmode="numeric" placeholder="مثلاً ٧٠٠"></div>
         <div class="fg"><label>تاريخ الانتقال</label><input id="rDate" type="date"></div>
+        <div class="fg"><label>نوع السكن المفضّل</label><select id="rKind">
+          <option value="">مرن — أي نوع</option>
+          ${Object.entries(KIND).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}
+        </select></div>
+        <div class="fg"><label>مفروش؟</label><select id="rFurn">
+          <option value="">مرن</option><option value="true">يفضّل مفروش</option>
+          <option value="false">مش ضروري</option></select></div>
+        <div class="fg"><label>أقل مدة بالشهور (اختياري)</label>
+          <input id="rMin" data-num inputmode="numeric" placeholder="مثلاً ٦"></div>
+        <div class="fg"><label>بتدخّن؟</label><select id="rSmoke">
+          <option value="">ما بحب أحدد</option><option value="false">لا</option>
+          <option value="true">نعم</option></select></div>
       </div>
-      <div class="fg"><label>المناطق المفضّلة (اختر أكثر من وحدة)</label>
-        <select id="rAreas" multiple size="6">${areaOpts}</select></div>
-      <div class="fg"><label>ملاحظات</label><textarea id="rNote" placeholder="هادئ/ة، غير مدخّن/ة، أفضّل قرب المواصلات…"></textarea></div>
-      <div id="rErr"></div>
-      <div id="rWrap"><button class="btn acc" style="width:100%" onclick="subRequest()">سجّل طلبي</button></div>
-    </div></div>`;
-  ov.classList.add("on");
-}
-const phoneOk=p=>/^0?5\d{8}$/.test(p.replace(/[\s-]/g,""));
-async function subListing(){
-  lErr.innerHTML="";
-  const v={p_name:lName.value.trim(),p_phone:lPhone.value.trim(),p_title:lTitle.value.trim(),
-    p_area:Number(lArea.value),p_price:Number(lPrice.value),p_kind:lKind.value,p_pol:lPol.value,
-    p_furnished:lFurn.value==="true",p_from:lFrom.value||null,p_occ:lOcc.value.trim()||null,
-    p_landmark:lLand.value.trim()||null,p_desc:lDesc.value.trim()||null};
-  if(v.p_name.length<2||!phoneOk(v.p_phone)||v.p_title.length<5||!v.p_price)
-    return lErr.innerHTML='<div class="err">عبّي الاسم والرقم والعنوان والسعر بشكل صحيح.</div>';
-  try{
-    const ref=await rpc("submit_listing",v);
-    lWrap.innerHTML=`<div class="done">وصلنا إعلانك ✓ رقمه <b>${esc(ref)}</b>.<br>
-      بنتواصل معك خلال ٢٤ ساعة لترتيب زيارة التوثيق.</div>`;
-  }catch(e){ lErr.innerHTML='<div class="err">صار خطأ بالإرسال. جرّب مرة ثانية.</div>'; }
-}
-async function subRequest(){
-  rErr.innerHTML="";
-  const areas=[...rAreas.selectedOptions].map(o=>Number(o.value));
-  const v={p_name:rName.value.trim(),p_phone:rPhone.value.trim(),p_gender:rG.value,
-    p_occupation:rOcc.value,p_budget:Number(rBud.value),p_areas:areas,
-    p_move_in:rDate.value||null,p_tags:[],p_note:rNote.value.trim()||null};
-  if(v.p_name.length<2||!phoneOk(v.p_phone)||!v.p_budget||!areas.length)
-    return rErr.innerHTML='<div class="err">عبّي الاسم والرقم والميزانية واختر منطقة على الأقل.</div>';
-  try{
-    const ref=await rpc("submit_request",v);
-    rWrap.innerHTML=`<div class="done">تم تسجيل طلبك ✓ رقمه <b>${esc(ref)}</b>.<br>
-      بنخبرك أول ما تنزل غرفة بتناسبك.</div>`;
-  }catch(e){ rErr.innerHTML='<div class="err">صار خطأ بالإرسال. جرّب مرة ثانية.</div>'; }
-}
-function closeAll(){ ov.classList.remove("on"); modal.innerHTML=""; }
-document.addEventListener("keydown",e=>{ if(e.key==="Escape")closeAll(); });
 
-/* ===== تأكيد توفّر الإعلان (رابط المندوب) ===== */
+      <div class="fg"><label>المدينة</label>${citySelect("rCity","onReqCity()")}</div>
+      <div class="fg"><label>المناطق المفضّلة</label>
+        <div class="chips-box" id="rAreasBox">
+          <div class="hint">قم باختيار المدينة أولاً.</div></div>
+        <div class="hint">اختر منطقة أو أكتر، أو اتركها فاضية إذا أي منطقة بالمدينة بتناسبك.</div></div>
+
+      <div class="fg"><label>صفاتك كساكن</label>
+        ${chipsHTML("rTags", TAGS)}
+        <div class="hint">بتساعد المالك يعرف إذا بتناسب السكن.</div></div>
+
+      <div class="fg"><label>ملاحظات</label>
+        <textarea id="rNote" placeholder="أي إشي تاني بدك المالك يعرفه…"></textarea></div>
+
+      <div id="rErr"></div>
+      <div id="rWrap"><button class="btn acc" style="width:100%" onclick="subRequest()">
+        سجّل طلبي</button></div>
+    </div></div>`;
+  wireDigits($("modal"));
+  $("ov").classList.add("on");
+}
+
+const num = id => { const v = toEN($(id).value).replace(/[^\d.]/g,""); return v ? Number(v) : null; };
+
+async function subListing(){
+  $("lErr").innerHTML = "";
+  const phone = telValue("lDial","lPhone");
+  const v = {
+    p_name: $("lName").value.trim(),
+    p_phone: phone,
+    p_title: $("lTitle").value.trim(),
+    p_area: Number($("lArea").value),
+    p_price: num("lPrice"),
+    p_kind: $("lKind").value,
+    p_pol: $("lPol").value,
+    p_furnished: $("lFurn").value === "true",
+    p_from: $("lFrom").value || null,
+    p_occ: $("lOcc").value.trim() || null,
+    p_landmark: $("lLand").value.trim() || null,
+    p_desc: $("lDesc").value.trim() || null,
+    p_features: chipsValue("lFeat"),
+    p_deposit: num("lDep"),
+    p_bills: $("lBills").value === "true",
+    p_rooms: num("lRooms"),
+    p_min_stay: num("lMin")
+  };
+  const bad = m => { $("lErr").innerHTML = `<div class="err">${m}</div>`; return null; };
+  if(v.p_name.length < 2)  return bad("اكتب اسمك.");
+  if(!phone)               return bad(telError("lDial"));
+  if(v.p_title.length < 5) return bad("عنوان الإعلان قصير — اكتب وصف واضح.");
+  if(!$("lCity").value)    return bad("اختر المدينة.");
+  if(!v.p_area)            return bad("اختر المنطقة.");
+  if(!v.p_price)           return bad("اكتب السعر الشهري.");
+  try{
+    const ref = await rpc("submit_listing", v);
+    $("lWrap").innerHTML = `<div class="done">وصلنا إعلانك ✓ رقمه <b>${esc(ref)}</b>.<br>
+      بنتواصل معك خلال ٢٤ ساعة للتوثيق.</div>`;
+    $("lErr").innerHTML = "";
+  }catch(e){
+    $("lErr").innerHTML = '<div class="err">صار خطأ بالإرسال. جرّب مرة ثانية بعد شوي.</div>';
+  }
+}
+
+async function subRequest(){
+  $("rErr").innerHTML = "";
+  const phone = telValue("rDial","rPhone");
+  const tri = id => { const s = $(id).value; return s === "" ? null : s === "true"; };
+  const v = {
+    p_name: $("rName").value.trim(),
+    p_phone: phone,
+    p_gender: $("rG").value,
+    p_occupation: $("rOcc").value,
+    p_budget: num("rBud"),
+    p_areas: chipsValue("rAreas").map(Number),
+    p_move_in: $("rDate").value || null,
+    p_tags: chipsValue("rTags"),
+    p_note: $("rNote").value.trim() || null,
+    p_city: Number($("rCity").value) || null,
+    p_kind: $("rKind").value || null,
+    p_furnished: tri("rFurn"),
+    p_min_stay: num("rMin"),
+    p_smoker: tri("rSmoke")
+  };
+  const bad = m => { $("rErr").innerHTML = `<div class="err">${m}</div>`; return null; };
+  if(v.p_name.length < 2) return bad("اكتب اسمك.");
+  if(!phone)              return bad(telError("rDial"));
+  if(!v.p_city)           return bad("اختر المدينة.");
+  if(!v.p_budget)         return bad("اكتب أعلى ميزانية.");
+  try{
+    const ref = await rpc("submit_request", v);
+    $("rWrap").innerHTML = `<div class="done">تم تسجيل طلبك ✓ رقمه <b>${esc(ref)}</b>.<br>
+      بنراجعه وبنخبرك أول ما تنزل غرفة بتناسبك.</div>`;
+    $("rErr").innerHTML = "";
+  }catch(e){
+    $("rErr").innerHTML = '<div class="err">صار خطأ بالإرسال. جرّب مرة ثانية بعد شوي.</div>';
+  }
+}
+
+function closeAll(){ $("ov").classList.remove("on"); $("modal").innerHTML = ""; }
+document.addEventListener("keydown", e => { if(e.key === "Escape") closeAll(); });
+
+/* ═══════════════ تأكيد توفّر الإعلان (رابط المالك) ═══════════════ */
 async function checkConfirmLink(){
-  const p=new URLSearchParams(location.search);
-  const ref=p.get("c"), token=p.get("t");
-  if(!ref||!token) return;
-  history.replaceState(null,"",location.pathname);
-  let ok=false;
-  try{ ok=await rpc("confirm_listing_available",{p_ref:ref,p_token:token}); }catch(e){ ok=false; }
-  modal.innerHTML=`
+  const p = new URLSearchParams(location.search);
+  const ref = p.get("c"), token = p.get("t");
+  if(!ref || !token) return;
+  history.replaceState(null, "", location.pathname);
+  let ok = false;
+  try{ ok = await rpc("confirm_listing_available", {p_ref:ref, p_token:token}); }catch(e){ ok = false; }
+  $("modal").innerHTML = `
     <div class="mh"><h2>تأكيد الإعلان</h2><button class="x" onclick="closeAll()">×</button></div>
     <div class="mb">${ok
       ? '<div class="done">تم تمديد إعلانك ٢١ يوم ✓</div>'
       : '<div class="err">الرابط غير صالح أو منتهي.</div>'}</div>`;
-  ov.classList.add("on");
+  $("ov").classList.add("on");
 }
 
-/* ===== التحميل ===== */
-(async()=>{
+/* ═══════════════ التحميل ═══════════════ */
+(async () => {
+  try{
+    /* المدن والمناطق أولاً — الفلاتر والنماذج كلها بتعتمد عليهم */
+    [CITIES, AREAS] = await Promise.all([
+      api("cities?select=id,name_ar,slug&is_active=eq.true&order=id"),
+      api("areas?select=id,city_id,name_ar,slug,sort_order&is_active=eq.true&order=city_id,sort_order")
+    ]);
+    if(!CITIES.length){
+      console.error("Sakan: cities returned empty — تحقق من سياسات RLS على cities/areas");
+    }
+  }catch(e){
+    console.error("Sakan: تعذّر تحميل المدن والمناطق", e);
+    CITIES = []; AREAS = [];
+  }
+
   renderFilters();
   await checkConfirmLink();
+
   try{
-    [L,R]=await Promise.all([
+    [L, R] = await Promise.all([
       api("v_listings_public?select=*&order=published_at.desc"),
       api("v_requests_public?select=*&order=created_at.desc")
     ]);
     render();
   }catch(e){
-    console.error("Supabase error:",e);
-    count.textContent="";
-    grid.innerHTML='<div class="empty">ما قدرنا نحمّل الإعلانات. تأكد من الاتصال وجرّب تحديث الصفحة.</div>';
+    console.error("Supabase error:", e);
+    $("count").textContent = "";
+    $("grid").innerHTML =
+      '<div class="empty">ما قدرنا نحمّل الإعلانات. تأكد من الاتصال وجرّب تحديث الصفحة.</div>';
   }
 })();
 </script>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>سكن</title>
+<meta name="description" content="سياسة الخصوصية وشروط الاستخدام — منصة سكن.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#12634E;--brand-d:#0C4839;--accent:#C4682B;--bg:#FAF7F2;--card:#FFFFFF;
+  --ink:#15201C;--mut:#6B7B75;--line:#E4DED4;--r:14px;--sh:0 1px 2px rgba(20,32,28,.05),0 8px 24px rgba(20,32,28,.06)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,sans-serif;line-height:1.85}
+a{color:var(--brand)}
+.wrap{max-width:760px;margin:0 auto;padding:0 18px}
+header{background:var(--brand);color:#fff}
+.hd{display:flex;align-items:center;justify-content:space-between;padding:16px 0;gap:12px;flex-wrap:wrap}
+.logo{font-size:26px;font-weight:700;letter-spacing:-1px;color:#fff;text-decoration:none}
+.logo span{display:block;font-size:12px;font-weight:400;opacity:.85;letter-spacing:0}
+.back{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:10px;
+  padding:9px 15px;font:inherit;font-weight:600;text-decoration:none}
+.back:hover{background:rgba(255,255,255,.24)}
+main{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);
+  padding:28px 26px;margin:22px 0 30px}
+h1{font-size:27px;margin:0 0 4px;line-height:1.4}
+.upd{color:var(--mut);font-size:13px;margin-bottom:20px}
+main h2{font-size:19px;margin:28px 0 8px;padding-top:14px;border-top:1px solid var(--line)}
+main h2:first-of-type{border-top:0;padding-top:0}
+main h3{font-size:16px;margin:18px 0 6px;color:var(--brand-d)}
+main p{margin:0 0 12px}
+main ul{margin:0 0 12px;padding-inline-start:22px}
+main li{margin-bottom:5px}
+main strong{font-weight:600}
+main hr{border:0;border-top:1px solid var(--line);margin:22px 0}
+main table{width:100%;border-collapse:collapse;margin:6px 0 16px;font-size:14.5px}
+main th,main td{border:1px solid var(--line);padding:9px 11px;text-align:start}
+main th{background:#F3F0EA;font-weight:600}
+.tabs{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+.tabs a{background:#fff;border:1px solid var(--line);border-radius:99px;
+  padding:7px 15px;font-size:14px;font-weight:600;text-decoration:none}
+.tabs a.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.msg{padding:40px;text-align:center;color:var(--mut)}
+footer{background:#101B18;color:#9FB2AC;padding:24px 0;font-size:13px}
+footer a{color:#CFE0DA}
+@media(max-width:600px){main{padding:22px 18px}h1{font-size:23px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap hd">
+    <a class="logo" href="/">سكن<span>غرف وسكن مشترك موثّق</span></a>
+    <a class="back" href="/">رجوع للموقع</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="tabs" style="margin-top:18px">
+    <a href="?p=privacy" id="tPrivacy">سياسة الخصوصية</a>
+    <a href="?p=terms" id="tTerms">شروط الاستخدام</a>
+  </div>
+  <main id="doc"><div class="msg">بيحمّل…</div></main>
+</div>
+
+<footer><div class="wrap">
+  <b style="color:#fff">سكن</b> — <a href="/">الصفحة الرئيسية</a>
+</div></footer>
+
+<script>
+const SUPABASE_URL = "https://yckteijitcqjtedoyoyv.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlja3RlaWppdGNxanRlZG95b3l2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MjA3MTksImV4cCI6MjEwMzQ5NjcxOX0.mAY5A6ROvtxN4kkD8g1s_tsDlSjGfy4TCNkgbYHeRvo";
+
+const esc = s => String(s??"").replace(/[&<>"']/g,
+  c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* عارض ماركداون مصغّر — بيغطي اللي بنستخدمه بصفحات المحتوى فقط.
+   كل نص بينهرب قبل التنسيق، فما في طريق لحقن HTML من القاعدة. */
+function md(src){
+  const lines = String(src).replace(/\r/g,"").split("\n");
+  let out = "", list = null, tbl = null;
+
+  const closeList = () => { if(list){ out += "</ul>"; list = null; } };
+  const closeTbl  = () => { if(tbl){ out += "</tbody></table>"; tbl = null; } };
+  const inline = s => esc(s)
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>");
+  const cells = s => s.replace(/^\||\|$/g,"").split("|").map(c=>c.trim());
+
+  for(let i=0; i<lines.length; i++){
+    const ln = lines[i], t = ln.trim();
+
+    if(!t){ closeList(); closeTbl(); continue; }
+
+    /* جدول: سطر رأس ثم سطر فاصل ---|--- */
+    if(t.startsWith("|") && !tbl && /^\|[\s:|-]+\|$/.test((lines[i+1]||"").trim())){
+      closeList();
+      out += "<table><thead><tr>" +
+        cells(t).map(c=>"<th>"+inline(c)+"</th>").join("") +
+        "</tr></thead><tbody>";
+      tbl = true; i++; continue;
+    }
+    if(tbl && t.startsWith("|")){
+      out += "<tr>" + cells(t).map(c=>"<td>"+inline(c)+"</td>").join("") + "</tr>";
+      continue;
+    }
+    closeTbl();
+
+    if(/^---+$/.test(t)){ closeList(); out += "<hr>"; continue; }
+
+    const h = t.match(/^(#{1,4})\s+(.*)$/);
+    if(h){ closeList(); const n = Math.min(h[1].length+1, 4);
+           out += `<h${n}>${inline(h[2])}</h${n}>`; continue; }
+
+    const li = t.match(/^[-*]\s+(.*)$/) || t.match(/^\d+\.\s+(.*)$/);
+    if(li){ if(!list){ out += "<ul>"; list = true; }
+            out += "<li>"+inline(li[1])+"</li>"; continue; }
+
+    closeList();
+    out += "<p>"+inline(t)+"</p>";
+  }
+  closeList(); closeTbl();
+  return out;
+}
+
+const KEYS = {privacy:"tPrivacy", terms:"tTerms"};
+
+(async () => {
+  const p = new URLSearchParams(location.search).get("p");
+  const key = KEYS[p] ? p : "privacy";
+  const el = document.getElementById(KEYS[key]);
+  if(el) el.classList.add("on");
+
+  try{
+    const r = await fetch(
+      SUPABASE_URL+"/rest/v1/pages?select=title_ar,body_md,updated_at&key=eq."+encodeURIComponent(key),
+      {headers:{apikey:SUPABASE_ANON_KEY, Authorization:"Bearer "+SUPABASE_ANON_KEY}});
+    if(!r.ok) throw new Error(r.status);
+    const rows = await r.json();
+    if(!rows.length) throw new Error("empty");
+    const d = rows[0];
+    document.title = d.title_ar + " — سكن";
+    document.getElementById("doc").innerHTML =
+      `<h1>${esc(d.title_ar)}</h1>
+       <div class="upd">آخر تحديث: ${new Date(d.updated_at)
+         .toLocaleDateString("ar-EG",{day:"numeric",month:"long",year:"numeric"})}</div>`
+      + md(d.body_md);
+  }catch(e){
+    console.error("Sakan page load:", e);
+    document.getElementById("doc").innerHTML =
+      '<div class="msg">ما قدرنا نحمّل الصفحة. جرّب تحديث الصفحة، أو ارجع للموقع.</div>';
+  }
+})();
+</script>
+</body>
+</html>

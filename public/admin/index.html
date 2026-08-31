@@ -141,6 +141,7 @@ tbody tr:hover{background:#182234;cursor:pointer}
 .tst{background:var(--ink-3);border:1px solid var(--line);border-inline-start:3px solid var(--info);
   border-radius:var(--r);padding:10px 14px;font-size:13px;max-width:340px;box-shadow:0 6px 22px rgba(0,0,0,.4)}
 .tst.ok{border-inline-start-color:var(--ok)} .tst.bad{border-inline-start-color:var(--bad)}
+.tst.warn{border-inline-start-color:var(--warn)}
 
 .warnbox{background:rgba(232,163,61,.09);border:1px solid rgba(232,163,61,.4);border-radius:var(--r);
   padding:9px 12px;font-size:12.5px;color:#f0bd6d;margin-bottom:12px}
@@ -167,21 +168,14 @@ tbody tr:hover{background:#182234;cursor:pointer}
 <div id="gate">
   <div class="gate-box">
     <h1>سكن — مركز التحكم</h1>
-    <p class="sub">المفتاح بينحفظ بهذه الجلسة بس. بينمسح لما تسكّر التبويب.</p>
+    <p class="sub">سجّل دخول بحساب الطاقم. الاسم والدور بيجوا من القاعدة تلقائياً.</p>
     <div class="field">
-      <label for="gk">مفتاح الخدمة (service_role)</label>
-      <input id="gk" type="password" autocomplete="off" spellcheck="false" placeholder="sb_secret_… أو eyJ…">
+      <label for="gEmail">الإيميل</label>
+      <input id="gEmail" type="email" autocomplete="username" placeholder="name@example.com">
     </div>
     <div class="field">
-      <label for="gn">اسمك (بينسجّل مع كل إجراء)</label>
-      <input id="gn" type="text" autocomplete="off" placeholder="عبداللطيف">
-    </div>
-    <div class="field">
-      <label for="gr">الدور</label>
-      <select id="gr">
-        <option value="admin">مدير — صلاحية كاملة</option>
-        <option value="agent">مندوب ميداني — صلاحية محدودة</option>
-      </select>
+      <label for="gPass">كلمة السر</label>
+      <input id="gPass" type="password" autocomplete="current-password">
     </div>
     <button class="btn primary wide" id="gbtn">دخول</button>
     <div class="err" id="gerr"></div>
@@ -211,12 +205,13 @@ tbody tr:hover{background:#182234;cursor:pointer}
 
 const SUPA = "https://yckteijitcqjtedoyoyv.supabase.co";
 const REST = SUPA + "/rest/v1";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlja3RlaWppdGNxanRlZG95b3l2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MjA3MTksImV4cCI6MjEwMzQ5NjcxOX0.mAY5A6ROvtxN4kkD8g1s_tsDlSjGfy4TCNkgbYHeRvo";
 
-const S = { key:"", actor:"", role:"admin", view:"dash", cache:{}, filters:{} };
+const S = { token:"", refresh:"", exp:0, actor:"", role:"agent", view:"dash", page:"privacy", cache:{}, filters:{} };
 
 /* ── الشبكة ───────────────────────────────────────────── */
 function hdr(extra){
-  return Object.assign({ apikey:S.key, Authorization:"Bearer "+S.key,
+  return Object.assign({ apikey:SUPABASE_ANON_KEY, Authorization:"Bearer "+S.token,
                          "Content-Type":"application/json" }, extra||{});
 }
 async function get(path, count){
@@ -304,7 +299,8 @@ function q(obj){
 const L_STATUS = {draft:"مسودّة",pending:"بانتظار المراجعة",published:"منشور",rejected:"مرفوض",
                   reserved:"محجوز",rented:"مؤجّر",expired:"منتهي"};
 const L_VERIF  = {none:"غير موثّق",desk:"توثيق مكتبي",field:"توثيق ميداني"};
-const L_KIND   = {room_shared:"غرفة بسكن مشترك",studio:"ستوديو",apartment:"شقة"};
+const L_KIND   = {room_shared:"غرفة بسكن مشترك",bed_shared:"سرير بغرفة مشتركة",
+                  studio:"ستوديو",apartment:"شقة",family:"سكن عائلي"};
 const L_POL    = {female:"إناث فقط",male:"ذكور فقط",mixed:"مختلط"};
 const C_STATUS = {new:"جديد",forwarded:"محوّل للمالك",owner_responded:"المالك ردّ",
                   viewing_set:"معاينة محدّدة",rented:"تم التأجير",dead:"مغلق"};
@@ -319,6 +315,7 @@ const REJECTS  = ["صور مش مطابقة للواقع","السعر غير و�
 const VIEWS = [
   {id:"dash",    t:"لوحة القيادة",   grp:"التشغيل اليومي", both:true},
   {id:"queue",   t:"بانتظار المراجعة", grp:"", both:true, badge:"pending"},
+  {id:"requests",t:"طلبات الباحثين",   grp:"", both:true, badge:"reqs"},
   {id:"reports", t:"البلاغات",        grp:"", both:false, badge:"reports"},
   {id:"pipeline",t:"مسار التأجير",     grp:"", both:true},
   {id:"listings",t:"كل الإعلانات",    grp:"المخزون", both:true},
@@ -329,45 +326,105 @@ const VIEWS = [
   {id:"fees",    t:"الرسوم",          grp:"المال", both:true, badge:"fees"},
   {id:"activity",t:"نشاط المنصة",     grp:"السجلات", both:false},
   {id:"audit",   t:"سجل الإجراءات",   grp:"", both:false},
-  {id:"settings",t:"الإعدادات",       grp:"", both:false}
+  {id:"settings",t:"الإعدادات",       grp:"", both:false},
+  {id:"pages",   t:"صفحات المحتوى",   grp:"", both:false}
 ];
 const isAdmin = () => S.role === "admin";
 const can = v => v.both || isAdmin();
 
-/* ── الدخول ───────────────────────────────────────────── */
+/* ── الدخول (Supabase Auth) ──────────────────────────── */
+let refreshTimer = null;
+
 $("#gbtn").addEventListener("click", enter);
-["gk","gn"].forEach(id => $("#"+id).addEventListener("keydown", e => { if(e.key==="Enter") enter(); }));
+["gEmail","gPass"].forEach(id => $("#"+id).addEventListener("keydown", e => { if(e.key==="Enter") enter(); }));
+
+function setSession(token, refresh, expiresIn){
+  S.token = token; S.refresh = refresh; S.exp = Date.now() + expiresIn*1000;
+  sessionStorage.setItem("sakan_token", token);
+  sessionStorage.setItem("sakan_refresh", refresh);
+  sessionStorage.setItem("sakan_exp", String(S.exp));
+}
+
+async function loadIdentity(){
+  S.actor = await rpc("actor_name");
+  S.role  = (await rpc("is_admin")) ? "admin" : "agent";
+}
+
+function scheduleRefresh(){
+  if(refreshTimer) clearTimeout(refreshTimer);
+  const wait = Math.max(5000, S.exp - Date.now() - 60000);
+  refreshTimer = setTimeout(async () => {
+    try { await refreshToken(); scheduleRefresh(); }
+    catch(e){ doLogout("انتهت الجلسة — سجّل دخول من جديد."); }
+  }, wait);
+}
+
+async function refreshToken(){
+  const r = await fetch(SUPA+"/auth/v1/token?grant_type=refresh_token", {
+    method:"POST", headers:{ apikey:SUPABASE_ANON_KEY, "Content-Type":"application/json" },
+    body: JSON.stringify({ refresh_token:S.refresh })
+  });
+  const j = await r.json();
+  if(!r.ok) throw new Error(j.error_description||j.msg||"فشل تجديد الجلسة.");
+  setSession(j.access_token, j.refresh_token, j.expires_in);
+}
 
 async function enter(){
-  const k = $("#gk").value.trim(), n = $("#gn").value.trim(), r = $("#gr").value;
-  if(!k) return ($("#gerr").textContent = "لصق المفتاح أولاً.");
-  if(!n) return ($("#gerr").textContent = "اكتب اسمك — كل إجراء بينتسجّل باسم صاحبه.");
-  if(!(k.startsWith("sb_secret_") || k.startsWith("eyJ")))
-    return ($("#gerr").textContent = "شكل المفتاح غير معروف. المتوقّع sb_secret_… أو eyJ…");
-
+  const email = $("#gEmail").value.trim(), pass = $("#gPass").value;
+  if(!email || !pass) return ($("#gerr").textContent = "الإيميل وكلمة السر مطلوبين.");
   $("#gerr").textContent = "بيتحقّق…";
-  S.key = k;
-  try {
-    await get("/settings?select=key&limit=1");
+  $("#gbtn").disabled = true;
+  try{
+    const r = await fetch(SUPA+"/auth/v1/token?grant_type=password", {
+      method:"POST", headers:{ apikey:SUPABASE_ANON_KEY, "Content-Type":"application/json" },
+      body: JSON.stringify({ email, password:pass })
+    });
+    const j = await r.json();
+    if(!r.ok) throw new Error(j.error_description||j.msg||"الإيميل أو كلمة السر غلط.");
+    setSession(j.access_token, j.refresh_token, j.expires_in);
+    await loadIdentity();
+    scheduleRefresh();
+    boot();
   } catch(e){
-    S.key = "";
-    return ($("#gerr").textContent = e.message);
+    $("#gerr").textContent = e.message;
+  } finally {
+    $("#gbtn").disabled = false;
   }
-  S.actor = n; S.role = r;
-  sessionStorage.setItem("sakan_key", k);
-  sessionStorage.setItem("sakan_actor", n);
-  sessionStorage.setItem("sakan_role", r);
-  boot();
 }
-function restore(){
-  const k = sessionStorage.getItem("sakan_key");
-  if(!k) return false;
-  S.key = k;
-  S.actor = sessionStorage.getItem("sakan_actor") || "admin";
-  S.role  = sessionStorage.getItem("sakan_role")  || "admin";
-  return true;
+
+function showGate(msg){
+  $("#app").classList.remove("on");
+  $("#gate").style.display = "grid";
+  $("#gerr").textContent = msg||"";
 }
-function logout(){ sessionStorage.clear(); location.reload(); }
+
+async function doLogout(msg){
+  if(refreshTimer) clearTimeout(refreshTimer);
+  const tok = S.token;
+  sessionStorage.clear();
+  S.token=""; S.refresh=""; S.exp=0; S.actor=""; S.role="agent";
+  if(tok){
+    try{ await fetch(SUPA+"/auth/v1/logout", {method:"POST",
+      headers:{ apikey:SUPABASE_ANON_KEY, Authorization:"Bearer "+tok }}); } catch(e){}
+  }
+  showGate(msg);
+}
+function logout(){ doLogout(); }
+
+async function init(){
+  const t = sessionStorage.getItem("sakan_token"), rf = sessionStorage.getItem("sakan_refresh");
+  const exp = +sessionStorage.getItem("sakan_exp") || 0;
+  if(!t || !rf) return $("#gEmail").focus();
+  S.token = t; S.refresh = rf; S.exp = exp;
+  try{
+    if(Date.now() > S.exp - 60000) await refreshToken();
+    await loadIdentity();
+    scheduleRefresh();
+    boot();
+  } catch(e){
+    doLogout("انتهت الجلسة — سجّل دخول من جديد.");
+  }
+}
 
 function boot(){
   $("#gate").style.display = "none";
@@ -394,9 +451,10 @@ function go(v){
   if(!VIEWS.some(x => x.id===v && can(x))) v = "dash";
   S.view = v; location.hash = v;
   $("#nav").querySelectorAll("a").forEach(a => a.classList.toggle("on", a.dataset.v===v));
-  ({dash:vDash,queue:vQueue,listings:vListings,reports:vReports,pipeline:vPipeline,verify:vVerify,
-    owners:vOwners,seekers:vSeekers,fees:vFees,matches:vMatches,activity:vActivity,
-    audit:vAudit,settings:vSettings}[v])();
+  ({dash:vDash,queue:vQueue,requests:vRequests,listings:vListings,reports:vReports,
+    pipeline:vPipeline,verify:vVerify,owners:vOwners,seekers:vSeekers,fees:vFees,
+    matches:vMatches,activity:vActivity,audit:vAudit,settings:vSettings,
+    pages:vPages}[v])();
 }
 function loading(t){ $("#main").innerHTML = '<div class="head"><h2>'+esc(t)+'</h2></div><div class="empty">بيحمّل…</div>'; }
 function fail(e){ $("#main").innerHTML += '<div class="warnbox">'+esc(e.message)+"</div>"; }
@@ -405,9 +463,11 @@ async function refreshBadges(){
   try {
     const k = (await get("/v_kpi_core?select=awaiting_review,open_reports"))[0] || {};
     const f = await get("/v_admin_fees?select=id&status=eq.due", true);
+    const q = await get("/v_admin_requests?select=id&status=eq.pending", true);
     set("b-pending", k.awaiting_review, "warm");
     set("b-reports", k.open_reports, "hot");
     set("b-fees",    f.__total, "warm");
+    set("b-reqs",    q.__total, "warm");
   } catch(e){}
   function set(id, n, cls){
     const el = document.getElementById(id);
@@ -542,7 +602,7 @@ async function vQueue(){
 
 async function setStatus(id, status, reason){
   try{
-    await rpc("admin_listing_status", {p_id:id, p_status:status, p_reason:reason||null, p_actor:S.actor});
+    await rpc("admin_listing_status", {p_id:id, p_status:status, p_reason:reason||null});
     toast("تم: "+(L_STATUS[status]||status), "ok");
     closeDrawer(); refreshBadges(); go(S.view);
   } catch(e){ toast(e.message, "bad"); }
@@ -653,6 +713,7 @@ async function openDrawer(kind, id){
     if(kind==="listing")  return drawListing(id);
     if(kind==="owner")    return drawOwner(id);
     if(kind==="seeker")   return drawSeeker(id);
+    if(kind==="request")  return drawRequest(id);
     if(kind==="report")   return drawReport(id);
     if(kind==="contact")  return drawContact(id);
     if(kind==="fee")      return drawFee(id);
@@ -685,7 +746,7 @@ async function drawListing(id){
     <dt>متاح من</dt><dd>${dt(r.available_from)}</dd>
     <dt>نُشر</dt><dd>${dt(r.published_at,true)}</dd>
     <dt>ينتهي</dt><dd>${dt(r.expires_at,true)} ${r.days_left!=null&&r.status==="published"?"("+r.days_left+" يوم)":""}</dd>
-    <dt>مشاهدات</dt><dd class="num">${num(r.view_count)} · ${num(r.contacts)} طلب تواصل · ${num(r.reviews_count)} تقييم</dd>
+    <dt>مشاهدات</dt><dd class="num">${num(r.view_count)} زائر فتح التفاصيل · ${num(r.contacts)} طلب تواصل · ${num(r.reviews_count)} تقييم${r.view_count>0?' · تحويل '+Math.round((r.contacts/r.view_count)*100)+'٪':""}</dd>
     ${r.reject_reason?'<dt>سبب الرفض</dt><dd style="color:var(--bad)">'+esc(r.reject_reason)+"</dd>":""}
   </dl>
   ${r.description?'<div style="color:var(--text-2);font-size:13px">'+esc(r.description)+"</div>":""}
@@ -707,20 +768,34 @@ async function drawListing(id){
 
   <div class="sec">
     <h4>الزيارة الميدانية ${safetyDone?"— "+dt(r.visit_date):"— ما صارت بعد"}</h4>
+
+    <div class="ref" style="margin-bottom:4px">شروط الترقية لتوثيق ميداني</div>
     <div class="chk"><input type="checkbox" id="s1" ${r.room_exists?"checked":""}><label for="s1">الغرفة موجودة فعلاً</label></div>
     <div class="chk"><input type="checkbox" id="s2" ${r.photos_match?"checked":""}><label for="s2">الصور مطابقة للواقع</label></div>
     <div class="chk"><input type="checkbox" id="s3" ${r.door_lock?"checked":""}><label for="s3">قفل باب سليم على الغرفة</label></div>
-    <div class="chk"><input type="checkbox" id="s4" ${r.no_indoor_cameras?"checked":""}><label for="s4">لا كاميرات داخلية</label></div>
     <div class="chk"><input type="checkbox" id="s5" ${r.occupants_verified?"checked":""}><label for="s5">عدد الساكنين مطابق</label></div>
+
+    <div class="ref" style="margin:10px 0 4px">ملاحظات المندوب (مش شرط للترقية)</div>
+    <div class="chk"><input type="checkbox" id="s4" ${r.no_indoor_cameras?"checked":""}><label for="s4">ما شفت كاميرات داخلية وقت الزيارة</label></div>
     <div class="chk"><input type="checkbox" id="s6" ${r.exterior_lighting?"checked":""}><label for="s6">إنارة خارجية كافية</label></div>
     <div class="chk"><input type="checkbox" id="s7" ${r.gas_detector?"checked":""}><label for="s7">كاشف غاز</label></div>
+    <div class="chk"><input type="checkbox" id="s8" ${r.private_bathroom?"checked":""}><label for="s8">حمام خاص</label></div>
+    <div class="chk"><input type="checkbox" id="s9" ${r.kitchen_access?"checked":""}><label for="s9">وصول للمطبخ</label></div>
+    <div class="chk"><input type="checkbox" id="s10" ${r.hot_water?"checked":""}><label for="s10">ماء ساخن</label></div>
+    <div class="chk"><input type="checkbox" id="s11" ${r.heating?"checked":""}><label for="s11">تدفئة</label></div>
+    <div class="chk"><input type="checkbox" id="s12" ${r.internet?"checked":""}><label for="s12">إنترنت</label></div>
+    <div class="chk"><input type="checkbox" id="s13" ${r.emergency_exit?"checked":""}><label for="s13">مخرج طوارئ</label></div>
+    <div class="chk"><input type="checkbox" id="s14" ${r.street_access?"checked":""}><label for="s14">وصول الشارع للمبنى</label></div>
+    <div class="chk"><input type="checkbox" id="s15" ${r.owner_met?"checked":""}><label for="s15">قابلت المالك شخصياً</label></div>
+
     <div class="field" style="margin-top:8px">
       <label for="snote">ملاحظات الزيارة</label>
       <textarea id="snote" rows="2">${esc(r.safety_notes)}</textarea>
     </div>
     <button class="btn sm primary" id="saveSafety">حفظ الزيارة</button>
     <div class="note" style="font-size:11.5px;color:var(--mute);margin-top:6px">
-      البنود الخمسة الأولى كلها لازم تمرّ عشان يترقّى الإعلان لتوثيق ميداني. وجود كاميرا داخلية بيوقف الإعلان تلقائياً.
+      البنود الأربعة الأولى كلها لازم تمرّ عشان يترقّى الإعلان لتوثيق ميداني.
+      الكاميرا انشالت من الشروط — ما بنقدر نضمنها، والحماية عبر البلاغات: بلاغ «كاميرا» بيوقف الإعلان تلقائياً.
     </div>
   </div>
 
@@ -758,14 +833,14 @@ async function drawListing(id){
   });
   $("#dpanel").querySelectorAll("[data-vf]").forEach(b => b.onclick = async () => {
     try{
-      await rpc("admin_listing_verification", {p_id:r.id, p_level:b.dataset.vf, p_actor:S.actor});
+      await rpc("admin_listing_verification", {p_id:r.id, p_level:b.dataset.vf});
       toast("تحدّث التوثيق.", "ok"); openDrawer("listing", r.id); go(S.view);
     } catch(e){ toast(e.message, "bad"); }
   });
   const ex = $("#extend");
   if(ex) ex.onclick = async () => {
     try{
-      await rpc("admin_listing_extend", {p_id:r.id, p_days:null, p_actor:S.actor});
+      await rpc("admin_listing_extend", {p_id:r.id, p_days:null});
       toast("تمدّدت الصلاحية.", "ok"); openDrawer("listing", r.id);
     } catch(e){ toast(e.message, "bad"); }
   };
@@ -775,12 +850,17 @@ async function drawListing(id){
   };
   $("#saveSafety").onclick = async () => {
     const v = i => $("#s"+i).checked;
+    const passed = v(1) && v(2) && v(3) && v(5);
     try{
       await rpc("admin_save_safety", {
         p_listing:r.id, p_visit:new Date().toISOString().slice(0,10),
         p_room:v(1), p_photos:v(2), p_lock:v(3), p_nocam:v(4), p_occ:v(5),
-        p_light:v(6), p_gas:v(7), p_notes:$("#snote").value.trim()||null, p_actor:S.actor });
-      toast(v(4) ? "انحفظت الزيارة." : "انحفظت الزيارة — الإعلان انوقف بسبب الكاميرا.", v(4)?"ok":"bad");
+        p_light:v(6), p_gas:v(7), p_notes:$("#snote").value.trim()||null,
+        p_extras:{ private_bathroom:v(8), kitchen_access:v(9), hot_water:v(10),
+                   heating:v(11), internet:v(12), emergency_exit:v(13),
+                   street_access:v(14), owner_met:v(15) } });
+      toast(passed ? "انحفظت الزيارة — الإعلان ترقّى لتوثيق ميداني."
+                   : "انحفظت الزيارة. ما ترقّى — في بند من الأربعة الإلزامية ناقص.", passed?"ok":"warn");
       openDrawer("listing", r.id); go(S.view);
     } catch(e){ toast(e.message, "bad"); }
   };
@@ -848,7 +928,7 @@ async function drawReport(id){
   $("#dpanel").querySelectorAll("[data-rs]").forEach(b => b.onclick = async () => {
     try{
       await rpc("admin_report_status", {p_id:r.id, p_status:b.dataset.rs,
-        p_note:$("#rn").value.trim()||null, p_actor:S.actor});
+        p_note:$("#rn").value.trim()||null});
       toast("تحدّث البلاغ.", "ok"); closeDrawer(); refreshBadges(); vReports();
     } catch(e){ toast(e.message, "bad"); }
   });
@@ -857,7 +937,7 @@ async function drawReport(id){
     const why = prompt("سبب إيقاف الحساب:\nكل إعلانات المالك المنشورة رح توقف.");
     if(!why) return;
     try{
-      await rpc("admin_profile_block", {p_id:r.owner_id, p_blocked:true, p_reason:why, p_actor:S.actor});
+      await rpc("admin_profile_block", {p_id:r.owner_id, p_blocked:true, p_reason:why});
       toast("انوقف الحساب وانوقفت إعلاناته.", "ok"); closeDrawer(); vReports();
     } catch(e){ toast(e.message, "bad"); }
   };
@@ -930,7 +1010,7 @@ async function drawContact(id){
   $("#dpanel").querySelectorAll("[data-cs]").forEach(b => b.onclick = async () => {
     try{
       await rpc("admin_contact_status", {p_id:r.id, p_status:b.dataset.cs,
-        p_notes:$("#cn").value.trim()||null, p_actor:S.actor});
+        p_notes:$("#cn").value.trim()||null});
       toast("تحدّثت الحالة.", "ok"); closeDrawer(); vPipeline();
     } catch(e){ toast(e.message, "bad"); }
   });
@@ -1002,7 +1082,7 @@ async function vVerify(){
       const note = prompt("ملاحظة التوثيق (اختياري):") ?? null;
       try{
         await rpc("admin_profile_level", {p_id:b.dataset.pid, p_level:+b.dataset.pl,
-          p_note:note||null, p_actor:S.actor});
+          p_note:note||null});
         toast("تحدّث المستوى.", "ok"); vVerify();
       } catch(e){ toast(e.message, "bad"); }
     });
@@ -1078,7 +1158,7 @@ async function drawOwner(id){
     const why = on ? prompt("سبب الإيقاف:\nكل إعلاناته المنشورة رح توقف.") : "رفع الإيقاف";
     if(on && !why) return;
     try{
-      await rpc("admin_profile_block", {p_id:r.id, p_blocked:on, p_reason:why, p_actor:S.actor});
+      await rpc("admin_profile_block", {p_id:r.id, p_blocked:on, p_reason:why});
       toast(on?"انوقف الحساب.":"انرفع الإيقاف.", "ok"); openDrawer("owner", r.id); 
     } catch(e){ toast(e.message, "bad"); }
   };
@@ -1141,8 +1221,118 @@ async function drawSeeker(id){
   $("#dx").onclick = closeDrawer;
   $("#dpanel").querySelectorAll("[data-pl]").forEach(b => b.onclick = async () => {
     try{
-      await rpc("admin_profile_level", {p_id:r.id, p_level:+b.dataset.pl, p_note:null, p_actor:S.actor});
+      await rpc("admin_profile_level", {p_id:r.id, p_level:+b.dataset.pl, p_note:null});
       toast("تحدّث المستوى.", "ok"); openDrawer("seeker", r.id);
+    } catch(e){ toast(e.message, "bad"); }
+  });
+}
+
+/* ══════════════ ٨ب. طلبات الباحثين ══════════════
+   بدون هاد القسم الطلبات بتضل status='pending' للأبد، و
+   v_requests_public بتفلتر على 'published' — يعني ما بتظهر
+   بالموقع أبداً مهما رفعت مستوى توثيق الباحث. */
+const REQ_ST = {pending:"بانتظار المراجعة", published:"منشور", closed:"مغلق"};
+
+async function vRequests(){
+  loading("طلبات الباحثين");
+  try{
+    const rows = await get("/v_admin_requests?select=*&order=created_at.desc&limit=300");
+    const pend = rows.filter(r=>r.status==="pending");
+    const pub  = rows.filter(r=>r.status==="published");
+    $("#main").innerHTML = `
+      <div class="head"><h2>طلبات الباحثين</h2>
+        <span class="note">النشر بيخلّي الطلب يظهر بتبويب «باحثون عن سكن» بالموقع العام</span></div>
+      <div class="grid k4" style="margin-bottom:14px">
+        <div class="card kpi ${pend.length?"warn":""}"><div class="lab">بانتظار المراجعة</div>
+          <div class="val">${num(pend.length)}</div></div>
+        <div class="card kpi"><div class="lab">منشورة</div><div class="val">${num(pub.length)}</div></div>
+        <div class="card kpi"><div class="lab">الكل</div><div class="val">${num(rows.length)}</div></div>
+      </div>
+      ${rows.length?"":'<div class="empty"><b>ما في طلبات</b>أول طلب سكن من الموقع بيظهر هون.</div>'}
+      <div class="tw" ${rows.length?"":'style="display:none"'}><table><thead><tr>
+        <th>الرقم</th><th>الباحث</th><th>الهاتف</th><th>الصفة</th><th>المدينة</th>
+        <th>المناطق</th><th>الميزانية</th><th>الانتقال</th><th>التوثيق</th>
+        <th>الحالة</th><th>مسجّل</th>
+      </tr></thead><tbody>
+      ${rows.map(r=>`<tr data-id="${r.id}">
+        <td class="ref">${esc(r.ref)}</td>
+        <td>${esc(r.first_name||"—")}${r.is_blocked?' <span class="tag t-rejected">موقوف</span>':""}</td>
+        <td class="phone">${esc(r.phone||"—")}</td>
+        <td>${esc({student:"طالب",employee:"موظّف",other:"أخرى"}[r.occupation]||"—")}</td>
+        <td>${esc(r.city||"—")}</td>
+        <td style="color:var(--text-2);font-size:12.5px">${esc(r.areas_ar||"—")}</td>
+        <td class="num">${money(r.budget_max)}</td>
+        <td>${dt(r.move_in_date)}</td>
+        <td>${lvl(r.seeker_level)}</td>
+        <td>${tag(r.status, REQ_ST)}</td>
+        <td style="color:var(--mute)">${ago(r.created_at)}</td>
+      </tr>`).join("")}</tbody></table></div>`;
+    wireRows("request");
+  } catch(e){ fail(e); }
+}
+
+async function drawRequest(id){
+  const r = (await get("/v_admin_requests?select=*&id=eq."+id))[0];
+  if(!r) return ($("#dpanel").innerHTML = '<div class="warnbox">الطلب غير موجود.</div>');
+  const yn = v => v===null||v===undefined ? "مرن" : (v ? "نعم" : "لا");
+  $("#dpanel").innerHTML = `
+    <div class="dhead"><div><h3>${esc(r.first_name||"باحث/ة")}</h3>
+      <div class="ref">${esc(r.ref)} · ${lvl(r.seeker_level)} ${r.seeker_level}/4</div></div>
+      <button class="btn sm" id="dx">إغلاق</button></div>
+
+    <dl class="dl">
+      <dt>الحالة</dt><dd>${tag(r.status, REQ_ST)}</dd>
+      <dt>الهاتف</dt><dd class="phone">${esc(r.phone||"—")}</dd>
+      <dt>الصفة</dt><dd>${esc({student:"طالب",employee:"موظّف",other:"أخرى"}[r.occupation]||"—")}${r.org_name?" · "+esc(r.org_name):""}</dd>
+      <dt>الجنس</dt><dd>${r.gender==="female"?"أنثى":r.gender==="male"?"ذكر":"—"}</dd>
+      <dt>المدينة</dt><dd>${esc(r.city||"—")}</dd>
+      <dt>المناطق</dt><dd>${esc(r.areas_ar||"مرن — أي منطقة")}</dd>
+      <dt>الميزانية</dt><dd class="num">حتى ${money(r.budget_max)}</dd>
+      <dt>نوع السكن</dt><dd>${esc(L_KIND[r.kind_pref]||"مرن")}</dd>
+      <dt>مفروش</dt><dd>${yn(r.furnished_pref)}</dd>
+      <dt>الانتقال</dt><dd>${dt(r.move_in_date)}</dd>
+      <dt>أقل مدة</dt><dd>${r.min_stay_months?r.min_stay_months+" شهر":"—"}</dd>
+      <dt>التدخين</dt><dd>${yn(r.smoker)}</dd>
+      <dt>مسجّل</dt><dd>${dt(r.created_at)}</dd>
+    </dl>
+
+    ${(r.lifestyle_tags||[]).length?`<div class="sec"><h4>صفاته كساكن</h4>
+      <div>${r.lifestyle_tags.map(t=>'<span class="tag">'+esc(t)+"</span>").join(" ")}</div></div>`:""}
+    ${r.note?`<div class="sec"><h4>ملاحظاته</h4><div style="font-size:13px">${esc(r.note)}</div></div>`:""}
+
+    <div class="acts">
+      <a class="btn sm" href="tel:${esc(r.phone||"")}">اتصال</a>
+      <a class="btn sm" target="_blank" rel="noopener"
+        href="https://wa.me/${esc(String(r.phone||"").replace(/[^\d]/g,""))}">واتساب</a>
+      <button class="btn sm" id="goSeeker">ملف الباحث</button>
+    </div>
+
+    <div class="sec"><h4>مراجعة الطلب</h4>
+      <div class="acts">
+        <button class="btn sm ok"  data-rq="published" ${r.status==="published"?"disabled":""}>نشر</button>
+        <button class="btn sm"     data-rq="pending"   ${r.status==="pending"?"disabled":""}>إرجاع للمراجعة</button>
+        <button class="btn sm bad" data-rq="closed"    ${r.status==="closed"?"disabled":""}>إغلاق</button>
+      </div>
+      <div class="note" style="font-size:11.5px;color:var(--mute);margin-top:8px">
+        قبل النشر: اتصل وتأكد إنه الطلب حقيقي وإنه الميزانية والمناطق منطقية.
+        بينعرض بالموقع الاسم الأول فقط — الرقم والصفة ما بينعرضوا.
+      </div>
+    </div>`;
+  $("#dx").onclick = closeDrawer;
+  const gs = $("#goSeeker");
+  if(gs) gs.onclick = () => r.seeker_id ? openDrawer("seeker", r.seeker_id)
+                                        : toast("ما في ملف باحث مربوط.", "bad");
+  $("#dpanel").querySelectorAll("[data-rq]").forEach(b => b.onclick = async () => {
+    const st = b.dataset.rq;
+    let reason = null;
+    if(st==="closed"){
+      reason = prompt("سبب الإغلاق؟");
+      if(reason===null) return;
+    }
+    try{
+      await rpc("admin_request_status", {p_id:r.id, p_status:st, p_reason:reason});
+      toast(st==="published" ? "اننشر الطلب — صار ظاهر بالموقع." : "تحدّثت حالة الطلب.", "ok");
+      openDrawer("request", r.id); go(S.view); refreshBadges();
     } catch(e){ toast(e.message, "bad"); }
   });
 }
@@ -1211,14 +1401,14 @@ async function drawFee(id){
   $("#dx").onclick = closeDrawer;
   $("#applyPc").onclick = async () => {
     try{
-      const v = await rpc("admin_fee_promo", {p_id:r.id, p_code:$("#pc").value.trim(), p_actor:S.actor});
+      const v = await rpc("admin_fee_promo", {p_id:r.id, p_code:$("#pc").value.trim()});
       toast("المستحق صار "+money(v), "ok"); openDrawer("fee", r.id);
     } catch(e){ toast(e.message, "bad"); }
   };
   $("#dpanel").querySelectorAll("[data-fs]").forEach(b => b.onclick = async () => {
     try{
       await rpc("admin_fee_status", {p_id:r.id, p_status:b.dataset.fs,
-        p_note:$("#fn").value.trim()||null, p_actor:S.actor});
+        p_note:$("#fn").value.trim()||null});
       toast("تحدّث الرسم.", "ok"); closeDrawer(); refreshBadges(); vFees();
     } catch(e){ toast(e.message, "bad"); }
   });
@@ -1356,19 +1546,56 @@ async function vSettings(){
 
       <div class="card">
         <h3>المدن والمناطق</h3>
-        <table><thead><tr><th>المدينة</th><th>المناطق</th><th>الحالة</th><th></th></tr></thead>
+        <table><thead><tr><th>المدينة</th><th>الحالة</th><th></th></tr></thead>
         <tbody>${cities.map(c=>{
           const a = areas.filter(x=>x.city_id===c.id);
           return `<tr style="cursor:default">
-            <td>${esc(c.name_ar)} <span class="ref">${esc(c.slug)}</span></td>
-            <td style="color:var(--text-2);font-size:12.5px">${a.map(x=>esc(x.name_ar)).join(" · ")||"—"}</td>
+            <td>${esc(c.name_ar)} <span class="ref">${esc(c.slug)}</span>
+              <div style="color:var(--text-2);font-size:12px;margin-top:2px">
+                ${a.length?a.map(x=>esc(x.name_ar)+(x.is_active?"":" (معطّلة)")).join(" · "):"ما في مناطق بعد"}</div></td>
             <td>${c.is_active?'<span class="tag t-published">مفعّلة</span>':'<span class="tag t-expired">معطّلة</span>'}</td>
-            <td><button class="btn sm" data-ct="${c.id}" data-on="${c.is_active}"
-                  ${!c.is_active&&a.length===0?"disabled title='ضيف مناطق قبل التفعيل'":""}>
-                  ${c.is_active?"تعطيل":"تفعيل"}</button></td>
+            <td style="white-space:nowrap">
+              <button class="btn sm" data-ct="${c.id}" data-nm="${esc(c.name_ar)}"
+                data-sl="${esc(c.slug)}" data-on="${c.is_active}"
+                ${!c.is_active&&a.filter(x=>x.is_active).length===0?"disabled title='ضيف منطقة مفعّلة قبل التفعيل'":""}>
+                ${c.is_active?"تعطيل":"تفعيل"}</button>
+            </td>
           </tr>`;}).join("")}</tbody></table>
+
+        <div class="bars" style="margin-top:12px">
+          <input id="ncn" placeholder="اسم المدينة بالعربي" style="width:190px">
+          <input id="ncs" placeholder="slug بالإنجليزي" style="width:150px">
+          <button class="btn sm primary" id="addCity">إضافة مدينة</button>
+        </div>
+
+        <h3 style="margin-top:18px">المناطق</h3>
+        <table><thead><tr><th>المنطقة</th><th>المدينة</th><th>الترتيب</th><th>الحالة</th><th></th></tr></thead>
+        <tbody>${areas.map(a=>{
+          const c = cities.find(x=>x.id===a.city_id) || {};
+          return `<tr style="cursor:default">
+            <td>${esc(a.name_ar)} <span class="ref">${esc(a.slug)}</span></td>
+            <td>${esc(c.name_ar||"—")}</td>
+            <td class="num">${a.sort_order}</td>
+            <td>${a.is_active!==false?'<span class="tag t-published">مفعّلة</span>':'<span class="tag t-expired">معطّلة</span>'}</td>
+            <td><button class="btn sm" data-at="${a.id}" data-city="${a.city_id}"
+                  data-nm="${esc(a.name_ar)}" data-sl="${esc(a.slug)}"
+                  data-so="${a.sort_order}" data-on="${a.is_active!==false}">
+                  ${a.is_active!==false?"تعطيل":"تفعيل"}</button></td>
+          </tr>`;}).join("")}</tbody></table>
+
+        <div class="bars" style="margin-top:12px">
+          <select id="nac" style="width:170px">
+            ${cities.map(c=>`<option value="${c.id}">${esc(c.name_ar)}</option>`).join("")}</select>
+          <input id="nan" placeholder="اسم المنطقة بالعربي" style="width:190px">
+          <input id="nas" placeholder="slug بالإنجليزي" style="width:150px">
+          <input id="nao" type="number" placeholder="ترتيب" style="width:90px">
+          <button class="btn sm primary" id="addArea">إضافة منطقة</button>
+        </div>
+
         <div class="warnbox" style="margin:12px 0 0">
-          تفعيل مدينة بيفتحها بنموذج الإعلان بالموقع العام. لا تفعّل مدينة قبل ما يكون فيها مندوب يقدر يزور.
+          تفعيل مدينة أو منطقة بيفتحها فوراً بالموقع العام وبنموذج الإعلان.
+          لا تفعّل مدينة قبل ما يكون فيها مندوب يقدر يزور.
+          التعطيل ما بيمسح الإعلانات القديمة — بس بيمنع إعلانات جديدة عليها.
         </div>
       </div>`;
 
@@ -1381,7 +1608,7 @@ async function vSettings(){
       else if(inp.dataset.kind==="bool"){ val = (raw==="true"||raw==="نعم"); }
       else val = raw;
       try{
-        await rpc("admin_set_setting", {p_key:k, p_value:val, p_actor:S.actor});
+        await rpc("admin_set_setting", {p_key:k, p_value:val});
         toast("انحفظ الإعداد.", "ok"); vSettings();
       } catch(e){ toast(e.message, "bad"); }
     });
@@ -1390,7 +1617,7 @@ async function vSettings(){
       try{
         await patch("promo_codes", "code=eq."+encodeURIComponent(b.dataset.pt), {is_active: b.dataset.on!=="true"});
         await rpc("admin_log", {p_action:"promo_toggle", p_subject_type:"promo",
-          p_subject_ref:b.dataset.pt, p_reason:b.dataset.on==="true"?"إيقاف":"تفعيل", p_actor:S.actor});
+          p_subject_ref:b.dataset.pt, p_reason:b.dataset.on==="true"?"إيقاف":"تفعيل"});
         toast("تحدّث الكود.", "ok"); vSettings();
       } catch(e){ toast(e.message, "bad"); }
     });
@@ -1403,27 +1630,133 @@ async function vSettings(){
           max_uses: $("#npm").value ? +$("#npm").value : null,
           valid_until: $("#npu").value || null, is_active:true});
         await rpc("admin_log", {p_action:"promo_create", p_subject_type:"promo",
-          p_subject_ref:code, p_reason:d+"٪", p_actor:S.actor});
+          p_subject_ref:code, p_reason:d+"٪"});
         toast("انضاف الكود.", "ok"); vSettings();
       } catch(e){ toast(e.message, "bad"); }
     };
 
+    /* التبديل صار عبر admin_city_save/admin_area_save: التعديل والتسجيل
+       بالسجل بيصيروا بمعاملة وحدة. قبل هيك كان PATCH مباشر + admin_log
+       منفصل — لو الثاني فشل بيصير تعديل بدون أثر بالسجل. */
+    const slugOk = s => /^[a-z0-9][a-z0-9-]*$/.test(s);
+
     $("#main").querySelectorAll("[data-ct]").forEach(b => b.onclick = async () => {
       const on = b.dataset.on !== "true";
-      if(!on && !confirm("تعطيل المدينة بيخفيها من نموذج الإعلان. متأكد؟")) return;
+      if(!on && !confirm("تعطيل المدينة بيخفيها من الموقع العام ونموذج الإعلان. متأكد؟")) return;
       try{
-        await patch("cities", "id=eq."+b.dataset.ct, {is_active:on});
-        await rpc("admin_log", {p_action:"city_toggle", p_subject_type:"city",
-          p_subject_ref:b.dataset.ct, p_reason:on?"تفعيل":"تعطيل", p_actor:S.actor});
+        await rpc("admin_city_save", {p_id:+b.dataset.ct, p_name:b.dataset.nm,
+          p_slug:b.dataset.sl, p_active:on});
         toast("تحدّثت المدينة.", "ok"); vSettings();
       } catch(e){ toast(e.message, "bad"); }
     });
+
+    $("#main").querySelectorAll("[data-at]").forEach(b => b.onclick = async () => {
+      const on = b.dataset.on !== "true";
+      if(!on && !confirm("تعطيل المنطقة بيمنع إعلانات جديدة عليها. متأكد؟")) return;
+      try{
+        await rpc("admin_area_save", {p_id:+b.dataset.at, p_city:+b.dataset.city,
+          p_name:b.dataset.nm, p_slug:b.dataset.sl, p_sort:+b.dataset.so,
+          p_active:on});
+        toast("تحدّثت المنطقة.", "ok"); vSettings();
+      } catch(e){ toast(e.message, "bad"); }
+    });
+
+    $("#addCity").onclick = async () => {
+      const n = $("#ncn").value.trim(), s = $("#ncs").value.trim().toLowerCase();
+      if(n.length < 2) return toast("اكتب اسم المدينة.", "bad");
+      if(!slugOk(s)) return toast("الـslug لازم يكون حروف إنجليزية صغيرة وأرقام وشرطات.", "bad");
+      try{
+        await rpc("admin_city_save", {p_id:null, p_name:n, p_slug:s,
+          p_active:false});
+        toast("انضافت المدينة — معطّلة. ضيف مناطق ثم فعّلها.", "ok"); vSettings();
+      } catch(e){ toast(e.message, "bad"); }
+    };
+
+    $("#addArea").onclick = async () => {
+      const n = $("#nan").value.trim(), s = $("#nas").value.trim().toLowerCase();
+      const city = +$("#nac").value, so = $("#nao").value ? +$("#nao").value : 100;
+      if(!city) return toast("اختر المدينة.", "bad");
+      if(n.length < 2) return toast("اكتب اسم المنطقة.", "bad");
+      if(!slugOk(s)) return toast("الـslug لازم يكون حروف إنجليزية صغيرة وأرقام وشرطات.", "bad");
+      try{
+        await rpc("admin_area_save", {p_id:null, p_city:city, p_name:n, p_slug:s,
+          p_sort:so, p_active:true});
+        toast("انضافت المنطقة.", "ok"); vSettings();
+      } catch(e){ toast(e.message, "bad"); }
+    };
+  } catch(e){ fail(e); }
+}
+
+/* ══════════════ ١٤. صفحات المحتوى ══════════════
+   سياسة الخصوصية والشروط بتنحفظ بجدول pages وبتنقرأ من
+   page.html مباشرة — يعني التعديل هون بيظهر بالموقع فوراً
+   بدون إعادة نشر. */
+async function vPages(){
+  loading("صفحات المحتوى");
+  try{
+    const rows = await get("/pages?select=*&order=key");
+    const cur  = S.page || (rows[0] && rows[0].key) || "privacy";
+    const d    = rows.find(r=>r.key===cur) || rows[0];
+
+    $("#main").innerHTML = `
+      <div class="head"><h2>صفحات المحتوى</h2>
+        <span class="note">التعديل بيظهر بالموقع فوراً — بدون إعادة نشر</span></div>
+
+      <div class="bars" style="margin-bottom:12px">
+        ${rows.map(r=>`<button class="btn sm ${r.key===cur?"primary":""}"
+          data-pg="${esc(r.key)}">${esc(r.title_ar)}</button>`).join("")}
+      </div>
+
+      ${d ? `
+      <div class="card">
+        <div class="bars" style="margin-bottom:10px">
+          <input id="pgTitle" value="${esc(d.title_ar)}" style="width:280px">
+          <label class="chk" style="margin:0">
+            <input type="checkbox" id="pgPub" ${d.is_published?"checked":""}>
+            <span>منشورة</span></label>
+          <a class="btn sm" target="_blank" rel="noopener"
+             href="/page.html?p=${encodeURIComponent(d.key)}">معاينة بالموقع</a>
+        </div>
+
+        <textarea id="pgBody" rows="26" spellcheck="false"
+          style="width:100%;font-family:ui-monospace,monospace;font-size:13px;line-height:1.8"
+          >${esc(d.body_md)}</textarea>
+
+        <div class="bars" style="margin-top:10px">
+          <button class="btn sm primary" id="pgSave">حفظ</button>
+          <span class="note" id="pgMeta">آخر تعديل ${dt(d.updated_at)} · ${esc(d.updated_by||"—")}</span>
+        </div>
+
+        <div class="warnbox" style="margin-top:12px">
+          الصيغة ماركداون: <code>##</code> عنوان · <code>**غامق**</code> ·
+          <code>-</code> نقطة · <code>---</code> فاصل · وجداول بـ<code>|</code>.
+          أي HTML بينكتب هون بينعرض كنص عادي مش ككود — الصفحة بتهرب كل شي.
+          <br><b>تنبيه:</b> سياسة الخصوصية مستند قانوني. لا تشيل بند إلا وأنت متأكد إنه ما عاد ينطبق.
+        </div>
+      </div>` : '<div class="empty"><b>ما في صفحات</b>شغّل migration المحتوى أولاً.</div>'}`;
+
+    $("#main").querySelectorAll("[data-pg]").forEach(b => b.onclick = () => {
+      S.page = b.dataset.pg; vPages();
+    });
+
+    const sv = $("#pgSave");
+    if(sv) sv.onclick = async () => {
+      const body = $("#pgBody").value;
+      if(body.trim().length < 20) return toast("النص قصير جداً.", "bad");
+      sv.disabled = true;
+      try{
+        await rpc("admin_page_save", {p_key:d.key, p_title:$("#pgTitle").value.trim(),
+          p_body:body, p_published:$("#pgPub").checked});
+        toast("انحفظت الصفحة — صارت ظاهرة بالموقع.", "ok");
+        S.page = d.key; vPages();
+      } catch(e){ toast(e.message, "bad"); sv.disabled = false; }
+    };
   } catch(e){ fail(e); }
 }
 
 /* ── الإقلاع ─────────────────────────────────────────── */
-window.addEventListener("hashchange", () => { if(S.key) go(location.hash.slice(1)||"dash"); });
-if(restore()) boot(); else $("#gk").focus();
+window.addEventListener("hashchange", () => { if(S.token) go(location.hash.slice(1)||"dash"); });
+init();
 </script>
 </body>
 </html>
