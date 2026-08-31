@@ -388,13 +388,13 @@ async function enter(){
   $("#gbtn").disabled = true;
   try{
     const email = await resolveEmail(raw);
-    if(!email) throw new Error("الإيميل أو اسم المستخدم أو كلمة السر غلط.");
+    if(!email) throw new Error("اسم المستخدم مش موجود.");
     const r = await fetch(SUPA+"/auth/v1/token?grant_type=password", {
       method:"POST", headers:{ apikey:SUPABASE_ANON_KEY, "Content-Type":"application/json" },
       body: JSON.stringify({ email, password:pass })
     });
     const j = await r.json();
-    if(!r.ok) throw new Error(j.error_description||j.msg||"الإيميل أو اسم المستخدم أو كلمة السر غلط.");
+    if(!r.ok){ console.error("login failed", r.status, j); throw new Error(j.error_description||j.msg||"الإيميل أو كلمة السر غلط."); }
     setSession(j.access_token, j.refresh_token, j.expires_in);
     await loadIdentity();
     scheduleRefresh();
