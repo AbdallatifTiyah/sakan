@@ -754,6 +754,7 @@ function openForm(kind){
   $("modal").innerHTML = kind==="listing" ? `
     <div class="mh"><h2>أضف غرفة للإيجار</h2><button class="x" onclick="closeAll()">×</button></div>
     <div class="mb"><div class="sec">
+      <div id="draftBanner"></div>
       <div class="note">رقمك ما بينعرض على الموقع أبداً. بنستخدمه للتواصل معك وترتيب التوثيق فقط.</div>
 
       <div class="fg" style="margin-top:12px"><label>اسمك</label><input id="lName"></div>
@@ -858,7 +859,44 @@ function openForm(kind){
         سجّل طلبي</button></div>
     </div></div>`;
   wireDigits($("modal"));
+  if(kind==="listing") restoreDraftIfAny();
   $("ov").classList.add("on");
+}
+
+/* ═══════════════ مسودة الإعلان (محلياً — النموذج طويل) ═══════════════ */
+const DRAFT_KEY = "sakan_listing_draft";
+const DRAFT_FIELDS = ["lName","lDial","lPhone","lTitle","lCity","lArea","lPrice","lDep",
+  "lKind","lPol","lFurn","lBills","lRooms","lMin","lFrom","lLand","lOcc","lDesc"];
+
+function saveDraft(){
+  if(!$("lTitle")) return;
+  try{
+    const d = {}; DRAFT_FIELDS.forEach(id => d[id] = $(id).value);
+    d.lFeat = chipsValue("lFeat");
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
+  }catch(e){ /* التخزين معطّل — المسودة مش لازمة تعطّل الفورم */ }
+}
+function clearDraft(){
+  try{ localStorage.removeItem(DRAFT_KEY); }catch(e){}
+}
+function restoreDraftIfAny(){
+  let d = null;
+  try{ d = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null"); }catch(e){}
+  if(!d) return;
+  DRAFT_FIELDS.forEach(id => { if(d[id] !== undefined) $(id).value = d[id]; });
+  telSync("lDial","lPhone");
+  onFormCity();
+  if(d.lArea) $("lArea").value = d.lArea;
+  (d.lFeat||[]).forEach(v => {
+    const el = document.querySelector(`input[name="lFeat"][value="${CSS.escape(v)}"]`);
+    if(el) el.checked = true;
+  });
+  $("draftBanner").innerHTML = `<div class="note">رجّعنا مسودة كنت عم تعبّيها قبل هيك.
+    <button class="linkish" onclick="discardDraft()">امسحها وابدأ من جديد</button></div>`;
+}
+function discardDraft(){
+  clearDraft();
+  openForm("listing");
 }
 
 const num = id => { const v = toEN($(id).value).replace(/[^\d.]/g,""); return v ? Number(v) : null; };
@@ -901,6 +939,7 @@ async function subListing(){
       بنتواصل معك خلال ٢٤ ساعة للتوثيق.</div>`;
     $("lErr").innerHTML = "";
     selectedImages = [];
+    clearDraft();
   }catch(e){
     $("lErr").innerHTML = '<div class="err">صار خطأ بالإرسال. جرّب مرة ثانية بعد شوي.</div>';
     if(btn){ btn.disabled = false; btn.textContent = "أرسل الإعلان للمراجعة"; }
@@ -960,6 +999,9 @@ function paintLightbox(){
 }
 function lbMove(d){ LB_I = (LB_I + d + CUR_IMGS.length) % CUR_IMGS.length; paintLightbox(); }
 function closeLightbox(){ $("lightbox").classList.remove("on"); }
+
+document.addEventListener("input",  e => { if($("modal").contains(e.target)) saveDraft(); });
+document.addEventListener("change", e => { if($("modal").contains(e.target)) saveDraft(); });
 
 document.addEventListener("keydown", e => {
   if($("lightbox").classList.contains("on")){
