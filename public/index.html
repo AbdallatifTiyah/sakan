@@ -948,7 +948,7 @@ document.addEventListener("keydown", e => {
 /* ═══════════════ تأكيد توفّر الإعلان (رابط المالك) ═══════════════ */
 async function checkConfirmLink(){
   const p = new URLSearchParams(location.search);
-  const ref = p.get("c"), token = p.get("t");
+  const ref = p.get("confirm"), token = p.get("t");
   if(!ref || !token) return;
   history.replaceState(null, "", location.pathname);
   let ok = false;
@@ -959,6 +959,86 @@ async function checkConfirmLink(){
       ? '<div class="done">تم تمديد إعلانك ٢١ يوم ✓</div>'
       : '<div class="err">الرابط غير صالح أو منتهي.</div>'}</div>`;
   $("ov").classList.add("on");
+}
+
+/* ═══════════════ تقييم السكن (رابط موقّع — يشتغل بدون تسجيل دخول) ═══════════════ */
+let REVIEW_REF = null, REVIEW_TOKEN = null;
+
+const ratingSelect = id => `<select id="${id}">
+  <option value="5">٥ — ممتاز</option><option value="4">٤ — جيد جداً</option>
+  <option value="3">٣ — متوسط</option><option value="2">٢ — دون المتوسط</option>
+  <option value="1">١ — ضعيف</option></select>`;
+
+async function checkReviewLink(){
+  const p = new URLSearchParams(location.search);
+  const ref = p.get("review"), token = p.get("t");
+  if(!ref || !token) return;
+  history.replaceState(null, "", location.pathname);
+
+  let info = null;
+  try{ [info] = await rpc("review_link_info", {p_ref:ref, p_token:token}); }catch(e){ info = null; }
+
+  if(!info){
+    $("modal").innerHTML = `
+      <div class="mh"><h2>رابط التقييم</h2><button class="x" onclick="closeAll()">×</button></div>
+      <div class="mb"><div class="err">الرابط غير صالح.</div></div>`;
+    $("ov").classList.add("on");
+    return;
+  }
+
+  REVIEW_REF = ref; REVIEW_TOKEN = token;
+  $("modal").innerHTML = `
+    <div class="mh"><h2>قيّم سكنك</h2><button class="x" onclick="closeAll()">×</button></div>
+    <div class="mb"><div class="sec">
+      <div class="note">تقييمك بيساعد باحثين تانيين، وما بيظهر لحدا إلا بعد ما يوصل ٣ تقييمات على نفس الإعلان.</div>
+      <div class="fg" style="margin-top:12px"><b>${esc(info.title)}</b> — ${esc(info.area)}, ${esc(info.city)}</div>
+
+      <div class="fg"><label>وضعك هلأ</label><select id="vStage">
+        <option value="day30">سكنت من شهر تقريباً</option>
+        <option value="move_out">طلعت من السكن</option></select></div>
+
+      <div class="f2">
+        <div class="fg"><label>الصيانة والاستجابة للأعطال</label>${ratingSelect("vMaint")}</div>
+        <div class="fg"><label>الهدوء بالسكن</label>${ratingSelect("vQuiet")}</div>
+        <div class="fg"><label>دقة وصف الإعلان</label>${ratingSelect("vAcc")}</div>
+        <div class="fg"><label>الأمان بالليل</label>${ratingSelect("vSafe")}</div>
+      </div>
+
+      <div class="fg"><label>دخل المالك الغرفة بدون إذنك؟</label><select id="vEnter">
+        <option value="">ما بحب أحدد</option><option value="false">لا</option>
+        <option value="true">نعم</option></select></div>
+      <div class="fg"><label>رجّع المالك التأمين كامل؟</label><select id="vDep">
+        <option value="">مش منطبق / لسا</option><option value="true">نعم</option>
+        <option value="false">لا</option></select></div>
+
+      <div id="vErr"></div>
+      <div id="vWrap"><button class="btn acc" style="width:100%" onclick="subReview()">
+        أرسل تقييمي</button></div>
+    </div></div>`;
+  $("ov").classList.add("on");
+}
+
+async function subReview(){
+  $("vErr").innerHTML = "";
+  const tri = id => { const s = $(id).value; return s === "" ? null : s === "true"; };
+  const v = {
+    p_ref: REVIEW_REF, p_token: REVIEW_TOKEN, p_stage: $("vStage").value,
+    p_r_maintenance: Number($("vMaint").value),
+    p_r_quiet: Number($("vQuiet").value),
+    p_r_accuracy: Number($("vAcc").value),
+    p_r_safety_night: Number($("vSafe").value),
+    p_entered_without_permission: tri("vEnter"),
+    p_deposit_returned: tri("vDep")
+  };
+  const btn = $("vWrap").querySelector("button");
+  if(btn){ btn.disabled = true; btn.textContent = "عم يرسل…"; }
+  try{
+    await rpc("submit_review", v);
+    $("vWrap").innerHTML = '<div class="done">وصلنا تقييمك ✓ شكراً إلك.</div>';
+  }catch(e){
+    $("vErr").innerHTML = '<div class="err">صار خطأ بالإرسال. جرّب مرة ثانية بعد شوي.</div>';
+    if(btn){ btn.disabled = false; btn.textContent = "أرسل تقييمي"; }
+  }
 }
 
 /* ═══════════════ التحميل ═══════════════ */
@@ -979,6 +1059,7 @@ async function checkConfirmLink(){
 
   renderFilters();
   await checkConfirmLink();
+  await checkReviewLink();
 
   try{
     [L, R] = await Promise.all([

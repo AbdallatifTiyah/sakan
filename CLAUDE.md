@@ -3,7 +3,7 @@
 منصة تأجير غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت.
 واجهة عربية RTL. باك إند Supabase. نشر على Cloudflare Workers.
 
-**آخر تحديث: ٣١ آب ٢٠٢٦ — conv14 (إدارة صور الإعلان من اللوحة + عارض صور مكبّر بالموقع العام)**
+**آخر تحديث: ١ أيلول ٢٠٢٦ — conv15 (رابط تقييم موقّع — يشتغل حتى لمستأجرين مو عن طريق المنصة)**
 
 ---
 
@@ -11,7 +11,7 @@
 
 | البند | الحالة |
 |---|---|
-| قاعدة البيانات | ✅ ١٧ جدول · ١٤ واجهة · ٢٦ migration (Frankfurt) |
+| قاعدة البيانات | ✅ ١٧ جدول · ١٤ واجهة · ٢٧ migration (Frankfurt) |
 | فخ الـzero-policy على `cities`/`areas` | ✅ **انحلّ** — كان `anon` بيقرأ صفر صفوف بصمت |
 | الرفض التلقائي بسبب الكاميرا | ✅ **انشال** — كان `default false` + مشغّل = رفض أي زيارة الخانة فيها مش متأشّرة |
 | نشر طلبات الباحثين | ✅ **انحلّ** — ما كان في أي RPC تغيّر `seeker_requests.status` |
@@ -22,7 +22,7 @@
 | حماية `/admin` | ✅ Supabase Auth (شاشة دخول إيميل أو يوزرنيم + كلمة سر) + حارس `is_staff()`/`is_admin()` جوّا كل دالة إدارية. Basic Auth انشال. |
 | **مفتاح `service_role` بالمتصفح** | ✅ **انحلّ** — الدخول بالمفتاح العام (`anon`) فقط، الصلاحية الفعلية من جدول `staff` |
 | رفع الصور | ✅ Supabase Storage (`listing-images`) — المالك بيرفع لحد ٦ صور وقت التقديم، والطاقم يقدر يضيف/يحذف/يرتّب من اللوحة |
-| وصول التقييمات للمستأجر | ❌ الجدول موجود، ما في طريق يوصله |
+| رابط التقييم | ✅ زر باللوحة (نسخ/واتساب) — رابط موقّع بـ`review_token` على الإعلان، يشتغل بدون تسجيل دخول وحتى لمستأجر مو عن طريق المنصة |
 | النطاق `sakan.ps` | ❌ بيد أبواللطيف — خارج نطاق مساعدة Claude |
 | البيانات | إعلان منشور واحد · إعلان `pending` · ٤ طلبات باحثين `pending` · ٦ ملفات |
 
@@ -96,6 +96,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 20260831183933_strip_bidi_marks_from_username_lookup
 20260831185357_listing_images_storage_and_upload
 20260831191905_admin_listing_images_manage
+20260831222144_review_link_and_submit
 ```
 
 > migrations conv9 مسجّلة بطوابع `2026082901…` فبتسبق `…120000` بالترتيب.
@@ -112,7 +113,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 |---|---|
 | قراءة | `v_listings_public` · `v_requests_public` · `cities` · `areas` · `pages` |
 | كتابة (insert فقط) | `contact_requests` · `reports` · `events` |
-| دوال | `submit_listing` · `submit_request` · `confirm_listing_available` · `bump_listing_view` · `staff_email_for_username` (تحويل يوزرنيم لإيميل قبل تسجيل الدخول — ما بترجّع غير الإيميل) |
+| دوال | `submit_listing` · `submit_request` · `confirm_listing_available` · `bump_listing_view` · `staff_email_for_username` (تحويل يوزرنيم لإيميل قبل تسجيل الدخول — ما بترجّع غير الإيميل) · `review_link_info` · `submit_review` (رابط التقييم — بدون تسجيل دخول) |
 
 **`authenticated` (بشرط `is_staff()`/`is_admin()`) + `service_role` — مركز التحكم فقط**
 
@@ -254,7 +255,6 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 ## مهام مفتوحة — بترتيب الأولوية
 
 **قبل النزول للميدان**
-- [ ] **رابط التقييم** — زر باللوحة يولّد رابط موقّع للمستأجر (واتساب/نسخ)، ويشتغل كمان لمستأجرين ما استأجروا عبر المنصة.
 - [ ] **مشاركة الإعلان** — `?l=SK-123` + صورة OG. الواتساب أهم قناة توزيع بفلسطين.
 - [ ] **البحث النصي** بالعنوان والوصف.
 - [ ] `robots.txt` + `sitemap.xml`.

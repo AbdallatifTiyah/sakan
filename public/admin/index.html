@@ -852,6 +852,17 @@ async function drawListing(id){
     <button class="btn sm" id="copyConfirm" style="margin-top:8px">نسخ الرابط</button>
   </div>
 
+  <div class="sec">
+    <h4>رابط التقييم للمستأجر</h4>
+    <div class="note">شاركه مع أي مستأجر سكن بالغرفة — حتى لو ما قدّم طلبه عبر المنصة.</div>
+    <div class="ref" style="word-break:break-all;color:var(--text-2);margin-top:6px">
+      ${location.origin}/?review=${esc(r.ref)}&t=${esc(r.review_token)}</div>
+    <div class="acts" style="margin-top:8px">
+      <button class="btn sm" id="copyReview">نسخ الرابط</button>
+      <a class="btn sm" target="_blank" rel="noopener" id="waReview">مشاركة واتساب</a>
+    </div>
+  </div>
+
   <div class="sec"><h4>سجل هذا الإعلان</h4><div id="lhist" class="feed"></div></div>`;
 
   $("#dx").onclick = closeDrawer;
@@ -947,6 +958,13 @@ async function drawListing(id){
     navigator.clipboard.writeText(location.origin+"/?confirm="+r.ref+"&t="+r.confirm_token)
       .then(()=>toast("انتسخ الرابط.", "ok"), ()=>toast("ما زبط النسخ — علّم عليه يدوياً.", "bad"));
   };
+  $("#copyReview").onclick = () => {
+    navigator.clipboard.writeText(location.origin+"/?review="+r.ref+"&t="+r.review_token)
+      .then(()=>toast("انتسخ الرابط.", "ok"), ()=>toast("ما زبط النسخ — علّم عليه يدوياً.", "bad"));
+  };
+  $("#waReview").href = "https://wa.me/?text=" + encodeURIComponent(
+    "قيّم سكنك بـ«"+r.title+"» — بياخذ دقيقتين وبيساعد باحثين تانيين:\n" +
+    location.origin+"/?review="+r.ref+"&t="+r.review_token);
   $("#saveSafety").onclick = async () => {
     const v = i => $("#s"+i).checked;
     const passed = v(1) && v(2) && v(3) && v(5);
