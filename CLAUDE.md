@@ -3,7 +3,7 @@
 منصة تأجير غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت.
 واجهة عربية RTL. باك إند Supabase. نشر على Cloudflare Workers.
 
-**آخر تحديث: ٣١ آب ٢٠٢٦ — conv13 (رفع الصور عبر Supabase Storage)**
+**آخر تحديث: ٣١ آب ٢٠٢٦ — conv14 (إدارة صور الإعلان من اللوحة + عارض صور مكبّر بالموقع العام)**
 
 ---
 
@@ -11,7 +11,7 @@
 
 | البند | الحالة |
 |---|---|
-| قاعدة البيانات | ✅ ١٧ جدول · ١٤ واجهة · ٢٥ migration (Frankfurt) |
+| قاعدة البيانات | ✅ ١٧ جدول · ١٤ واجهة · ٢٦ migration (Frankfurt) |
 | فخ الـzero-policy على `cities`/`areas` | ✅ **انحلّ** — كان `anon` بيقرأ صفر صفوف بصمت |
 | الرفض التلقائي بسبب الكاميرا | ✅ **انشال** — كان `default false` + مشغّل = رفض أي زيارة الخانة فيها مش متأشّرة |
 | نشر طلبات الباحثين | ✅ **انحلّ** — ما كان في أي RPC تغيّر `seeker_requests.status` |
@@ -21,7 +21,7 @@
 | عدّاد المشاهدات | ✅ `bump_listing_view` — كان عمود ميت |
 | حماية `/admin` | ✅ Supabase Auth (شاشة دخول إيميل أو يوزرنيم + كلمة سر) + حارس `is_staff()`/`is_admin()` جوّا كل دالة إدارية. Basic Auth انشال. |
 | **مفتاح `service_role` بالمتصفح** | ✅ **انحلّ** — الدخول بالمفتاح العام (`anon`) فقط، الصلاحية الفعلية من جدول `staff` |
-| رفع الصور | ✅ Supabase Storage (`listing-images`) — المالك بيرفع لحد ٦ صور وقت التقديم |
+| رفع الصور | ✅ Supabase Storage (`listing-images`) — المالك بيرفع لحد ٦ صور وقت التقديم، والطاقم يقدر يضيف/يحذف/يرتّب من اللوحة |
 | وصول التقييمات للمستأجر | ❌ الجدول موجود، ما في طريق يوصله |
 | النطاق `sakan.ps` | ❌ بيد أبواللطيف — خارج نطاق مساعدة Claude |
 | البيانات | إعلان منشور واحد · إعلان `pending` · ٤ طلبات باحثين `pending` · ٦ ملفات |
@@ -32,12 +32,12 @@
 
 | ملف | الوصف |
 |---|---|
-| `public/index.html` | الموقع العام — ٩٤٩ سطر، صفحة واحدة، بدون build ولا npm. فيها رفع الصور. |
+| `public/index.html` | الموقع العام — ٩٩٨ سطر، صفحة واحدة، بدون build ولا npm. فيها رفع الصور + عارض صور مكبّر (lightbox). |
 | `public/page.html` | سياسة الخصوصية والشروط — بتقرأ من جدول `pages` |
-| `public/admin/index.html` | مركز التحكم — ١٧٨٢ سطر، منشور على `/admin`، دخول عبر Supabase Auth |
+| `public/admin/index.html` | مركز التحكم — ١٨٦١ سطر، منشور على `/admin`، دخول عبر Supabase Auth |
 | `src/worker.js` | بيمرّر لـ`ASSETS` ويضيف `X-Robots-Tag: noindex` على `/admin` (١٦ سطر، بدون Basic Auth) |
 | `wrangler.toml` | `main` + `binding = "ASSETS"` + `run_worker_first = true` |
-| `supabase/migrations/` | ٢٥ ملف — لازم يطابقوا `supabase_migrations` بالحرف |
+| `supabase/migrations/` | ٢٦ ملف — لازم يطابقوا `supabase_migrations` بالحرف |
 
 **Supabase**
 - ref: `yckteijitcqjtedoyoyv` (eu-central-1، Postgres 17.6)
@@ -47,8 +47,10 @@
 
 **Storage**
 - bucket `listing-images` — عام (قراءة)، حجم أقصى ٥ MB، أنواع مسموحة `jpeg`/`png`/`webp` فقط.
-- `anon`/`authenticated` عندهم `insert` فقط (رفع) — ممنوع `update`/`delete`. الرفع بيصير من متصفح
-  المالك مباشرة قبل `submit_listing`، والروابط بتنمرّر كـ`p_images` بنفس الاستدعاء.
+- `anon`/`authenticated` عندهم `insert` (رفع). `authenticated` + `is_staff()` عندهم كمان `delete`
+  (الطاقم بيقدر يمسح صورة فعلياً من اللوحة). ممنوع `update` للجميع.
+- الرفع بيصير من متصفح المالك مباشرة قبل `submit_listing`، والروابط بتنمرّر كـ`p_images` بنفس
+  الاستدعاء. الطاقم بيرفع/يحذف/يرتّب من مركز التحكم عبر `admin_listing_images`.
 - ممنوع حذف/تعديل صفوف `storage.objects` مباشرة بـSQL (حتى بـservice_role) — `protect_delete`
   trigger بيرفض. الحذف لازم يصير عبر Storage API (`DELETE /storage/v1/object/...`).
 
@@ -66,7 +68,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 ```
 لازم `select` قبلها. الترتيب: إيميل، اسم، دور (`admin`/`agent`)، يوزرنيم (اختياري، أو `null`).
 
-**الـmigrations المسجّلة (٢٥ — بالترتيب)**
+**الـmigrations المسجّلة (٢٦ — بالترتيب)**
 ```
 20260828161300_remote_schema
 20260828203602_restore_service_role_grants
@@ -93,6 +95,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 20260831182131_staff_username_login_and_match_score_grant
 20260831183933_strip_bidi_marks_from_username_lookup
 20260831185357_listing_images_storage_and_upload
+20260831191905_admin_listing_images_manage
 ```
 
 > migrations conv9 مسجّلة بطوابع `2026082901…` فبتسبق `…120000` بالترتيب.
@@ -120,14 +123,17 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 `v_admin_reports` · `v_admin_pipeline` · `v_admin_fees` · `v_admin_activity` ·
 `v_kpi_daily` · `v_kpi_core` · `v_kpi_quality` · `v_reverse_matches`
 
-الدوال الإدارية (١٦) — كل وحدة فيها حارس `if not (is_staff() or auth.uid() is null) then raise exception`
+الدوال الإدارية (١٧) — كل وحدة فيها حارس `if not (is_staff() or auth.uid() is null) then raise exception`
 (أربعة منها بـ`is_admin()`: `admin_profile_block` · `admin_set_setting` · `admin_page_save` · `admin_report_status`)،
 ومنحصرة بـ`authenticated, service_role` (`anon` ممنوعة):
 `admin_listing_status` · `admin_listing_verification` · `admin_listing_extend` ·
 `admin_request_status` · `admin_profile_level` · `admin_profile_block` ·
 `admin_report_status` · `admin_fee_status` · `admin_fee_promo` ·
 `admin_contact_status` · `admin_save_safety` · `admin_city_save` ·
-`admin_area_save` · `admin_page_save` · `admin_set_setting` · `admin_log`
+`admin_area_save` · `admin_page_save` · `admin_set_setting` · `admin_log` · `admin_listing_images`
+
+> `admin_listing_images(p_id, p_images)` أحدث دالة — بدون `p_actor` إطلاقاً (النمط الجديد
+> بعد القاعدة ١٦: الفاعل من `auth.uid()` حصراً، صفر توافق مع نص قديم).
 
 > `auth.uid() is null` (استدعاء من `service_role` أو SQL مباشر) بيعدّي الحارس —
 > مسموح لطوارئ القاعدة، مش للاستخدام العادي.

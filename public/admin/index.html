@@ -136,6 +136,9 @@ tbody tr:hover{background:#182234;cursor:pointer}
 .phone{font-family:var(--mono);font-size:14px;color:var(--gold)}
 .imgs{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .imgs img{width:76px;height:58px;object-fit:cover;border-radius:4px;border:1px solid var(--line)}
+.imgs-edit{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+.imgcell{width:120px}
+.imgcell img{width:120px;height:90px;object-fit:cover;border-radius:6px;border:1px solid var(--line);display:block}
 
 #toast{position:fixed;inset-block-end:20px;inset-inline-start:20px;z-index:90;display:flex;flex-direction:column;gap:8px}
 .tst{background:var(--ink-3);border:1px solid var(--line);border-inline-start:3px solid var(--info);
@@ -744,6 +747,7 @@ async function drawListing(id){
   const r = (await get("/v_admin_listings?select=*&id=eq."+id))[0];
   if(!r) return ($("#dpanel").innerHTML = '<div class="empty">الإعلان مش موجود.</div>');
   const imgs = Array.isArray(r.images) ? r.images : [];
+  let curImages = imgs.slice();
   const safetyDone = r.visit_date != null;
 
   $("#dpanel").innerHTML = `
@@ -770,7 +774,13 @@ async function drawListing(id){
     ${r.reject_reason?'<dt>سبب الرفض</dt><dd style="color:var(--bad)">'+esc(r.reject_reason)+"</dd>":""}
   </dl>
   ${r.description?'<div style="color:var(--text-2);font-size:13px">'+esc(r.description)+"</div>":""}
-  ${imgs.length?'<div class="imgs">'+imgs.slice(0,8).map(u=>'<img src="'+esc(u)+'" alt="">').join("")+"</div>":""}
+
+  <div class="sec">
+    <h4>صور الإعلان (<span id="imgCount">${imgs.length}</span>/6)</h4>
+    <div class="imgs-edit" id="imgsEdit"></div>
+    <input type="file" id="addImgInput" accept="image/jpeg,image/png,image/webp" multiple style="display:none">
+    <button class="btn sm" id="addImgBtn" style="margin-top:8px">+ إضافة صورة</button>
+  </div>
 
   <div class="sec">
     <h4>المالك</h4>
@@ -845,6 +855,75 @@ async function drawListing(id){
   <div class="sec"><h4>سجل هذا الإعلان</h4><div id="lhist" class="feed"></div></div>`;
 
   $("#dx").onclick = closeDrawer;
+
+  function paintImgs(){
+    $("#imgCount").textContent = curImages.length;
+    $("#imgsEdit").innerHTML = curImages.length ? curImages.map((u,i)=>`
+      <div class="imgcell">
+        <img src="${esc(u)}" alt="">
+        <div class="acts" style="margin-top:5px;gap:4px;flex-wrap:nowrap">
+          <button class="btn sm" type="button" data-mv="-1" data-i="${i}" ${i===0?"disabled":""} title="قدّم">▲</button>
+          <button class="btn sm" type="button" data-mv="1" data-i="${i}" ${i===curImages.length-1?"disabled":""} title="أخّر">▼</button>
+          <button class="btn sm bad" type="button" data-del="${i}" title="حذف">حذف</button>
+        </div>
+      </div>`).join("") : '<div class="hint">ما في صور.</div>';
+    $("#addImgBtn").disabled = curImages.length >= 6;
+
+    $("#imgsEdit").querySelectorAll("[data-del]").forEach(b => b.onclick = async () => {
+      const i = +b.dataset.del, url = curImages[i];
+      await saveImages(curImages.filter((_,idx)=>idx!==i), "انحذفت الصورة.");
+      deleteStorageObject(url);
+    });
+    $("#imgsEdit").querySelectorAll("[data-mv]").forEach(b => b.onclick = async () => {
+      const i = +b.dataset.i, j = i + (+b.dataset.mv);
+      if(j<0 || j>=curImages.length) return;
+      const next = curImages.slice();
+      [next[i], next[j]] = [next[j], next[i]];
+      await saveImages(next, "تغيّر ترتيب الصور.");
+    });
+  }
+  async function saveImages(list, msg){
+    try{
+      await rpc("admin_listing_images", {p_id:r.id, p_images:list});
+      curImages = list;
+      paintImgs();
+      if(msg) toast(msg, "ok");
+    } catch(e){ toast(e.message, "bad"); }
+  }
+  function deleteStorageObject(url){
+    const marker = "/object/public/listing-images/";
+    const idx = url.indexOf(marker);
+    if(idx<0) return;
+    fetch(SUPA+"/storage/v1/object/listing-images/"+url.slice(idx+marker.length),
+      {method:"DELETE", headers:{apikey:SUPABASE_ANON_KEY, Authorization:"Bearer "+S.token}}).catch(()=>{});
+  }
+  paintImgs();
+  $("#addImgBtn").onclick = () => $("#addImgInput").click();
+  $("#addImgInput").onchange = async e => {
+    const room = 6 - curImages.length;
+    const files = Array.from(e.target.files||[])
+      .filter(f => ["image/jpeg","image/png","image/webp"].includes(f.type) && f.size <= 5*1024*1024)
+      .slice(0, room);
+    e.target.value = "";
+    if(!files.length) return;
+    toast("عم يرفع الصور…", "warn");
+    const urls = [];
+    for(const f of files){
+      const ext = f.type==="image/png" ? "png" : f.type==="image/webp" ? "webp" : "jpg";
+      const path = crypto.randomUUID()+"/"+Date.now()+"."+ext;
+      try{
+        const res = await fetch(SUPA+"/storage/v1/object/listing-images/"+path, {
+          method:"POST",
+          headers:{ apikey:SUPABASE_ANON_KEY, Authorization:"Bearer "+S.token, "Content-Type":f.type },
+          body:f
+        });
+        if(res.ok) urls.push(SUPA+"/storage/v1/object/public/listing-images/"+path);
+      } catch(err){}
+    }
+    if(!urls.length) return toast("فشل رفع الصور.", "bad");
+    await saveImages(curImages.concat(urls), "انضافت الصور.");
+  };
+
   $("#goOwner").onclick = () => openDrawer("owner", r.owner_id);
   $("#dpanel").querySelectorAll("[data-st]").forEach(b => b.onclick = async () => {
     const st = b.dataset.st;
