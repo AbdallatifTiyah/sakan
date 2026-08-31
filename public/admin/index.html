@@ -380,9 +380,11 @@ async function resolveEmail(idOrEmail){
     headers:{ apikey:SUPABASE_ANON_KEY, Authorization:"Bearer "+SUPABASE_ANON_KEY, "Content-Type":"application/json" },
     body: JSON.stringify({ p_username:idOrEmail })
   });
-  if(!r.ok) throw new Error("تعذّر التحقق من اسم المستخدم.");
   const t = await r.text();
-  return t ? JSON.parse(t) : null;
+  if(!r.ok) throw new Error("تعذّر التحقق (كود "+r.status+"): "+t.slice(0,150));
+  if(!t) throw new Error("اسم المستخدم مش موجود [رد فاضي — status "+r.status+"].");
+  try { return JSON.parse(t); }
+  catch(e){ throw new Error("رد غير متوقّع من الخادم: "+t.slice(0,150)); }
 }
 
 async function enter(){
