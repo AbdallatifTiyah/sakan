@@ -3,7 +3,7 @@
 منصة تأجير غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت.
 واجهة عربية RTL. باك إند Supabase. نشر على Cloudflare Workers.
 
-**آخر تحديث: ٣١ آب ٢٠٢٦ — conv12 (نظام المستخدمين: Supabase Auth + دخول بيوزرنيم أو إيميل + إصلاح صلاحية `sakan_match_score`)**
+**آخر تحديث: ٣١ آب ٢٠٢٦ — conv13 (رفع الصور عبر Supabase Storage)**
 
 ---
 
@@ -11,7 +11,7 @@
 
 | البند | الحالة |
 |---|---|
-| قاعدة البيانات | ✅ ١٧ جدول · ١٤ واجهة · ٢٢ migration (Frankfurt) |
+| قاعدة البيانات | ✅ ١٧ جدول · ١٤ واجهة · ٢٥ migration (Frankfurt) |
 | فخ الـzero-policy على `cities`/`areas` | ✅ **انحلّ** — كان `anon` بيقرأ صفر صفوف بصمت |
 | الرفض التلقائي بسبب الكاميرا | ✅ **انشال** — كان `default false` + مشغّل = رفض أي زيارة الخانة فيها مش متأشّرة |
 | نشر طلبات الباحثين | ✅ **انحلّ** — ما كان في أي RPC تغيّر `seeker_requests.status` |
@@ -21,7 +21,7 @@
 | عدّاد المشاهدات | ✅ `bump_listing_view` — كان عمود ميت |
 | حماية `/admin` | ✅ Supabase Auth (شاشة دخول إيميل أو يوزرنيم + كلمة سر) + حارس `is_staff()`/`is_admin()` جوّا كل دالة إدارية. Basic Auth انشال. |
 | **مفتاح `service_role` بالمتصفح** | ✅ **انحلّ** — الدخول بالمفتاح العام (`anon`) فقط، الصلاحية الفعلية من جدول `staff` |
-| رفع الصور | ❌ `listings.images` فاضي دايماً — أكبر فجوة منتَج |
+| رفع الصور | ✅ Supabase Storage (`listing-images`) — المالك بيرفع لحد ٦ صور وقت التقديم |
 | وصول التقييمات للمستأجر | ❌ الجدول موجود، ما في طريق يوصله |
 | النطاق `sakan.ps` | ❌ بيد أبواللطيف — خارج نطاق مساعدة Claude |
 | البيانات | إعلان منشور واحد · إعلان `pending` · ٤ طلبات باحثين `pending` · ٦ ملفات |
@@ -32,18 +32,25 @@
 
 | ملف | الوصف |
 |---|---|
-| `public/index.html` | الموقع العام — ٨٨٣ سطر، صفحة واحدة، بدون build ولا npm |
+| `public/index.html` | الموقع العام — ٩٤٩ سطر، صفحة واحدة، بدون build ولا npm. فيها رفع الصور. |
 | `public/page.html` | سياسة الخصوصية والشروط — بتقرأ من جدول `pages` |
-| `public/admin/index.html` | مركز التحكم — ١٧٦٢ سطر، منشور على `/admin`، دخول عبر Supabase Auth |
+| `public/admin/index.html` | مركز التحكم — ١٧٨٢ سطر، منشور على `/admin`، دخول عبر Supabase Auth |
 | `src/worker.js` | بيمرّر لـ`ASSETS` ويضيف `X-Robots-Tag: noindex` على `/admin` (١٦ سطر، بدون Basic Auth) |
 | `wrangler.toml` | `main` + `binding = "ASSETS"` + `run_worker_first = true` |
-| `supabase/migrations/` | ٢٢ ملف — لازم يطابقوا `supabase_migrations` بالحرف |
+| `supabase/migrations/` | ٢٥ ملف — لازم يطابقوا `supabase_migrations` بالحرف |
 
 **Supabase**
 - ref: `yckteijitcqjtedoyoyv` (eu-central-1، Postgres 17.6)
 - URL: `https://yckteijitcqjtedoyoyv.supabase.co`
 - anon key عام ومسموح يظهر بالكود. `service_role` **ممنوع** يظهر بأي ملف — وما عاد يُلصق يدوياً بمركز التحكم أصلاً.
 - نظامين مفاتيح: JWT قديم (`eyJ...`) وجديد (`sb_publishable_...` / `sb_secret_...`). أي كود بيتعامل مع مفتاح لازم يقبل الشكلين.
+
+**Storage**
+- bucket `listing-images` — عام (قراءة)، حجم أقصى ٥ MB، أنواع مسموحة `jpeg`/`png`/`webp` فقط.
+- `anon`/`authenticated` عندهم `insert` فقط (رفع) — ممنوع `update`/`delete`. الرفع بيصير من متصفح
+  المالك مباشرة قبل `submit_listing`، والروابط بتنمرّر كـ`p_images` بنفس الاستدعاء.
+- ممنوع حذف/تعديل صفوف `storage.objects` مباشرة بـSQL (حتى بـservice_role) — `protect_delete`
+  trigger بيرفض. الحذف لازم يصير عبر Storage API (`DELETE /storage/v1/object/...`).
 
 **الجداول (١٧)**
 `admin_actions` · `areas` · `cities` · `contact_requests` · `events` · `listing_safety` ·
@@ -59,7 +66,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 ```
 لازم `select` قبلها. الترتيب: إيميل، اسم، دور (`admin`/`agent`)، يوزرنيم (اختياري، أو `null`).
 
-**الـmigrations المسجّلة (٢٣ — بالترتيب)**
+**الـmigrations المسجّلة (٢٥ — بالترتيب)**
 ```
 20260828161300_remote_schema
 20260828203602_restore_service_role_grants
@@ -84,6 +91,8 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 20260831173555_add_family_listing_kind
 20260831175234_admin_rpc_role_guard
 20260831182131_staff_username_login_and_match_score_grant
+20260831183933_strip_bidi_marks_from_username_lookup
+20260831185357_listing_images_storage_and_upload
 ```
 
 > migrations conv9 مسجّلة بطوابع `2026082901…` فبتسبق `…120000` بالترتيب.
@@ -210,6 +219,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 | `create or replace view` بيفشل | ما بتقدر تعيد ترتيب ولا تعيد تسمية أعمدة. **الأعمدة الجديدة بتنضاف بذيل القائمة فقط.** |
 | `permission denied for function X` من واجهة `security_invoker` | دالة مستخدَمة جوّا تعريف الـview نفسه بدون منح `authenticated` — شوف الدرس فوق بقسم «من يقرأ ماذا». |
 | اسم ملف الـmigration المحلي ما بطابق `supabase_migrations` بعد `apply_migration` | أداة الـMCP بتسجّل نسختها الزمنية الخاصة، مش اسم الملف اللي أعطيته. **دايماً** شغّل `list_migrations` بعد التطبيق وسمّي الملف المحلي بنفس الرقم بالضبط. |
+| حذف من `storage.objects` بـSQL مباشر بيرفض حتى بـ`service_role` | `protect_delete` trigger مقصود. احذف عبر Storage API (`DELETE /storage/v1/object/<bucket>/<path>`) بمفتاح عنده صلاحية `delete` على الـbucket. |
 
 ---
 
@@ -238,7 +248,6 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 ## مهام مفتوحة — بترتيب الأولوية
 
 **قبل النزول للميدان**
-- [ ] **رفع الصور** — Supabase Storage. `listings.images` فاضي دايماً والكروت بتعرض إيموجي.
 - [ ] **رابط التقييم** — زر باللوحة يولّد رابط موقّع للمستأجر (واتساب/نسخ)، ويشتغل كمان لمستأجرين ما استأجروا عبر المنصة.
 - [ ] **مشاركة الإعلان** — `?l=SK-123` + صورة OG. الواتساب أهم قناة توزيع بفلسطين.
 - [ ] **البحث النصي** بالعنوان والوصف.
