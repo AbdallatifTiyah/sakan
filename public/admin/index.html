@@ -328,6 +328,8 @@ const R_STATUS = {open:"مفتوح",investigating:"قيد التحقيق",action
 const R_CAT    = {fake_listing:"إعلان وهمي",already_rented:"مؤجّر أصلاً",harassment:"تحرّش",
                   entered_room:"دخول الغرفة بدون إذن",deposit:"نزاع تأمين",camera:"كاميرا داخلية",other:"أخرى"};
 const F_STATUS = {due:"مستحق",collected:"محصّل",waived:"معفى",lost:"ضائع"};
+const I_TYPE   = {ngo:"منظمة غير حكومية",university:"جامعة",company:"شركة",government:"جهة حكومية",other:"غير ذلك"};
+const I_STATUS = {new:"جديد",contacted:"تم التواصل",negotiating:"قيد التفاوض",won:"اتفاق",lost:"مغلق"};
 const REJECTS  = ["صور مش مطابقة للواقع","السعر غير واقعي","الرقم ما بيرد / رقم غلط",
                   "المالك انسحب","تكرار إعلان موجود","معلومات ناقصة","مخالف لشروط السلامة"];
 
@@ -337,6 +339,7 @@ const VIEWS = [
   {id:"queue",   t:"بانتظار المراجعة", grp:"", both:true, badge:"pending"},
   {id:"alerts",  t:"تنبيهات",         grp:"", both:true, badge:"soon"},
   {id:"requests",t:"طلبات الباحثين",   grp:"", both:true, badge:"reqs"},
+  {id:"institutions",t:"طلبات المؤسسات", grp:"", both:true, badge:"inst"},
   {id:"reports", t:"البلاغات",        grp:"", both:false, badge:"reports"},
   {id:"pipeline",t:"مسار التأجير",     grp:"", both:true},
   {id:"listings",t:"كل الإعلانات",    grp:"المخزون", both:true},
@@ -492,7 +495,8 @@ function go(v){
   if(!VIEWS.some(x => x.id===v && can(x))) v = "dash";
   S.view = v; location.hash = v;
   $("#nav").querySelectorAll("a").forEach(a => a.classList.toggle("on", a.dataset.v===v));
-  ({dash:vDash,queue:vQueue,alerts:vAlerts,requests:vRequests,listings:vListings,reports:vReports,
+  ({dash:vDash,queue:vQueue,alerts:vAlerts,requests:vRequests,institutions:vInstitutions,
+    listings:vListings,reports:vReports,
     pipeline:vPipeline,verify:vVerify,owners:vOwners,seekers:vSeekers,fees:vFees,
     matches:vMatches,activity:vActivity,audit:vAudit,settings:vSettings,
     pages:vPages}[v])();
@@ -506,11 +510,13 @@ async function refreshBadges(){
     const f = await get("/v_admin_fees?select=id&status=eq.due", true);
     const q = await get("/v_admin_requests?select=id&status=eq.pending", true);
     const s = await get("/v_admin_listings?select=id&status=eq.published&days_left=lte.3&days_left=gte.0", true);
+    const i = await get("/institution_leads?select=id&status=eq.new", true);
     set("b-pending", k.awaiting_review, "warm");
     set("b-reports", k.open_reports, "hot");
     set("b-fees",    f.__total, "warm");
     set("b-reqs",    q.__total, "warm");
     set("b-soon",    s.__total, "warm");
+    set("b-inst",    i.__total, "warm");
   } catch(e){}
   function set(id, n, cls){
     const el = document.getElementById(id);
@@ -812,6 +818,7 @@ async function openDrawer(kind, id){
     if(kind==="report")   return drawReport(id);
     if(kind==="contact")  return drawContact(id);
     if(kind==="fee")      return drawFee(id);
+    if(kind==="inst")     return drawInstitutionLead(id);
   } catch(e){ $("#dpanel").innerHTML = '<div class="warnbox">'+esc(e.message)+"</div>"; }
 }
 
@@ -1539,6 +1546,81 @@ async function drawRequest(id){
       await rpc("admin_request_status", {p_id:r.id, p_status:st, p_reason:reason});
       toast(st==="published" ? "اننشر الطلب — صار ظاهر بالموقع." : "تحدّثت حالة الطلب.", "ok");
       openDrawer("request", r.id); go(S.view); refreshBadges();
+    } catch(e){ toast(e.message, "bad"); }
+  });
+}
+
+/* ══════════════ طلبات المؤسسات — تسعير معكوس، متابعة يدوية بالكامل ══════════════ */
+async function vInstitutions(){
+  loading("طلبات المؤسسات");
+  try{
+    const cities = S.cache.cities || (S.cache.cities = await get("/cities?select=id,name_ar&order=id"));
+    const cityName = id => (cities.find(c=>c.id===id)||{}).name_ar || "—";
+    const rows = await get("/institution_leads?select=*&order=created_at.desc&limit=300");
+    const openN = rows.filter(r=>r.status==="new"||r.status==="contacted"||r.status==="negotiating").length;
+    $("#main").innerHTML = `
+      <div class="head"><h2>طلبات المؤسسات</h2>
+        <span class="note">تسعير معكوس — المؤسسة بتدفع لكل غرفة، المالك لأ. متابعة وتسعير يدوي بالكامل.</span></div>
+      <div class="grid k4" style="margin-bottom:14px">
+        <div class="card kpi ${openN?"warn":""}"><div class="lab">قيد المتابعة</div><div class="val">${num(openN)}</div></div>
+        <div class="card kpi"><div class="lab">الكل</div><div class="val">${num(rows.length)}</div></div>
+      </div>
+      ${rows.length?"":'<div class="empty"><b>ما في طلبات مؤسسات</b>أول طلب من صفحة «لمؤسستك» بيظهر هون.</div>'}
+      <div class="tw" ${rows.length?"":'style="display:none"'}><table><thead><tr>
+        <th>المؤسسة</th><th>النوع</th><th>المدينة</th><th>التواصل</th><th>الرقم</th>
+        <th>غرف مطلوبة</th><th>الحالة</th><th>وصل</th>
+      </tr></thead><tbody>
+      ${rows.map(r=>`<tr data-id="${r.id}">
+        <td>${esc(r.org_name)}</td>
+        <td>${esc(I_TYPE[r.org_type]||r.org_type)}</td>
+        <td>${esc(cityName(r.city_id))}</td>
+        <td>${esc(r.contact_name)}</td>
+        <td class="phone">${esc(r.contact_phone)}</td>
+        <td class="num">${r.rooms_needed??"—"}</td>
+        <td>${tag(r.status, I_STATUS)}</td>
+        <td style="color:var(--mute)">${ago(r.created_at)}</td>
+      </tr>`).join("")}</tbody></table></div>`;
+    wireRows("inst");
+  } catch(e){ fail(e); }
+}
+async function drawInstitutionLead(id){
+  const cities = S.cache.cities || (S.cache.cities = await get("/cities?select=id,name_ar&order=id"));
+  const cityName = cid => (cities.find(c=>c.id===cid)||{}).name_ar || "—";
+  const r = (await get("/institution_leads?select=*&id=eq."+id))[0];
+  if(!r) return ($("#dpanel").innerHTML = '<div class="empty">الطلب مش موجود.</div>');
+  $("#dpanel").innerHTML = `
+    <div class="dhead"><div><h3>${esc(r.org_name)}</h3>
+      <div class="ref">${esc(I_TYPE[r.org_type]||r.org_type)} · ${tag(r.status,I_STATUS)}</div></div>
+      <button class="btn sm" id="dx">إغلاق</button></div>
+    <dl class="dl">
+      <dt>شخص التواصل</dt><dd>${esc(r.contact_name)}</dd>
+      <dt>الهاتف</dt><dd class="phone">${esc(r.contact_phone)}</dd>
+      <dt>الإيميل</dt><dd>${esc(r.contact_email)||"—"}</dd>
+      <dt>المدينة</dt><dd>${esc(cityName(r.city_id))}</dd>
+      <dt>غرف مطلوبة</dt><dd class="num">${r.rooms_needed??"—"}</dd>
+      <dt>وصل</dt><dd>${dt(r.created_at,true)}</dd>
+    </dl>
+    ${r.message?'<div class="sec"><h4>تفاصيل من المؤسسة</h4><div style="font-size:13px">'+esc(r.message)+"</div></div>":""}
+    <div class="acts">
+      <a class="btn sm" href="tel:${esc(r.contact_phone)}">اتصال</a>
+      <a class="btn sm" target="_blank" rel="noopener"
+         href="https://wa.me/970${esc(String(r.contact_phone||"").replace(/^0/,""))}">واتساب</a>
+    </div>
+    <div class="sec">
+      <h4>ملاحظات المتابعة</h4>
+      <div class="field"><textarea id="in" rows="3">${esc(r.staff_notes)}</textarea></div>
+      <div class="acts">
+        ${Object.entries(I_STATUS).map(([k,v])=>
+          '<button class="btn sm '+(k==="won"?"ok":k==="lost"?"bad":"")+'" data-is="'+k+'"'+
+          (r.status===k?" disabled":"")+">"+v+"</button>").join("")}
+      </div>
+    </div>`;
+  $("#dx").onclick = closeDrawer;
+  $("#dpanel").querySelectorAll("[data-is]").forEach(b => b.onclick = async () => {
+    try{
+      await rpc("admin_institution_lead_status", {p_id:r.id, p_status:b.dataset.is,
+        p_notes:$("#in").value.trim()||null});
+      toast("تحدّثت الحالة.", "ok"); closeDrawer(); refreshBadges(); vInstitutions();
     } catch(e){ toast(e.message, "bad"); }
   });
 }

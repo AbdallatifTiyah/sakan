@@ -31,7 +31,7 @@ function robotsTxt(origin) {
 }
 
 function sitemapXml(origin, listings) {
-  const staticUrls = [origin + "/", origin + "/page.html?p=how-it-works",
+  const staticUrls = [origin + "/", origin + "/page.html?p=how-it-works", origin + "/institutions.html",
     origin + "/page.html?p=privacy", origin + "/page.html?p=terms"];
   const staticTags = staticUrls.map(u => `<url><loc>${esc(u)}</loc></url>`).join("");
   const listingTags = listings.map(l => {

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>سكن للمؤسسات — إسكان موظفين وطلاب ومستفيدين</title>
+<meta name="description" content="مؤسستك أو شركتك محتاجة تؤمّن سكن لموظفين أو طلاب أو مستفيدين؟ سكن بتأمّن غرف موثّقة بالجملة برام الله والبيرة وبيرزيت.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#12634E;--brand-d:#0C4839;--accent:#C4682B;--bg:#FAF7F2;--card:#FFFFFF;
+  --ink:#15201C;--mut:#6B7B75;--line:#E4DED4;--r:14px;
+  --sh:0 1px 2px rgba(20,32,28,.05),0 8px 24px rgba(20,32,28,.06)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,sans-serif;line-height:1.75}
+a{color:var(--brand)}
+.wrap{max-width:760px;margin:0 auto;padding:0 18px}
+header{background:var(--brand);color:#fff}
+.hd{display:flex;align-items:center;justify-content:space-between;padding:16px 0;gap:12px;flex-wrap:wrap}
+.logo{font-size:26px;font-weight:700;letter-spacing:-1px;color:#fff;text-decoration:none}
+.logo span{display:block;font-size:12px;font-weight:400;opacity:.85;letter-spacing:0}
+.back{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:10px;
+  padding:9px 15px;font:inherit;font-weight:600;text-decoration:none}
+.back:hover{background:rgba(255,255,255,.24)}
+.hero{padding:26px 0 24px}
+.hero h1{font-size:24px;margin:0 0 10px;line-height:1.4}
+.hero p{margin:0;color:var(--mut);font-size:15px}
+.pts{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;font-size:13.5px}
+.pts div{background:var(--card);border-radius:10px;padding:10px 14px;box-shadow:var(--sh)}
+.pts b{color:var(--brand-d)}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:24px;margin:10px 0 30px}
+.fg{margin-bottom:14px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+label{display:block;font-size:13px;color:var(--mut);margin-bottom:4px;font-weight:500}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+  font:inherit;background:#fff;color:var(--ink)}
+textarea{min-height:80px;resize:vertical}
+.btn{border:0;border-radius:10px;padding:12px 18px;font:inherit;font-weight:600;cursor:pointer;
+  background:var(--accent);color:#fff;width:100%}
+.btn:hover{background:#A9551F}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.note{background:#F3F0EA;border-radius:10px;padding:10px 12px;font-size:13px;color:var(--mut);margin-bottom:14px}
+.err{background:#FBE7E4;color:#A5301F;border-radius:10px;padding:10px 12px;font-size:13.5px;margin-top:10px}
+.done{background:#E3F1E9;color:var(--brand-d);border-radius:10px;padding:16px;font-size:14.5px;text-align:center}
+footer{background:#101B18;color:#9FB2AC;padding:24px 0;font-size:13px}
+footer a{color:#CFE0DA}
+@media(max-width:600px){.f2{grid-template-columns:1fr}.hero h1{font-size:21px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap hd">
+    <a class="logo" href="/">سكن<span>غرف وسكن مشترك موثّق</span></a>
+    <a class="back" href="/">الصفحة الرئيسية</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <section class="hero">
+    <h1>بتوظّف أو بتستضيف ناس محتاجين سكن؟</h1>
+    <p>مؤسستك، جامعتك، أو شركتك بتدفع رسم ثابت لكل غرفة — والمالك ما بيدفع إشي.
+       بنؤمّنلكم غرف موثّقة بالجملة برام الله والبيرة وبيرزيت، وبنتابع معكم مباشرة.</p>
+    <div class="pts">
+      <div><b>٣٠٠–٥٠٠ ₪</b> لكل غرفة — تسعير حسب العدد والمدة</div>
+      <div><b>يدوي بالكامل</b> — مندوب بيتواصل معكم خلال يوم عمل</div>
+      <div><b>بدون التزام</b> — الطلب استفسار أولي بس</div>
+    </div>
+  </section>
+
+  <div class="card" id="formCard">
+    <div class="note">اتركوا بياناتكم وبنتواصل معكم لنفهم احتياجكم بالتفصيل ونرتّب التسعير.</div>
+    <div class="fg"><label>اسم المؤسسة</label><input id="iOrg" placeholder="مثلاً: جمعية كذا، جامعة كذا"></div>
+    <div class="f2">
+      <div class="fg"><label>نوع الجهة</label><select id="iType">
+        <option value="ngo">منظمة غير حكومية</option>
+        <option value="university">جامعة</option>
+        <option value="company">شركة</option>
+        <option value="government">جهة حكومية</option>
+        <option value="other">غير ذلك</option></select></div>
+      <div class="fg"><label>المدينة</label><select id="iCity"><option value="">اختر المدينة</option></select></div>
+    </div>
+    <div class="f2">
+      <div class="fg"><label>اسم شخص التواصل</label><input id="iName" placeholder="اسمك"></div>
+      <div class="fg"><label>رقم الهاتف</label><input id="iPhone" inputmode="tel" placeholder="05XXXXXXXX"></div>
+    </div>
+    <div class="fg"><label>الإيميل (اختياري)</label><input id="iEmail" type="email" placeholder="name@org.org"></div>
+    <div class="fg"><label>عدد الغرف تقريباً</label><input id="iRooms" inputmode="numeric" placeholder="مثلاً ١٠"></div>
+    <div class="fg"><label>تفاصيل إضافية (اختياري)</label>
+      <textarea id="iMsg" placeholder="مين المستفيدين، لأي مدة، أي متطلبات خاصة…"></textarea></div>
+    <div id="iErr"></div>
+    <div id="iWrap"><button class="btn" id="iSend">أرسل الطلب</button></div>
+  </div>
+</div>
+
+<footer><div class="wrap">
+  <b style="color:#fff">سكن</b> — <a href="/">الصفحة الرئيسية</a>
+</div></footer>
+
+<script>
+const SUPABASE_URL = "https://yckteijitcqjtedoyoyv.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlja3RlaWppdGNxanRlZG95b3l2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MjA3MTksImV4cCI6MjEwMzQ5NjcxOX0.mAY5A6ROvtxN4kkD8g1s_tsDlSjGfy4TCNkgbYHeRvo";
+const H = {apikey:SUPABASE_ANON_KEY, Authorization:"Bearer "+SUPABASE_ANON_KEY, "Content-Type":"application/json"};
+const esc = s => String(s??"").replace(/[&<>"']/g,
+  c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const $ = id => document.getElementById(id);
+
+async function api(path, opt={}){
+  const r = await fetch(SUPABASE_URL+"/rest/v1/"+path, {...opt, headers:{...H, ...(opt.headers||{})}});
+  const txt = await r.text();
+  let data=null; try{ data = txt ? JSON.parse(txt) : null; }catch(e){}
+  if(!r.ok) throw {status:r.status, data, txt};
+  return data;
+}
+
+(async () => {
+  try{
+    const cities = await api("cities?select=id,name_ar&is_active=eq.true&order=id");
+    $("iCity").innerHTML = '<option value="">اختر المدينة</option>' +
+      cities.map(c=>`<option value="${c.id}">${esc(c.name_ar)}</option>`).join("");
+  }catch(e){}
+})();
+
+$("iSend").onclick = async () => {
+  $("iErr").innerHTML = "";
+  const v = {
+    org_name: $("iOrg").value.trim(),
+    org_type: $("iType").value,
+    city_id: $("iCity").value || null,
+    contact_name: $("iName").value.trim(),
+    contact_phone: $("iPhone").value.trim(),
+    contact_email: $("iEmail").value.trim() || null,
+    rooms_needed: $("iRooms").value ? Number($("iRooms").value) : null,
+    message: $("iMsg").value.trim() || null
+  };
+  const bad = m => { $("iErr").innerHTML = `<div class="err">${m}</div>`; return null; };
+  if(v.org_name.length < 2)   return bad("اكتب اسم المؤسسة.");
+  if(v.contact_name.length<2) return bad("اكتب اسم شخص التواصل.");
+  if(v.contact_phone.length<9)return bad("اكتب رقم هاتف صحيح.");
+  const btn = $("iSend");
+  btn.disabled = true; btn.textContent = "عم يرسل…";
+  try{
+    await api("institution_leads", {method:"POST", headers:{Prefer:"return=minimal"}, body:JSON.stringify(v)});
+    $("iWrap").innerHTML = '';
+    document.querySelectorAll("#formCard > *:not(.done)").forEach(el=>el.remove());
+    $("formCard").innerHTML = '<div class="done">وصلنا طلبكم ✓<br>بنتواصل معكم خلال يوم عمل لنرتّب التفاصيل.</div>';
+  }catch(e){
+    $("iErr").innerHTML = '<div class="err">صار خطأ بالإرسال. جرّب مرة ثانية بعد شوي.</div>';
+    btn.disabled = false; btn.textContent = "أرسل الطلب";
+  }
+};
+</script>
+</body>
+</html>

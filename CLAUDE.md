@@ -3,7 +3,7 @@
 منصة تأجير غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت.
 واجهة عربية RTL. باك إند Supabase. نشر على Cloudflare Workers.
 
-**آخر تحديث: ١ أيلول ٢٠٢٦ — conv15 (رابط تقييم موقّع + مشاركة إعلان + بحث نصي + robots.txt/sitemap.xml + مسودة الإعلان محلياً + صفحة «كيف بشتغل سكن» + تصدير CSV + تنبيهات المندوب + رابط المالك الموقّع)**
+**آخر تحديث: ١ أيلول ٢٠٢٦ — conv16 (طلبات المؤسسات + تجهيز واتساب API + عربي/إنجليزي بالموقع العام)**
 
 ---
 
@@ -11,7 +11,8 @@
 
 | البند | الحالة |
 |---|---|
-| قاعدة البيانات | ✅ ١٧ جدول · ١٤ واجهة · ٢٩ migration (Frankfurt) |
+| قاعدة البيانات | ✅ ١٨ جدول · ١٤ واجهة · ٣٠ migration (Frankfurt) |
+| عربي/إنجليزي | 🟡 `public/index.html` بالكامل (زر EN/عربي بالهيدر، `localStorage`، بدون reload وحدة، أرقام/تواريخ محلية بكل لغة) — **جزئي**: مواصفات الغرفة/صفات الباحث (`FEATURES`/`TAGS`) وأسماء المدن والمناطق بتضل عربي لأنها قيم مخزّنة بالقاعدة نفسها (`listings.features`, `cities.name_ar`) مش مجرد تسمية عرض. `page.html`/`institutions.html`/`owner.html`/مركز التحكم لسا عربي بس فقط. |
 | فخ الـzero-policy على `cities`/`areas` | ✅ **انحلّ** — كان `anon` بيقرأ صفر صفوف بصمت |
 | الرفض التلقائي بسبب الكاميرا | ✅ **انشال** — كان `default false` + مشغّل = رفض أي زيارة الخانة فيها مش متأشّرة |
 | نشر طلبات الباحثين | ✅ **انحلّ** — ما كان في أي RPC تغيّر `seeker_requests.status` |
@@ -29,6 +30,8 @@
 | تصدير CSV | ✅ زر بقسمَي «كل الإعلانات» و«الرسوم» — بيصدّر الصفوف المعروضة حالياً، بـBOM عشان يفتح صح بإكسل |
 | تنبيهات المندوب | ✅ قسم «تنبيهات» جديد باللوحة — إعلانات بتنتهي خلال `expiring_soon_days` (من `settings`)، بزر تذكير واتساب جاهز لكل مالك |
 | رابط المالك الموقّع | ✅ زر بملف المالك (نسخ/واتساب) — `owner.html?id=..&t=..` بتوكن `profiles.owner_token`، يوريه إعلاناته وطلبات التواصل عليها بدون تسجيل دخول. رقم الباحث ما بيظهر إلا بعد ما الطلب يصير حالته غير `new` (نفس بوابة التحويل اليدوي) |
+| طلبات المؤسسات | ✅ `institutions.html` (نموذج التقاط) + قسم «طلبات المؤسسات» باللوحة — التسعير والمتابعة يدوية بالكامل |
+| واتساب Business API | 🟡 مجهّز بالكود (`src/whatsapp.js`) وغير مفعّل — محتاج حساب Meta Business حقيقي |
 | النطاق `sakan.ps` | ❌ بيد أبواللطيف — خارج نطاق مساعدة Claude |
 | البيانات | إعلان منشور واحد · إعلان `pending` · ٤ طلبات باحثين `pending` · ٦ ملفات |
 
@@ -38,10 +41,12 @@
 
 | ملف | الوصف |
 |---|---|
-| `public/index.html` | الموقع العام — ١١٦٣ سطر، صفحة واحدة، بدون build ولا npm. فيها رفع الصور، عارض صور مكبّر (lightbox)، بحث نصي، مشاركة إعلان، ومسودة محلية لنموذج «أضف غرفة». |
+| `public/index.html` | الموقع العام — صفحة واحدة، بدون build ولا npm. فيها رفع الصور، عارض صور مكبّر (lightbox)، بحث نصي، مشاركة إعلان، مسودة محلية لنموذج «أضف غرفة»، وعربي/إنجليزي (`toggleLang()` بيحفظ باللغة بـ`localStorage` مفتاح `sakan_lang` ويعمل `location.reload()` — كل النصوص الثابتة عن طريق `tt(ar, en)` جنب مكان استخدامها، مش قاموس مركزي). |
 | `public/page.html` | صفحات المحتوى (كيف بشتغل سكن · سياسة الخصوصية · شروط الاستخدام) — بتقرأ من جدول `pages` |
 | `public/owner.html` | رابط المالك الموقّع — بتوكن `profiles.owner_token`، بدون تسجيل دخول |
-| `public/admin/index.html` | مركز التحكم — ١٩٧٩ سطر، منشور على `/admin`، دخول عبر Supabase Auth |
+| `public/institutions.html` | نموذج التقاط طلبات المؤسسات/NGOs — insert مباشر على `institution_leads` |
+| `public/admin/index.html` | مركز التحكم — منشور على `/admin`، دخول عبر Supabase Auth |
+| `src/whatsapp.js` | `sendWhatsAppTemplate()` — مجهّز، غير مستدعى من أي مكان لحد ما يصير حساب Meta جاهز |
 | `src/worker.js` | بيمرّر لـ`ASSETS` ويضيف `X-Robots-Tag: noindex` على `/admin`، وعلى `/?l=REF` بيبدّل meta tags (عنوان/وصف/`og:image`) بجلب بيانات الإعلان من `v_listings_public` بمفتاح anon قبل ما يرجّع الصفحة، وبيولّد `/robots.txt` و`/sitemap.xml` ديناميكياً (الأخير فيه كل إعلان منشور) |
 | `wrangler.toml` | `main` + `binding = "ASSETS"` + `run_worker_first = true` |
 | `supabase/migrations/` | ٢٩ ملف — لازم يطابقوا `supabase_migrations` بالحرف |
@@ -61,13 +66,13 @@
 - ممنوع حذف/تعديل صفوف `storage.objects` مباشرة بـSQL (حتى بـservice_role) — `protect_delete`
   trigger بيرفض. الحذف لازم يصير عبر Storage API (`DELETE /storage/v1/object/...`).
 
-**الجداول (١٧)**
-`admin_actions` · `areas` · `cities` · `contact_requests` · `events` · `listing_safety` ·
-`listings` · `owner_fees` · `pages` · `profiles` · `promo_codes` · `reports` ·
+**الجداول (١٨)**
+`admin_actions` · `areas` · `cities` · `contact_requests` · `events` · `institution_leads` ·
+`listing_safety` · `listings` · `owner_fees` · `pages` · `profiles` · `promo_codes` · `reports` ·
 `reviews` · `seeker_requests` · `settings` · `staff` (فيها `username` — اختياري، فريد بدون حساسية لحالة الأحرف) · `verification_log`
 
 **الأنواع (enums) الإضافية**
-`staff_role` (`admin` · `agent`)
+`staff_role` (`admin` · `agent`) · `institution_org_type` · `institution_lead_status`
 
 **ربط حساب طاقم جديد** (بعد إنشائه من Dashboard بـAuto Confirm):
 ```sql
@@ -106,6 +111,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 20260831222144_review_link_and_submit
 20260831224647_seed_how_it_works_page
 20260831225755_owner_dashboard_link
+20260831231136_institution_leads
 ```
 
 > migrations conv9 مسجّلة بطوابع `2026082901…` فبتسبق `…120000` بالترتيب.
@@ -121,7 +127,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 | نوع | الأسماء |
 |---|---|
 | قراءة | `v_listings_public` · `v_requests_public` · `cities` · `areas` · `pages` |
-| كتابة (insert فقط) | `contact_requests` · `reports` · `events` |
+| كتابة (insert فقط) | `contact_requests` · `reports` · `events` · `institution_leads` |
 | دوال | `submit_listing` · `submit_request` · `confirm_listing_available` · `bump_listing_view` · `staff_email_for_username` (تحويل يوزرنيم لإيميل قبل تسجيل الدخول — ما بترجّع غير الإيميل) · `review_link_info` · `submit_review` (رابط التقييم) · `owner_dashboard` (رابط المالك) — كلهن بدون تسجيل دخول |
 
 **`authenticated` (بشرط `is_staff()`/`is_admin()`) + `service_role` — مركز التحكم فقط**
@@ -158,6 +164,11 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 - أسرار `ADMIN_USER`/`ADMIN_PASS` (Basic Auth القديم) ما عاد الـWorker يستخدمها — الحماية صارت بالقاعدة. تركهن بالسر ما بيضرّ، ما فيهن استخدام فعلي.
 - النشر يدوي: `npx wrangler deploy`. **ما في CI/CD.**
 
+**واتساب Business API — مجهّز بالكود، غير مفعّل (`src/whatsapp.js`)**
+- التواصل الحالي كله يدوي عبر روابط `wa.me` (تذكير الإعلانات، رابط المالك، إلخ) — شغّال ومش محتاج أي حساب. `whatsapp.js` بديل **تلقائي** جاهز لما يصير في حساب.
+- قبل ما يشتغل: حساب Meta Business موثّق + تطبيق WhatsApp على Meta for Developers + رقم مخصّص + permanent token + Phone Number ID + اعتماد ٣ قوالب رسائل (تفاصيل كاملة بتعليق أعلى الملف).
+- بعد ما يصير الحساب جاهز: `npx wrangler secret put WHATSAPP_TOKEN` و`WHATSAPP_PHONE_ID`، وبعدها استدعاء `sendWhatsAppTemplate()` من `worker.js` بمكان الحدث المناسب. **لا تفعّلها بدون حساب حقيقي مختبر** — الكود موجود بس ما انفحص ضد Meta فعلياً.
+
 ---
 
 ## قواعد حاكمة — ممنوع كسرها
@@ -181,7 +192,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 
 ---
 
-## مركز التحكم — الأقسام (١٦)
+## مركز التحكم — الأقسام (١٧)
 
 | القسم | المدير | المندوب |
 |---|---|---|
@@ -189,6 +200,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 | بانتظار المراجعة | ✅ | ✅ |
 | **تنبيهات (إعلانات قربت تنتهي + تذكير واتساب)** | ✅ | ✅ |
 | **طلبات الباحثين** | ✅ | ✅ |
+| **طلبات المؤسسات** | ✅ | ✅ |
 | البلاغات | ✅ | ❌ |
 | مسار التأجير | ✅ | ✅ |
 | كل الإعلانات | ✅ | ✅ |
@@ -247,7 +259,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 - **مؤشر PMF الأساسي:** نسبة إعادة الإدراج من المالك خلال ٦٠ يوم (`v_kpi_quality.owner_repeat_pct`).
 - **الدخل:** رسم نجاح ٢٠٠ ₪ من المالك يُحصّل نقداً عبر المندوب. الباحث مجاني. `SAKAN50` (٥٠٪ · ٥٠ استخدام · حتى ٣١/١٢/٢٠٢٦).
 - **التسعير:** ٢٠٠ أرخص من قيمة الخدمة. المجال الواقعي لاحقاً ٣٥٠–٤٠٠ بعد إثبات `owner_repeat_pct`. **لا تنزّل الرسم أبداً** — الخصم بكود، مش بتغيير السعر.
-- **المؤسسات/NGOs:** تسعير معكوس — المؤسسة تدفع ٣٠٠–٥٠٠ لكل غرفة والمالك ما بيدفع. **يدوي، لا تبني شاشة قبل ٣ طلبات حقيقية.**
+- **المؤسسات/NGOs:** تسعير معكوس — المؤسسة تدفع ٣٠٠–٥٠٠ لكل غرفة والمالك ما بيدفع. شاشة الالتقاط (`institutions.html` + قسم «طلبات المؤسسات» باللوحة) صارت مبنية بقرار مباشر من أبواللطيف (١ أيلول ٢٠٢٦) قبل الوصول لـ٣ طلبات حقيقية — **التسعير والمتابعة الفعلية لسا يدوية بالكامل**، الشاشة بس بتلتقط الطلب.
 - **قانوني:** التسجيل بوزارة الاقتصاد الوطني حسب قانون التجارة الإلكترونية رقم ٢١ لسنة ٢٠٢٥ — **لسا ما خلص**، وبدونه ما في فوترة للمؤسسات.
 
 ---
@@ -264,8 +276,13 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 
 ## مهام مفتوحة — بترتيب الأولوية
 
+**استكمال عربي/إنجليزي** (البداية بـ`index.html` صارت — ١ أيلول ٢٠٢٦)
+- [ ] `page.html` (كيف بشتغل سكن/الخصوصية/الشروط) — يحتاج عمودَي `title_en`/`body_en` بجدول `pages` + محرر ثنائي اللغة باللوحة
+- [ ] `institutions.html`
+- [ ] أسماء المدن والمناطق بالإنجليزي — يحتاج عمود `name_en` + تعبئته يدوياً من اللوحة
+- [ ] `FEATURES`/`TAGS` (مواصفات الغرفة/صفات الباحث) — محتاجة فصل قيمة مخزّنة/تسمية عرض بدل النص العربي الحرفي كقيمة، وmigration بيانات للإعلانات والطلبات الموجودة
+
 **بعد بوابة القرار**
-- [ ] عربي/إنجليزي · شاشات المؤسسات · إشعارات واتساب Business API
 - [ ] ربط النطاق `sakan.ps` — أبواللطيف
 
 ---

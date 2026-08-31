@@ -1,13 +1,21 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<script>
+/* لازم يشتغل قبل أي رسم — عشان ما يصير فلاش اتجاه غلط لحظة التحميل */
+try{
+  var SAKAN_LANG = localStorage.getItem("sakan_lang") === "en" ? "en" : "ar";
+}catch(e){ var SAKAN_LANG = "ar"; }
+document.documentElement.lang = SAKAN_LANG;
+document.documentElement.dir  = SAKAN_LANG === "en" ? "ltr" : "rtl";
+</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>سكن — غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت</title>
-<meta name="description" content="غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت. كل إعلان موثّق هاتفياً، وقسم كبير منها زارها مندوبنا شخصياً. أرقام الهواتف محمية.">
-<meta property="og:title" content="سكن — غرف وسكن مشترك موثّق">
-<meta property="og:description" content="غرف موثّقة في رام الله والبيرة وبيرزيت.">
-<meta property="og:locale" content="ar_PS">
+<title id="pageTitle">سكن — غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت</title>
+<meta id="metaDesc" name="description" content="غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت. كل إعلان موثّق هاتفياً، وقسم كبير منها زارها مندوبنا شخصياً. أرقام الهواتف محمية.">
+<meta id="ogTitle" property="og:title" content="سكن — غرف وسكن مشترك موثّق">
+<meta id="ogDesc" property="og:description" content="غرف موثّقة في رام الله والبيرة وبيرزيت.">
+<meta id="ogLocale" property="og:locale" content="ar_PS">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -28,7 +36,7 @@ header{background:var(--brand);color:#fff}
 .hd{display:flex;align-items:center;justify-content:space-between;padding:16px 0;gap:12px;flex-wrap:wrap}
 .logo{font-size:28px;font-weight:700;letter-spacing:-1px}
 .logo span{display:block;font-size:12px;font-weight:400;opacity:.85;letter-spacing:0}
-.hd .cta{display:flex;gap:8px}
+.hd .cta{display:flex;gap:8px;align-items:center}
 .btn{border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer;
   background:var(--brand);color:#fff;transition:.15s}
 .btn:hover{background:var(--brand-d)}
@@ -38,6 +46,7 @@ header{background:var(--brand);color:#fff}
 .btn.line:hover{background:#F3F0EA}
 .btn.acc{background:var(--accent)} .btn.acc:hover{background:#A9551F}
 .btn[disabled]{opacity:.55;cursor:not-allowed}
+.btn.sm{padding:8px 12px;font-size:13px}
 
 .hero{padding:26px 0 30px;background:var(--brand);color:#fff}
 .hero h1{margin:0 0 8px;font-size:26px;line-height:1.4}
@@ -61,6 +70,7 @@ label{display:block;font-size:13px;color:var(--mut);margin-bottom:4px;font-weigh
 .tel{display:flex;gap:8px}
 .tel select{flex:0 0 128px;padding-inline:8px}
 .tel input{flex:1;direction:ltr;text-align:right}
+html[dir="ltr"] .tel input{text-align:left}
 
 /* ── شرائح الاختيار (مناطق / مواصفات / صفات) ── */
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
@@ -130,15 +140,15 @@ label{display:block;font-size:13px;color:var(--mut);margin-bottom:4px;font-weigh
 .row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line);font-size:14px;gap:10px}
 .row:last-child{border:0}
 .row span:first-child{color:var(--mut);flex:none}
-.row span:last-child{text-align:left}
+.row span:last-child{text-align:end}
 .chk{display:flex;align-items:center;gap:8px;font-size:14px;padding:4px 0}
 .chk i{font-style:normal;width:20px;flex:none}
 .yes{color:var(--ok)} .no{color:#B00020} .unk{color:var(--mut)}
-.note{background:#FBF6EE;border-right:3px solid var(--accent);padding:10px 12px;border-radius:8px;
+.note{background:#FBF6EE;border-inline-start:3px solid var(--accent);padding:10px 12px;border-radius:8px;
   font-size:13px;color:#6B4A2C;margin-top:10px}
-.err{background:#FDECEC;border-right:3px solid #B00020;padding:10px 12px;border-radius:8px;
+.err{background:#FDECEC;border-inline-start:3px solid #B00020;padding:10px 12px;border-radius:8px;
   font-size:13px;color:#8A0018;margin-top:10px}
-.done{background:#E8F5EE;border-right:3px solid var(--ok);padding:14px;border-radius:8px;
+.done{background:#E8F5EE;border-inline-start:3px solid var(--ok);padding:14px;border-radius:8px;
   font-size:14px;color:#0E5C36;margin-top:10px}
 .f2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .fg{margin-bottom:12px}
@@ -153,22 +163,23 @@ footer a,footer .linkish{color:#CFE0DA}
 
 <header>
   <div class="wrap hd">
-    <div class="logo">سكن<span>غرف وسكن مشترك موثّق</span></div>
+    <div class="logo">سكن<span id="tagline">غرف وسكن مشترك موثّق</span></div>
     <div class="cta">
-      <button class="btn ghost" onclick="openForm('listing')">أضف غرفة</button>
-      <button class="btn ghost" onclick="openForm('request')">أبحث عن سكن</button>
+      <button class="btn ghost" id="btnAddRoom" onclick="openForm('listing')">أضف غرفة</button>
+      <button class="btn ghost" id="btnFindHome" onclick="openForm('request')">أبحث عن سكن</button>
+      <button class="btn ghost" id="langBtn" onclick="toggleLang()">EN</button>
     </div>
   </div>
 </header>
 
 <section class="hero">
   <div class="wrap">
-    <h1>غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت</h1>
-    <p>كل إعلان موثّق هاتفياً، وقسم كبير منها زارها مندوبنا شخصياً. الإعلان بينتهي تلقائياً بعد ٢١ يوم إذا ما أكّد المالك إنه لسا متاح.</p>
+    <h1 id="heroH1">غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت</h1>
+    <p id="heroP">كل إعلان موثّق هاتفياً، وقسم كبير منها زارها مندوبنا شخصياً. الإعلان بينتهي تلقائياً بعد ٢١ يوم إذا ما أكّد المالك إنه لسا متاح.</p>
     <div class="trust">
-      <div>✓ <b>توثيق هاتفي</b> لكل إعلان</div>
-      <div>✓ <b>رقمك محمي</b> — ما بينعرض لحدا</div>
-      <div>✓ <b>بدون إعلانات ميتة</b></div>
+      <div id="trust1">✓ <b>توثيق هاتفي</b> لكل إعلان</div>
+      <div id="trust2">✓ <b>رقمك محمي</b> — ما بينعرض لحدا</div>
+      <div id="trust3">✓ <b>بدون إعلانات ميتة</b></div>
     </div>
   </div>
 </section>
@@ -198,27 +209,95 @@ footer a,footer .linkish{color:#CFE0DA}
 
 <footer>
   <div class="wrap">
-    <b style="color:#fff">سكن</b> — منصة تأجير غرف وسكن مشترك موثّق.<br>
-    الخصوصية أولاً: ما بننشر أرقام هواتف ولا عناوين دقيقة ولا جهات عمل على الموقع أبداً.<br>
-    <button class="linkish" onclick="openReport(null,null)">تواصل معنا أو قدّم شكوى</button>
-    &nbsp;·&nbsp; <a href="/page.html?p=how-it-works">كيف بشتغل سكن</a>
-    &nbsp;·&nbsp; <a href="/page.html?p=privacy">سياسة الخصوصية</a>
-    &nbsp;·&nbsp; <a href="/page.html?p=terms">شروط الاستخدام</a>
+    <b style="color:#fff">سكن</b> — <span id="footTagline">منصة تأجير غرف وسكن مشترك موثّق.</span><br>
+    <span id="footPrivacy">الخصوصية أولاً: ما بننشر أرقام هواتف ولا عناوين دقيقة ولا جهات عمل على الموقع أبداً.</span><br>
+    <button class="linkish" id="footContact" onclick="openReport(null,null)">تواصل معنا أو قدّم شكوى</button>
+    &nbsp;·&nbsp; <a href="/page.html?p=how-it-works" id="footHow">كيف بشتغل سكن</a>
+    &nbsp;·&nbsp; <a href="/institutions.html" id="footInst">لمؤسستك أو شركتك</a>
+    &nbsp;·&nbsp; <a href="/page.html?p=privacy" id="footPriv">سياسة الخصوصية</a>
+    &nbsp;·&nbsp; <a href="/page.html?p=terms" id="footTerms">شروط الاستخدام</a>
   </div>
 </footer>
 
 <script>
+/* ═══════════════ اللغة ═══════════════ */
+let LANG = SAKAN_LANG; // معرّف مسبقاً بالسكربت المبكر بالـ<head>
+/* ar/en بدل مفتاح إنجليزي مركزي كبير — الترجمة جنب مكان استخدامها مباشرة */
+const tt = (ar, en) => LANG === "en" ? en : ar;
+
+function toggleLang(){
+  const next = LANG === "ar" ? "en" : "ar";
+  try{ localStorage.setItem("sakan_lang", next); }catch(e){}
+  location.reload();
+}
+
+function paintChrome(){
+  document.getElementById("langBtn").textContent = LANG === "ar" ? "EN" : "عربي";
+
+  $("pageTitle").textContent = tt(
+    "سكن — غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت",
+    "Sakan — Verified rooms & shared housing in Ramallah, Al-Bireh & Birzeit");
+  $("metaDesc").content = tt(
+    "غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت. كل إعلان موثّق هاتفياً، وقسم كبير منها زارها مندوبنا شخصياً. أرقام الهواتف محمية.",
+    "Verified rooms and shared housing in Ramallah, Al-Bireh and Birzeit. Every listing is phone-verified, many visited in person. Phone numbers stay private.");
+  $("ogTitle").content = tt("سكن — غرف وسكن مشترك موثّق", "Sakan — Verified shared housing");
+  $("ogDesc").content = tt("غرف موثّقة في رام الله والبيرة وبيرزيت.", "Verified rooms in Ramallah, Al-Bireh and Birzeit.");
+  $("ogLocale").content = LANG === "en" ? "en_US" : "ar_PS";
+
+  $("tagline").textContent = tt("غرف وسكن مشترك موثّق", "Verified rooms & shared housing");
+  $("btnAddRoom").textContent = tt("أضف غرفة", "List a room");
+  $("btnFindHome").textContent = tt("أبحث عن سكن", "Looking for a room");
+
+  $("heroH1").textContent = tt(
+    "غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت",
+    "Verified rooms & shared housing in Ramallah, Al-Bireh & Birzeit");
+  $("heroP").textContent = tt(
+    "كل إعلان موثّق هاتفياً، وقسم كبير منها زارها مندوبنا شخصياً. الإعلان بينتهي تلقائياً بعد ٢١ يوم إذا ما أكّد المالك إنه لسا متاح.",
+    "Every listing is phone-verified, and many are visited in person by our field agent. Listings expire automatically after 21 days unless the owner confirms it's still available.");
+  $("trust1").innerHTML = tt("✓ <b>توثيق هاتفي</b> لكل إعلان", "✓ <b>Phone-verified</b> listings");
+  $("trust2").innerHTML = tt("✓ <b>رقمك محمي</b> — ما بينعرض لحدا", "✓ <b>Your number stays private</b>");
+  $("trust3").innerHTML = tt("✓ <b>بدون إعلانات ميتة</b>", "✓ <b>No dead listings</b>");
+
+  $("tabL").textContent = tt("غرف متاحة", "Available rooms");
+  $("tabR").textContent = tt("باحثون عن سكن", "Room seekers");
+
+  $("footTagline").textContent = tt("منصة تأجير غرف وسكن مشترك موثّق.", "A platform for verified room rentals & shared housing.");
+  $("footPrivacy").textContent = tt(
+    "الخصوصية أولاً: ما بننشر أرقام هواتف ولا عناوين دقيقة ولا جهات عمل على الموقع أبداً.",
+    "Privacy first: we never publish phone numbers, exact addresses, or workplaces on the site.");
+  $("footContact").textContent = tt("تواصل معنا أو قدّم شكوى", "Contact us / report an issue");
+  $("footHow").textContent = tt("كيف بشتغل سكن", "How Sakan works");
+  $("footInst").textContent = tt("لمؤسستك أو شركتك", "For institutions & companies");
+  $("footPriv").textContent = tt("سياسة الخصوصية", "Privacy policy");
+  $("footTerms").textContent = tt("شروط الاستخدام", "Terms of use");
+
+  $("count").textContent = tt("جارِ التحميل…", "Loading…");
+}
+
 /* ═══════════════ الإعدادات ═══════════════ */
 const SUPABASE_URL = "https://yckteijitcqjtedoyoyv.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlja3RlaWppdGNxanRlZG95b3l2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MjA3MTksImV4cCI6MjEwMzQ5NjcxOX0.mAY5A6ROvtxN4kkD8g1s_tsDlSjGfy4TCNkgbYHeRvo";
 
 /* ═══════════════ ثوابت ═══════════════ */
 /* المدن والمناطق بتنقرأ من القاعدة عند التحميل — ممنوع تثبيتها هون.
-   أي إضافة من مركز التحكم بتظهر هون تلقائياً. */
+   أي إضافة من مركز التحكم بتظهر هون تلقائياً. أسماؤها بالعربي فقط حالياً —
+   لا يوجد عمود name_en بالقاعدة بعد، فبتضل عربي حتى بوضع الإنجليزي. */
 let CITIES = [], AREAS = [];
 
 /* رمز الدولة + عدد الخانات المسموح للرقم المحلي (بدون صفر البداية) */
-const DIAL = [
+const DIAL = LANG === "en" ? [
+  {c:"PS", d:"970", n:"Palestine",     min:9,  max:9,  ex:"599123456"},
+  {c:"IL", d:"972", n:"+972",          min:9,  max:9,  ex:"599123456"},
+  {c:"JO", d:"962", n:"Jordan",        min:9,  max:9,  ex:"791234567"},
+  {c:"SA", d:"966", n:"Saudi Arabia",  min:9,  max:9,  ex:"512345678"},
+  {c:"AE", d:"971", n:"UAE",           min:9,  max:9,  ex:"501234567"},
+  {c:"QA", d:"974", n:"Qatar",         min:8,  max:8,  ex:"33123456"},
+  {c:"KW", d:"965", n:"Kuwait",        min:8,  max:8,  ex:"51234567"},
+  {c:"EG", d:"20",  n:"Egypt",         min:10, max:10, ex:"1012345678"},
+  {c:"TR", d:"90",  n:"Turkey",        min:10, max:10, ex:"5321234567"},
+  {c:"DE", d:"49",  n:"Germany",       min:10, max:11, ex:"15112345678"},
+  {c:"US", d:"1",   n:"USA",           min:10, max:10, ex:"2025550123"}
+] : [
   {c:"PS", d:"970", n:"فلسطين",   min:9,  max:9,  ex:"599123456"},
   {c:"IL", d:"972", n:"+972",     min:9,  max:9,  ex:"599123456"},
   {c:"JO", d:"962", n:"الأردن",   min:9,  max:9,  ex:"791234567"},
@@ -232,23 +311,38 @@ const DIAL = [
   {c:"US", d:"1",   n:"أمريكا",   min:10, max:10, ex:"2025550123"}
 ];
 
-const KIND = {room_shared:"غرفة بسكن مشترك", bed_shared:"سرير بغرفة مشتركة",
+const KIND = LANG === "en" ? {room_shared:"Shared room", bed_shared:"Bed in shared room",
+              studio:"Studio", apartment:"Apartment", family:"Family housing"} : {
+              room_shared:"غرفة بسكن مشترك", bed_shared:"سرير بغرفة مشتركة",
               studio:"استوديو", apartment:"شقة", family:"سكن عائلي"};
 const ICON = {room_shared:"🛏", bed_shared:"🛌", studio:"🏠", apartment:"🏢", family:"👨‍👩‍👧"};
-const POL  = {female:"إناث فقط", male:"ذكور فقط", mixed:"مختلط"};
-const OCC  = {student:"طالب/ة", employee:"موظف/ة", other:"غير ذلك"};
-const VER  = {field:"موثّق ميدانياً", desk:"موثّق هاتفياً", none:"غير موثّق"};
+const POL  = LANG === "en" ? {female:"Women only", male:"Men only", mixed:"Mixed"}
+                            : {female:"إناث فقط", male:"ذكور فقط", mixed:"مختلط"};
+const OCC  = LANG === "en" ? {student:"Student", employee:"Employee", other:"Other"}
+                            : {student:"طالب/ة", employee:"موظف/ة", other:"غير ذلك"};
+const VER  = LANG === "en" ? {field:"Field-verified", desk:"Phone-verified", none:"Not verified"}
+                            : {field:"موثّق ميدانياً", desk:"موثّق هاتفياً", none:"غير موثّق"};
 
-/* مواصفات الغرفة — بتنحفظ بعمود listings.features */
+/* مواصفات الغرفة — بتنحفظ بعمود listings.features كنص عربي حرفي (هي القيمة
+   المخزّنة نفسها، مش مجرد تسمية عرض)، فبتضل عربي بوضع الإنجليزي كمان —
+   ترجمتها بتحتاج فصل قيمة/تسمية وmigration بيانات، خارج نطاق هاي الدفعة. */
 const FEATURES = ["واي فاي","مطبخ","حمام خاص","غسالة","تدفئة","مكيّف","ماء ساخن",
                   "بلكونة","موقف سيارة","مصعد","قريب مواصلات","مسموح الطبخ",
                   "مدخل مستقل","قفل على باب الغرفة"];
 
-/* صفات الباحث — بتنحفظ بعمود seeker_requests.lifestyle_tags */
+/* صفات الباحث — نفس ملاحظة FEATURES، محفوظة بـseeker_requests.lifestyle_tags */
 const TAGS = ["هادئ/ة","غير مدخّن/ة","بشتغل من البيت","دوام جامعي","بحب النظام",
               "ملتزم/ة دينياً","ما بستقبل ضيوف","صاحي/ة بكير"];
 
-const REPORT_CATS = {
+const REPORT_CATS = LANG === "en" ? {
+  fake_listing:"Fake listing or false information",
+  already_rented:"Room already rented",
+  harassment:"Harassment or inappropriate behavior",
+  entered_room:"Entered the room without permission",
+  deposit:"Deposit dispute",
+  camera:"Camera inside the housing",
+  other:"General inquiry or other complaint"
+} : {
   fake_listing:"إعلان وهمي أو معلومات غير صحيحة",
   already_rented:"الغرفة مؤجّرة أصلاً",
   harassment:"تحرش أو سلوك غير لائق",
@@ -275,8 +369,8 @@ const rpc = (fn, body) => api("rpc/"+fn, {method:"POST", body:JSON.stringify(bod
 /* ═══════════════ الأدوات ═══════════════ */
 const esc = s => String(s??"").replace(/[&<>"']/g,
   c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const nis = n => Number(n).toLocaleString("ar-EG")+" ₪";
-const dt  = d => d ? new Date(d).toLocaleDateString("ar-EG",{day:"numeric",month:"long"}) : "—";
+const nis = n => Number(n).toLocaleString(LANG==="en"?"en-US":"ar-EG")+" ₪";
+const dt  = d => d ? new Date(d).toLocaleDateString(LANG==="en"?"en-US":"ar-EG",{day:"numeric",month:"long"}) : "—";
 const $   = id => document.getElementById(id);
 
 /* تحويل الأرقام العربية والفارسية لإنجليزية — بتنطبّق على كل حقل رقمي */
@@ -325,8 +419,8 @@ function telValue(idSel, idNum){
 function telError(idSel){
   const d = DIAL.find(x=>x.c===$(idSel).value) || DIAL[0];
   return d.min===d.max
-    ? `رقم ${d.n} لازم يكون ${d.min} خانات. مثال: ${d.ex}`
-    : `رقم ${d.n} لازم يكون بين ${d.min} و${d.max} خانة. مثال: ${d.ex}`;
+    ? tt(`رقم ${d.n} لازم يكون ${d.min} خانات. مثال: ${d.ex}`, `${d.n} number must be ${d.min} digits. Example: ${d.ex}`)
+    : tt(`رقم ${d.n} لازم يكون بين ${d.min} و${d.max} خانة. مثال: ${d.ex}`, `${d.n} number must be between ${d.min} and ${d.max} digits. Example: ${d.ex}`);
 }
 
 /* ═══════════════ شرائح الاختيار ═══════════════ */
@@ -350,13 +444,13 @@ function setTab(t){
   renderFilters(); render();
 }
 function cityOpts(sel){
-  return `<option value="">كل المدن</option>` +
+  return `<option value="">${tt("كل المدن","All cities")}</option>` +
     CITIES.map(c=>`<option value="${c.id}"${String(sel)===String(c.id)?" selected":""}>${esc(c.name_ar)}</option>`).join("");
 }
 /* المنطقة بتتفلتر حسب المدينة المختارة — فصل كامل بين الخانتين */
 function areaOptsFor(cityId, sel){
   const list = AREAS.filter(a => !cityId || String(a.city_id)===String(cityId));
-  return `<option value="">${cityId?"كل مناطق المدينة":"كل المناطق"}</option>` +
+  return `<option value="">${cityId?tt("كل مناطق المدينة","All areas in city"):tt("كل المناطق","All areas")}</option>` +
     list.map(a=>`<option value="${a.id}"${String(sel)===String(a.id)?" selected":""}>${esc(a.name_ar)}</option>`).join("");
 }
 function onCityFilter(v){
@@ -367,31 +461,31 @@ function onCityFilter(v){
 }
 function renderFilters(){
   const common = `
-    <div><label>المدينة</label>
+    <div><label>${tt("المدينة","City")}</label>
       <select id="fCity" onchange="onCityFilter(this.value)">${cityOpts(F.city)}</select></div>
-    <div><label>المنطقة</label>
+    <div><label>${tt("المنطقة","Area")}</label>
       <select id="fArea" onchange="F.area=this.value;render()">${areaOptsFor(F.city,F.area)}</select></div>`;
 
   $("filters").innerHTML = TAB==="L" ? `
-    <div style="grid-column:1/-1"><label>ابحث بالعنوان أو الوصف</label>
-      <input id="fQ" placeholder="مثلاً: مفروشة، قرب بيرزيت…" value="${esc(F.q||"")}"
+    <div style="grid-column:1/-1"><label>${tt("ابحث بالعنوان أو الوصف","Search by title or description")}</label>
+      <input id="fQ" placeholder="${tt("مثلاً: مفروشة، قرب بيرزيت…","e.g. furnished, near Birzeit…")}" value="${esc(F.q||"")}"
         oninput="F.q=this.value;render()"></div>` + common + `
-    <div><label>النوع</label><select onchange="F.kind=this.value;render()">
-      <option value="">الكل</option>
+    <div><label>${tt("النوع","Type")}</label><select onchange="F.kind=this.value;render()">
+      <option value="">${tt("الكل","All")}</option>
       ${Object.entries(KIND).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}
     </select></div>
-    <div><label>السكن لـ</label><select onchange="F.pol=this.value;render()">
-      <option value="">الكل</option><option value="female">إناث</option>
-      <option value="male">ذكور</option><option value="mixed">مختلط</option></select></div>
-    <div><label>أعلى سعر (₪)</label>
-      <input data-num inputmode="numeric" placeholder="مثلاً ٨٠٠"
+    <div><label>${tt("السكن لـ","Housing for")}</label><select onchange="F.pol=this.value;render()">
+      <option value="">${tt("الكل","All")}</option><option value="female">${POL.female}</option>
+      <option value="male">${POL.male}</option><option value="mixed">${POL.mixed}</option></select></div>
+    <div><label>${tt("أعلى سعر (₪)","Max price (₪)")}</label>
+      <input data-num inputmode="numeric" placeholder="${tt("مثلاً ٨٠٠","e.g. 800")}"
         oninput="F.max=this.value;render()"></div>` : common + `
-    <div><label>الجنس</label><select onchange="F.g=this.value;render()">
-      <option value="">الكل</option><option value="female">إناث</option>
-      <option value="male">ذكور</option></select></div>
-    <div><label>الحالة</label><select onchange="F.occ=this.value;render()">
-      <option value="">الكل</option><option value="student">طالب/ة</option>
-      <option value="employee">موظف/ة</option><option value="other">غير ذلك</option></select></div>`;
+    <div><label>${tt("الجنس","Gender")}</label><select onchange="F.g=this.value;render()">
+      <option value="">${tt("الكل","All")}</option><option value="female">${POL.female}</option>
+      <option value="male">${POL.male}</option></select></div>
+    <div><label>${tt("الحالة","Status")}</label><select onchange="F.occ=this.value;render()">
+      <option value="">${tt("الكل","All")}</option><option value="student">${OCC.student}</option>
+      <option value="employee">${OCC.employee}</option><option value="other">${OCC.other}</option></select></div>`;
   wireDigits($("filters"));
 }
 
@@ -407,19 +501,19 @@ function render(){
       (!F.pol  || x.gender_pol===F.pol) &&
       (!F.max  || Number(x.price) <= Number(toEN(F.max))) &&
       (!q || (x.title||"").toLowerCase().includes(q) || (x.description||"").toLowerCase().includes(q)));
-    count.textContent = d.length ? `${d.length} غرفة متاحة` : "";
+    count.textContent = d.length ? tt(`${d.length} غرفة متاحة`, `${d.length} rooms available`) : "";
     grid.innerHTML = d.length ? d.map(cardL).join("") :
-      `<div class="empty">ما في غرف بتطابق البحث حالياً.<br><br>
-       <button class="btn" onclick="openForm('request')">سجّل طلبك وبنخبرك أول ما تنزل</button></div>`;
+      `<div class="empty">${tt("ما في غرف بتطابق البحث حالياً.","No rooms match your search right now.")}<br><br>
+       <button class="btn" onclick="openForm('request')">${tt("سجّل طلبك وبنخبرك أول ما تنزل","Register your request and we'll notify you")}</button></div>`;
   }else{
     const d = R.filter(x =>
       (!F.city || String(x.city_id)===String(F.city)) &&
       (!F.area || (x.area_ids||[]).includes(Number(F.area))) &&
       (!F.g    || x.gender===F.g) &&
       (!F.occ  || x.occupation===F.occ));
-    count.textContent = d.length ? `${d.length} باحث عن سكن` : "";
+    count.textContent = d.length ? tt(`${d.length} باحث عن سكن`, `${d.length} people looking for housing`) : "";
     grid.innerHTML = d.length ? d.map(cardR).join("") :
-      `<div class="empty">ما في طلبات بتطابق البحث حالياً.</div>`;
+      `<div class="empty">${tt("ما في طلبات بتطابق البحث حالياً.","No requests match your search right now.")}</div>`;
   }
 }
 function cardL(x){
@@ -434,26 +528,26 @@ function cardL(x){
     <div class="b">
       <h3>${esc(x.title)}</h3>
       <div class="meta">${esc(x.city)} · ${esc(x.area)}${x.landmark?" · "+esc(x.landmark):""}</div>
-      <div class="price">${nis(x.price)}<small> / شهر${x.bills_included?" — شامل الفواتير":""}</small></div>
+      <div class="price">${nis(x.price)}<small> ${tt("/ شهر","/ month")}${x.bills_included?tt(" — شامل الفواتير"," — bills included"):""}</small></div>
       <div class="tags">${v}<span class="t">${KIND[x.kind]||""}</span>
         <span class="t">${POL[x.gender_pol]||""}</span>
-        ${x.furnished?'<span class="t">مفروش</span>':""}
-        <span class="t">متاح ${dt(x.available_from)}</span></div>
+        ${x.furnished?`<span class="t">${tt("مفروش","Furnished")}</span>`:""}
+        <span class="t">${tt("متاح","Available")} ${dt(x.available_from)}</span></div>
     </div></div>`;
 }
 function cardR(x){
   const areas = (x.area_ids||[]).map(areaName).filter(a=>a!=="—");
   return `<div class="card" onclick="openR('${x.id}')">
     <div class="b">
-      <h3>${esc(x.first_name||"باحث/ة")} — ${OCC[x.occupation]||""}</h3>
+      <h3>${esc(x.first_name||tt("باحث/ة","Seeker"))} — ${OCC[x.occupation]||""}</h3>
       <div class="meta">${esc(x.city||"")}${areas.length?" · "+areas.join(" · "):""}</div>
-      <div class="price">حتى ${nis(x.budget_max)}<small> / شهر</small></div>
+      <div class="price">${tt("حتى","Up to")} ${nis(x.budget_max)}<small> ${tt("/ شهر","/ month")}</small></div>
       <div class="tags">
         <span class="t">${POL[x.gender]||""}</span>
         ${x.kind_pref?`<span class="t">${KIND[x.kind_pref]}</span>`:""}
-        ${x.smoker===false?'<span class="t">غير مدخّن/ة</span>':""}
+        ${x.smoker===false?`<span class="t">${tt("غير مدخّن/ة","Non-smoker")}</span>`:""}
         ${(x.lifestyle_tags||[]).slice(0,3).map(t=>`<span class="t">${esc(t)}</span>`).join("")}
-        <span class="t">من ${dt(x.move_in_date)}</span></div>
+        <span class="t">${tt("من","From")} ${dt(x.move_in_date)}</span></div>
     </div></div>`;
 }
 
@@ -477,32 +571,32 @@ function countView(id){
 function chk3(v, txt){
   if(v === true)  return `<div class="chk"><i class="yes">✓</i>${txt}</div>`;
   if(v === false) return `<div class="chk"><i class="no">✕</i>${txt}</div>`;
-  return `<div class="chk"><i class="unk">–</i><span style="color:var(--mut)">${txt} — ما انفحص</span></div>`;
+  return `<div class="chk"><i class="unk">–</i><span style="color:var(--mut)">${txt} — ${tt("ما انفحص","not checked")}</span></div>`;
 }
 function openL(id){
   const x = L.find(a=>a.id===id); if(!x) return;
   countView(id);
   const visit = x.visit_date ? `<div class="sec">
-      <h4>فحص المندوب الميداني — زيارة ${dt(x.visit_date)}</h4>
-      ${chk3(x.room_exists,"الغرفة موجودة فعلياً كما بالوصف")}
-      ${chk3(x.photos_match,"الصور مطابقة للواقع")}
-      ${chk3(x.door_lock,"باب الغرفة عليه قفل")}
-      ${chk3(x.occupants_verified,"تم التحقق من الساكنين الحاليين")}
-      ${chk3(x.no_indoor_cameras,"ما شفنا كاميرات داخل السكن وقت الزيارة")}
-      ${chk3(x.private_bathroom,"حمام خاص")}
-      ${chk3(x.kitchen_access,"وصول للمطبخ")}
-      ${chk3(x.hot_water,"ماء ساخن")}
-      ${chk3(x.heating,"تدفئة")}
-      ${chk3(x.internet,"إنترنت")}
-      ${chk3(x.exterior_lighting,"إنارة خارجية كافية")}
-      ${chk3(x.emergency_exit,"مخرج طوارئ")}
-      ${chk3(x.street_access,"وصول الشارع للمبنى")}
-      ${chk3(x.gas_detector,"كاشف غاز")}
-      <div class="note">هاي ملاحظات مندوبنا وقت الزيارة، مش ضمانة دائمة.
-        إذا لاحظت إشي مخالف بلّغنا فوراً.</div>
+      <h4>${tt("فحص المندوب الميداني — زيارة","Field agent visit —")} ${dt(x.visit_date)}</h4>
+      ${chk3(x.room_exists,tt("الغرفة موجودة فعلياً كما بالوصف","The room exists as described"))}
+      ${chk3(x.photos_match,tt("الصور مطابقة للواقع","Photos match reality"))}
+      ${chk3(x.door_lock,tt("باب الغرفة عليه قفل","Room door has a lock"))}
+      ${chk3(x.occupants_verified,tt("تم التحقق من الساكنين الحاليين","Current occupants verified"))}
+      ${chk3(x.no_indoor_cameras,tt("ما شفنا كاميرات داخل السكن وقت الزيارة","No indoor cameras seen during the visit"))}
+      ${chk3(x.private_bathroom,tt("حمام خاص","Private bathroom"))}
+      ${chk3(x.kitchen_access,tt("وصول للمطبخ","Kitchen access"))}
+      ${chk3(x.hot_water,tt("ماء ساخن","Hot water"))}
+      ${chk3(x.heating,tt("تدفئة","Heating"))}
+      ${chk3(x.internet,tt("إنترنت","Internet"))}
+      ${chk3(x.exterior_lighting,tt("إنارة خارجية كافية","Adequate outdoor lighting"))}
+      ${chk3(x.emergency_exit,tt("مخرج طوارئ","Emergency exit"))}
+      ${chk3(x.street_access,tt("وصول الشارع للمبنى","Street access to the building"))}
+      ${chk3(x.gas_detector,tt("كاشف غاز","Gas detector"))}
+      <div class="note">${tt("هاي ملاحظات مندوبنا وقت الزيارة، مش ضمانة دائمة. إذا لاحظت إشي مخالف بلّغنا فوراً.",
+        "These are our agent's notes from the visit, not a permanent guarantee. If something's different, report it right away.")}</div>
     </div>` : "";
 
-  const feats = (x.features||[]).length ? `<div class="sec"><h4>مواصفات الغرفة</h4>
+  const feats = (x.features||[]).length ? `<div class="sec"><h4>${tt("مواصفات الغرفة","Room features")}</h4>
       <div class="tags">${x.features.map(f=>`<span class="t">${esc(f)}</span>`).join("")}</div></div>` : "";
 
   const imgs = Array.isArray(x.images) ? x.images : [];
@@ -513,47 +607,48 @@ function openL(id){
   $("modal").innerHTML = `
     <div class="mh"><h2>${esc(x.title)}</h2>
       <div style="display:flex;gap:8px;align-items:center;flex:none">
-        <button class="btn ghost" id="shareBtn" style="padding:8px 12px;font-size:13px"
-          onclick="shareListing('${esc(x.ref)}','${esc(x.title)}')">مشاركة</button>
+        <button class="btn ghost sm" id="shareBtn"
+          onclick="shareListing('${esc(x.ref)}','${esc(x.title)}')">${tt("مشاركة","Share")}</button>
         <button class="x" onclick="closeAll()">×</button>
       </div></div>
     ${gallery}
     <div class="mb">
       <div class="sec">
-        <div class="price" style="font-size:26px">${nis(x.price)}<small> / شهر</small></div>
+        <div class="price" style="font-size:26px">${nis(x.price)}<small> ${tt("/ شهر","/ month")}</small></div>
         <div class="tags" style="margin:10px 0 14px">
           ${x.verification==="field"?`<span class="t v">✓ ${VER.field}</span>`:""}
           ${x.verification==="desk"?`<span class="t d">✓ ${VER.desk}</span>`:""}
           <span class="t">${KIND[x.kind]||""}</span><span class="t">${POL[x.gender_pol]||""}</span>
-          ${x.furnished?'<span class="t">مفروش</span>':""}</div>
+          ${x.furnished?`<span class="t">${tt("مفروش","Furnished")}</span>`:""}</div>
         <p style="margin:0 0 12px">${esc(x.description||"")}</p>
-        <div class="row"><span>المدينة</span><span>${esc(x.city)}</span></div>
-        <div class="row"><span>المنطقة</span><span>${esc(x.area)}</span></div>
-        ${x.landmark?`<div class="row"><span>علامة مميزة</span><span>${esc(x.landmark)}</span></div>`:""}
-        <div class="row"><span>متاح من</span><span>${dt(x.available_from)}</span></div>
-        <div class="row"><span>أقل مدة</span><span>${x.min_stay_months?x.min_stay_months+" شهر":"—"}</span></div>
-        <div class="row"><span>عدد الغرف بالسكن</span><span>${x.rooms_total||"—"}</span></div>
-        <div class="row"><span>الساكنون حالياً</span><span>${x.occupants_now??"—"}</span></div>
-        <div class="row"><span>الفواتير</span><span>${x.bills_included?"مشمولة بالسعر":"مش محسوبة بالسعر"}</span></div>
-        ${x.deposit?`<div class="row"><span>التأمين (مسترد)</span><span>${nis(x.deposit)}</span></div>`:""}
+        <div class="row"><span>${tt("المدينة","City")}</span><span>${esc(x.city)}</span></div>
+        <div class="row"><span>${tt("المنطقة","Area")}</span><span>${esc(x.area)}</span></div>
+        ${x.landmark?`<div class="row"><span>${tt("علامة مميزة","Landmark")}</span><span>${esc(x.landmark)}</span></div>`:""}
+        <div class="row"><span>${tt("متاح من","Available from")}</span><span>${dt(x.available_from)}</span></div>
+        <div class="row"><span>${tt("أقل مدة","Min. stay")}</span><span>${x.min_stay_months?x.min_stay_months+" "+tt("شهر","months"):"—"}</span></div>
+        <div class="row"><span>${tt("عدد الغرف بالسكن","Rooms in the unit")}</span><span>${x.rooms_total||"—"}</span></div>
+        <div class="row"><span>${tt("الساكنون حالياً","Current occupants")}</span><span>${x.occupants_now??"—"}</span></div>
+        <div class="row"><span>${tt("الفواتير","Bills")}</span><span>${x.bills_included?tt("مشمولة بالسعر","Included in price"):tt("مش محسوبة بالسعر","Not included")}</span></div>
+        ${x.deposit?`<div class="row"><span>${tt("التأمين (مسترد)","Deposit (refundable)")}</span><span>${nis(x.deposit)}</span></div>`:""}
         ${x.occupants_note?`<div class="note">${esc(x.occupants_note)}</div>`:""}
       </div>
       ${feats}
       ${visit}
       <div class="sec">
-        <h4>تواصل مع المالك</h4>
+        <h4>${tt("تواصل مع المالك","Contact the owner")}</h4>
         <p style="font-size:14px;color:var(--mut);margin:0 0 12px">
-          ما بنعرض أرقام هواتف على الموقع. اترك اسمك ورقمك وبنوصله للمالك، وبنتابع معك خلال ٢٤ ساعة.</p>
+          ${tt("ما بنعرض أرقام هواتف على الموقع. اترك اسمك ورقمك وبنوصله للمالك، وبنتابع معك خلال ٢٤ ساعة.",
+            "We don't publish phone numbers on the site. Leave your name and number and we'll pass it to the owner, then follow up with you within 24 hours.")}</p>
         <div id="cWrap">
-          <div class="fg"><label>الاسم</label><input id="cName" placeholder="اسمك"></div>
-          <div class="fg"><label>رقم الواتساب</label>${telHTML("cDial","cPhone")}</div>
+          <div class="fg"><label>${tt("الاسم","Name")}</label><input id="cName" placeholder="${tt("اسمك","Your name")}"></div>
+          <div class="fg"><label>${tt("رقم الواتساب","WhatsApp number")}</label>${telHTML("cDial","cPhone")}</div>
           <div id="cErr"></div>
           <button class="btn acc" style="margin-top:4px;width:100%"
-            onclick="sendContact('${x.id}','${esc(x.ref)}')">أرسل طلب تواصل</button>
+            onclick="sendContact('${x.id}','${esc(x.ref)}')">${tt("أرسل طلب تواصل","Send contact request")}</button>
         </div>
       </div>
-      <div class="note">إعلان غير صحيح أو في مشكلة؟
-        <button class="linkish" onclick="openReport('${x.id}','${esc(x.ref)}')">قدّم بلاغ</button></div>
+      <div class="note">${tt("إعلان غير صحيح أو في مشكلة؟","Listing incorrect or a problem?")}
+        <button class="linkish" onclick="openReport('${x.id}','${esc(x.ref)}')">${tt("قدّم بلاغ","Report it")}</button></div>
     </div>`;
   wireDigits($("modal"));
   $("ov").classList.add("on");
@@ -570,7 +665,7 @@ function shareListing(ref, title){
     const b = $("shareBtn");
     if(!b) return;
     const old = b.textContent;
-    b.textContent = "انتسخ الرابط ✓";
+    b.textContent = tt("انتسخ الرابط ✓","Link copied ✓");
     setTimeout(()=>{ b.textContent = old; }, 1800);
   }).catch(()=>{});
 }
@@ -579,17 +674,17 @@ async function sendContact(id, ref){
   const n = $("cName").value.trim();
   const p = telValue("cDial","cPhone");
   $("cErr").innerHTML = "";
-  if(n.length < 2) return $("cErr").innerHTML = '<div class="err">اكتب اسمك.</div>';
+  if(n.length < 2) return $("cErr").innerHTML = `<div class="err">${tt("اكتب اسمك.","Enter your name.")}</div>`;
   if(!p) return $("cErr").innerHTML = `<div class="err">${telError("cDial")}</div>`;
   try{
     await api("contact_requests", {method:"POST", headers:{Prefer:"return=minimal"},
       body: JSON.stringify({listing_id:id, seeker_name:n, seeker_phone:p})});
-    $("cWrap").innerHTML = `<div class="done">وصلنا طلبك ✓<br>
-      بنتواصل معك خلال ٢٤ ساعة بخصوص الإعلان ${esc(ref)}.</div>`;
+    $("cWrap").innerHTML = `<div class="done">${tt("وصلنا طلبك ✓","Your request is in ✓")}<br>
+      ${tt(`بنتواصل معك خلال ٢٤ ساعة بخصوص الإعلان ${esc(ref)}.`, `We'll contact you within 24 hours about listing ${esc(ref)}.`)}</div>`;
   }catch(e){
     $("cWrap").innerHTML = e.status===409
-      ? '<div class="done">سبق وأرسلت طلب لهذا الإعلان. بنتواصل معك قريباً.</div>'
-      : '<div class="err">صار خطأ. جرّب مرة ثانية بعد شوي.</div>';
+      ? `<div class="done">${tt("سبق وأرسلت طلب لهذا الإعلان. بنتواصل معك قريباً.","You've already requested this listing. We'll be in touch soon.")}</div>`
+      : `<div class="err">${tt("صار خطأ. جرّب مرة ثانية بعد شوي.","Something went wrong. Try again in a bit.")}</div>`;
   }
 }
 
@@ -598,28 +693,28 @@ function openR(id){
   const x = R.find(a=>a.id===id); if(!x) return;
   const areas = (x.area_ids||[]).map(areaName).filter(a=>a!=="—");
   $("modal").innerHTML = `
-    <div class="mh"><h2>${esc(x.first_name||"باحث/ة")} — ${OCC[x.occupation]||""}</h2>
+    <div class="mh"><h2>${esc(x.first_name||tt("باحث/ة","Seeker"))} — ${OCC[x.occupation]||""}</h2>
       <button class="x" onclick="closeAll()">×</button></div>
     <div class="mb"><div class="sec">
-      <div class="row"><span>الميزانية</span><span>حتى ${nis(x.budget_max)} / شهر</span></div>
-      <div class="row"><span>المدينة</span><span>${esc(x.city||"—")}</span></div>
-      <div class="row"><span>المناطق المفضّلة</span><span>${areas.join(" · ")||"مرن — أي منطقة"}</span></div>
-      <div class="row"><span>نوع السكن</span><span>${KIND[x.kind_pref]||"مرن"}</span></div>
-      <div class="row"><span>مفروش؟</span><span>${x.furnished_pref===null||x.furnished_pref===undefined?"مرن":(x.furnished_pref?"يفضّل مفروش":"مش ضروري")}</span></div>
-      <div class="row"><span>تاريخ الانتقال</span><span>${dt(x.move_in_date)}</span></div>
-      <div class="row"><span>أقل مدة</span><span>${x.min_stay_months?x.min_stay_months+" شهر":"—"}</span></div>
-      <div class="row"><span>التدخين</span><span>${x.smoker===null||x.smoker===undefined?"—":(x.smoker?"مدخّن/ة":"غير مدخّن/ة")}</span></div>
+      <div class="row"><span>${tt("الميزانية","Budget")}</span><span>${tt("حتى","Up to")} ${nis(x.budget_max)} ${tt("/ شهر","/ month")}</span></div>
+      <div class="row"><span>${tt("المدينة","City")}</span><span>${esc(x.city||"—")}</span></div>
+      <div class="row"><span>${tt("المناطق المفضّلة","Preferred areas")}</span><span>${areas.join(" · ")||tt("مرن — أي منطقة","Flexible — any area")}</span></div>
+      <div class="row"><span>${tt("نوع السكن","Housing type")}</span><span>${KIND[x.kind_pref]||tt("مرن","Flexible")}</span></div>
+      <div class="row"><span>${tt("مفروش؟","Furnished?")}</span><span>${x.furnished_pref===null||x.furnished_pref===undefined?tt("مرن","Flexible"):(x.furnished_pref?tt("يفضّل مفروش","Prefers furnished"):tt("مش ضروري","Not required"))}</span></div>
+      <div class="row"><span>${tt("تاريخ الانتقال","Move-in date")}</span><span>${dt(x.move_in_date)}</span></div>
+      <div class="row"><span>${tt("أقل مدة","Min. stay")}</span><span>${x.min_stay_months?x.min_stay_months+" "+tt("شهر","months"):"—"}</span></div>
+      <div class="row"><span>${tt("التدخين","Smoking")}</span><span>${x.smoker===null||x.smoker===undefined?"—":(x.smoker?tt("مدخّن/ة","Smoker"):tt("غير مدخّن/ة","Non-smoker"))}</span></div>
       ${(x.lifestyle_tags||[]).length?`<div class="tags" style="margin-top:10px">
         ${x.lifestyle_tags.map(t=>`<span class="t">${esc(t)}</span>`).join("")}</div>`:""}
       ${x.note?`<div class="note">${esc(x.note)}</div>`:""}
       <p style="font-size:14px;color:var(--mut);margin-top:14px">
-        عندك غرفة بتناسبه/ا؟ اترك بياناتك وبنوصلك فيه/ا مباشرة.</p>
+        ${tt("عندك غرفة بتناسبه/ا؟ اترك بياناتك وبنوصلك فيه/ا مباشرة.","Have a room that fits? Leave your info and we'll connect you directly.")}</p>
       <div id="cWrap">
-        <div class="fg"><label>اسمك</label><input id="cName" placeholder="اسمك"></div>
-        <div class="fg"><label>رقم الواتساب</label>${telHTML("cDial","cPhone")}</div>
+        <div class="fg"><label>${tt("اسمك","Your name")}</label><input id="cName" placeholder="${tt("اسمك","Your name")}"></div>
+        <div class="fg"><label>${tt("رقم الواتساب","WhatsApp number")}</label>${telHTML("cDial","cPhone")}</div>
         <div id="cErr"></div>
         <button class="btn acc" style="width:100%" onclick="sendMatch('${x.id}','${esc(x.ref)}')">
-          عندي غرفة مناسبة</button>
+          ${tt("عندي غرفة مناسبة","I have a matching room")}</button>
       </div>
     </div></div>`;
   wireDigits($("modal"));
@@ -629,15 +724,15 @@ async function sendMatch(reqId, ref){
   const n = $("cName").value.trim();
   const p = telValue("cDial","cPhone");
   $("cErr").innerHTML = "";
-  if(n.length < 2) return $("cErr").innerHTML = '<div class="err">اكتب اسمك.</div>';
+  if(n.length < 2) return $("cErr").innerHTML = `<div class="err">${tt("اكتب اسمك.","Enter your name.")}</div>`;
   if(!p) return $("cErr").innerHTML = `<div class="err">${telError("cDial")}</div>`;
   try{
     await api("contact_requests", {method:"POST", headers:{Prefer:"return=minimal"},
       body: JSON.stringify({request_id:reqId, seeker_name:n, seeker_phone:p})});
-    $("cWrap").innerHTML = `<div class="done">وصلنا ✓<br>
-      بنتواصل معك خلال ٢٤ ساعة بخصوص الطلب ${esc(ref)}.</div>`;
+    $("cWrap").innerHTML = `<div class="done">${tt("وصلنا ✓","Received ✓")}<br>
+      ${tt(`بنتواصل معك خلال ٢٤ ساعة بخصوص الطلب ${esc(ref)}.`, `We'll contact you within 24 hours about request ${esc(ref)}.`)}</div>`;
   }catch(e){
-    $("cWrap").innerHTML = '<div class="err">صار خطأ. جرّب مرة ثانية بعد شوي.</div>';
+    $("cWrap").innerHTML = `<div class="err">${tt("صار خطأ. جرّب مرة ثانية بعد شوي.","Something went wrong. Try again in a bit.")}</div>`;
   }
 }
 
@@ -646,19 +741,19 @@ function openReport(listingId, ref){
   const cats = Object.entries(REPORT_CATS)
     .map(([k,v])=>`<option value="${k}">${v}</option>`).join("");
   $("modal").innerHTML = `
-    <div class="mh"><h2>${listingId ? "بلاغ عن إعلان "+esc(ref) : "تواصل معنا"}</h2>
+    <div class="mh"><h2>${listingId ? tt("بلاغ عن إعلان ","Report on listing ")+esc(ref) : tt("تواصل معنا","Contact us")}</h2>
       <button class="x" onclick="closeAll()">×</button></div>
     <div class="mb"><div class="sec" id="rpWrap">
-      <div class="note">كل بلاغ بيوصلنا مباشرة وبينفحص. ما بنعطي المالك أي معلومة عنك.</div>
-      <div class="fg" style="margin-top:12px"><label>نوع البلاغ</label>
-        <select id="rpCat">${listingId?cats:'<option value="other">استفسار عام أو شكوى</option>'+cats}</select></div>
-      <div class="fg"><label>التفاصيل</label>
-        <textarea id="rpDet" placeholder="احكيلنا شو صار بالتفصيل — إيمتى، ووين، ومين كان موجود."></textarea></div>
-      <div class="fg"><label>رقمك للتواصل (اختياري)</label>${telHTML("rpDial","rpPhone")}
-        <div class="hint">إذا ما تركت رقم بنستلم البلاغ بس ما بنقدر نرجعلك بالنتيجة.</div></div>
+      <div class="note">${tt("كل بلاغ بيوصلنا مباشرة وبينفحص. ما بنعطي المالك أي معلومة عنك.","Every report reaches us directly and gets reviewed. We never share your info with the owner.")}</div>
+      <div class="fg" style="margin-top:12px"><label>${tt("نوع البلاغ","Report type")}</label>
+        <select id="rpCat">${listingId?cats:`<option value="other">${tt("استفسار عام أو شكوى","General inquiry or complaint")}</option>`+cats}</select></div>
+      <div class="fg"><label>${tt("التفاصيل","Details")}</label>
+        <textarea id="rpDet" placeholder="${tt("احكيلنا شو صار بالتفصيل — إيمتى، ووين، ومين كان موجود.","Tell us what happened in detail — when, where, and who was involved.")}"></textarea></div>
+      <div class="fg"><label>${tt("رقمك للتواصل (اختياري)","Your contact number (optional)")}</label>${telHTML("rpDial","rpPhone")}
+        <div class="hint">${tt("إذا ما تركت رقم بنستلم البلاغ بس ما بنقدر نرجعلك بالنتيجة.","Without a number we'll still receive the report, but can't follow up with you.")}</div></div>
       <div id="rpErr"></div>
       <button class="btn acc" style="width:100%"
-        onclick="sendReport(${listingId?`'${listingId}'`:"null"})">أرسل البلاغ</button>
+        onclick="sendReport(${listingId?`'${listingId}'`:"null"})">${tt("أرسل البلاغ","Send report")}</button>
     </div></div>`;
   wireDigits($("modal"));
   $("ov").classList.add("on");
@@ -667,7 +762,7 @@ async function sendReport(listingId){
   const det = $("rpDet").value.trim();
   $("rpErr").innerHTML = "";
   if(det.length < 5)
-    return $("rpErr").innerHTML = '<div class="err">اكتب تفاصيل البلاغ — خمس حروف على الأقل.</div>';
+    return $("rpErr").innerHTML = `<div class="err">${tt("اكتب تفاصيل البلاغ — خمس حروف على الأقل.","Write the report details — at least 5 characters.")}</div>`;
   /* الرقم اختياري، بس إذا انكتب لازم يكون صحيح */
   let phone = null;
   if($("rpPhone").value.trim()){
@@ -678,17 +773,17 @@ async function sendReport(listingId){
     await api("reports", {method:"POST", headers:{Prefer:"return=minimal"},
       body: JSON.stringify({listing_id:listingId, category:$("rpCat").value,
                             details:det, reporter_phone:phone, status:"open"})});
-    $("rpWrap").innerHTML = `<div class="done">وصلنا بلاغك ✓<br>
-      بنراجعه خلال ٢٤ ساعة. شكراً إنك حميت غيرك.</div>`;
+    $("rpWrap").innerHTML = `<div class="done">${tt("وصلنا بلاغك ✓","Your report is in ✓")}<br>
+      ${tt("بنراجعه خلال ٢٤ ساعة. شكراً إنك حميت غيرك.","We'll review it within 24 hours. Thanks for looking out for others.")}</div>`;
   }catch(e){
-    $("rpErr").innerHTML = '<div class="err">صار خطأ بالإرسال. جرّب مرة ثانية بعد شوي.</div>';
+    $("rpErr").innerHTML = `<div class="err">${tt("صار خطأ بالإرسال. جرّب مرة ثانية بعد شوي.","Something went wrong sending this. Try again in a bit.")}</div>`;
   }
 }
 
 /* ═══════════════ نماذج الإضافة ═══════════════ */
 function citySelect(id, onchange){
   return `<select id="${id}" onchange="${onchange}">
-    <option value="">اختر المدينة</option>
+    <option value="">${tt("اختر المدينة","Choose a city")}</option>
     ${CITIES.map(c=>`<option value="${c.id}">${esc(c.name_ar)}</option>`).join("")}</select>`;
 }
 /* نموذج الإعلان: مدينة ← منطقة واحدة */
@@ -696,9 +791,9 @@ function onFormCity(){
   const cid = $("lCity").value;
   const list = AREAS.filter(a=>String(a.city_id)===String(cid));
   $("lArea").innerHTML = cid
-    ? `<option value="">اختر المنطقة</option>` +
+    ? `<option value="">${tt("اختر المنطقة","Choose an area")}</option>` +
       list.map(a=>`<option value="${a.id}">${esc(a.name_ar)}</option>`).join("")
-    : `<option value="">اختر المدينة أولاً</option>`;
+    : `<option value="">${tt("اختر المدينة أولاً","Choose a city first")}</option>`;
 }
 /* نموذج الباحث: مدينة ← شرائح مناطق (بدل الـmultiple select و«0 item») */
 function onReqCity(){
@@ -707,8 +802,8 @@ function onReqCity(){
   $("rAreasBox").innerHTML = cid
     ? (list.length
         ? chipsHTML("rAreas", list, {val:a=>a.id, lbl:a=>a.name_ar})
-        : `<div class="hint">ما في مناطق مسجّلة لهاي المدينة بعد.</div>`)
-    : `<div class="hint">قم باختيار المدينة أولاً.</div>`;
+        : `<div class="hint">${tt("ما في مناطق مسجّلة لهاي المدينة بعد.","No areas registered for this city yet.")}</div>`)
+    : `<div class="hint">${tt("قم باختيار المدينة أولاً.","Choose a city first.")}</div>`;
 }
 
 /* ═══════════════ صور الإعلان ═══════════════ */
@@ -753,111 +848,113 @@ async function uploadImages(){
 function openForm(kind){
   selectedImages = [];
   $("modal").innerHTML = kind==="listing" ? `
-    <div class="mh"><h2>أضف غرفة للإيجار</h2><button class="x" onclick="closeAll()">×</button></div>
+    <div class="mh"><h2>${tt("أضف غرفة للإيجار","List a room for rent")}</h2><button class="x" onclick="closeAll()">×</button></div>
     <div class="mb"><div class="sec">
       <div id="draftBanner"></div>
-      <div class="note">رقمك ما بينعرض على الموقع أبداً. بنستخدمه للتواصل معك وترتيب التوثيق فقط.</div>
+      <div class="note">${tt("رقمك ما بينعرض على الموقع أبداً. بنستخدمه للتواصل معك وترتيب التوثيق فقط.",
+        "Your number is never shown on the site. We use it only to reach you and arrange verification.")}</div>
 
-      <div class="fg" style="margin-top:12px"><label>اسمك</label><input id="lName"></div>
-      <div class="fg"><label>رقم الواتساب</label>${telHTML("lDial","lPhone")}</div>
-      <div class="fg"><label>عنوان الإعلان</label>
-        <input id="lTitle" placeholder="مثلاً: غرفة في شقة طالبات — الطيرة"></div>
+      <div class="fg" style="margin-top:12px"><label>${tt("اسمك","Your name")}</label><input id="lName"></div>
+      <div class="fg"><label>${tt("رقم الواتساب","WhatsApp number")}</label>${telHTML("lDial","lPhone")}</div>
+      <div class="fg"><label>${tt("عنوان الإعلان","Listing title")}</label>
+        <input id="lTitle" placeholder="${tt("مثلاً: غرفة في شقة طالبات — الطيرة","e.g. Room in a student apartment — Al-Tira")}"></div>
 
-      <div class="fg"><label>صور الغرفة (اختياري، حتى ٦ صور)</label>
+      <div class="fg"><label>${tt("صور الغرفة (اختياري، حتى ٦ صور)","Room photos (optional, up to 6)")}</label>
         <input type="file" id="lImgsInput" accept="image/jpeg,image/png,image/webp" multiple onchange="onImgsPick(event)">
         <div class="imgs-prev" id="lImgsPrev"></div>
-        <div class="hint">صورة وحدة ولو بسيطة بتزيد الثقة بالإعلان أضعاف.</div></div>
+        <div class="hint">${tt("صورة وحدة ولو بسيطة بتزيد الثقة بالإعلان أضعاف.","Even one simple photo greatly increases trust in the listing.")}</div></div>
 
       <div class="f2">
-        <div class="fg"><label>المدينة</label>${citySelect("lCity","onFormCity()")}</div>
-        <div class="fg"><label>المنطقة</label>
-          <select id="lArea"><option value="">اختر المدينة أولاً</option></select></div>
-        <div class="fg"><label>السعر الشهري (₪)</label>
-          <input id="lPrice" data-num inputmode="numeric" placeholder="مثلاً ٨٠٠"></div>
-        <div class="fg"><label>التأمين (₪ — اختياري)</label>
-          <input id="lDep" data-num inputmode="numeric" placeholder="مبلغ مسترد"></div>
-        <div class="fg"><label>النوع</label><select id="lKind">
+        <div class="fg"><label>${tt("المدينة","City")}</label>${citySelect("lCity","onFormCity()")}</div>
+        <div class="fg"><label>${tt("المنطقة","Area")}</label>
+          <select id="lArea"><option value="">${tt("اختر المدينة أولاً","Choose a city first")}</option></select></div>
+        <div class="fg"><label>${tt("السعر الشهري (₪)","Monthly price (₪)")}</label>
+          <input id="lPrice" data-num inputmode="numeric" placeholder="${tt("مثلاً ٨٠٠","e.g. 800")}"></div>
+        <div class="fg"><label>${tt("التأمين (₪ — اختياري)","Deposit (₪ — optional)")}</label>
+          <input id="lDep" data-num inputmode="numeric" placeholder="${tt("مبلغ مسترد","Refundable amount")}"></div>
+        <div class="fg"><label>${tt("النوع","Type")}</label><select id="lKind">
           ${Object.entries(KIND).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}
         </select></div>
-        <div class="fg"><label>السكن لـ</label><select id="lPol">
-          <option value="female">إناث فقط</option><option value="male">ذكور فقط</option>
-          <option value="mixed">مختلط</option></select></div>
-        <div class="fg"><label>مفروش؟</label><select id="lFurn">
-          <option value="true">مفروش</option><option value="false">غير مفروش</option></select></div>
-        <div class="fg"><label>الفواتير</label><select id="lBills">
-          <option value="false">مش محسوبة بالسعر</option>
-          <option value="true">مشمولة بالسعر</option></select></div>
-        <div class="fg"><label>عدد الغرف بالسكن (اختياري)</label>
-          <input id="lRooms" data-num inputmode="numeric" placeholder="مثلاً ٣"></div>
-        <div class="fg"><label>أقل مدة إيجار بالشهور (اختياري)</label>
-          <input id="lMin" data-num inputmode="numeric" placeholder="مثلاً ٦"></div>
-        <div class="fg"><label>متاح من</label><input id="lFrom" type="date"></div>
+        <div class="fg"><label>${tt("السكن لـ","Housing for")}</label><select id="lPol">
+          <option value="female">${POL.female}</option><option value="male">${POL.male}</option>
+          <option value="mixed">${POL.mixed}</option></select></div>
+        <div class="fg"><label>${tt("مفروش؟","Furnished?")}</label><select id="lFurn">
+          <option value="true">${tt("مفروش","Furnished")}</option><option value="false">${tt("غير مفروش","Unfurnished")}</option></select></div>
+        <div class="fg"><label>${tt("الفواتير","Bills")}</label><select id="lBills">
+          <option value="false">${tt("مش محسوبة بالسعر","Not included")}</option>
+          <option value="true">${tt("مشمولة بالسعر","Included in price")}</option></select></div>
+        <div class="fg"><label>${tt("عدد الغرف بالسكن (اختياري)","Rooms in the unit (optional)")}</label>
+          <input id="lRooms" data-num inputmode="numeric" placeholder="${tt("مثلاً ٣","e.g. 3")}"></div>
+        <div class="fg"><label>${tt("أقل مدة إيجار بالشهور (اختياري)","Min. rental period, months (optional)")}</label>
+          <input id="lMin" data-num inputmode="numeric" placeholder="${tt("مثلاً ٦","e.g. 6")}"></div>
+        <div class="fg"><label>${tt("متاح من","Available from")}</label><input id="lFrom" type="date"></div>
       </div>
 
-      <div class="fg"><label>مواصفات الغرفة والسكن</label>
+      <div class="fg"><label>${tt("مواصفات الغرفة والسكن","Room & housing features")}</label>
         ${chipsHTML("lFeat", FEATURES)}
-        <div class="hint">أشّر على كل اللي متوفر. هاد أكتر إشي بيسأل عنه الباحثون.</div></div>
+        <div class="hint">${tt("أشّر على كل اللي متوفر. هاد أكتر إشي بيسأل عنه الباحثون.","Check everything that's available — this is what seekers ask about most.")}</div></div>
 
-      <div class="fg"><label>علامة مميزة قريبة (اختياري)</label>
-        <input id="lLand" placeholder="قرب دوار الماصيون"></div>
-      <div class="fg"><label>الساكنون حالياً (اختياري)</label>
-        <input id="lOcc" placeholder="طالبتان في جامعة بيرزيت"></div>
-      <div class="fg"><label>وصف الغرفة</label>
-        <textarea id="lDesc" placeholder="المساحة، القفل، المطبخ، المواصلات…"></textarea></div>
+      <div class="fg"><label>${tt("علامة مميزة قريبة (اختياري)","Nearby landmark (optional)")}</label>
+        <input id="lLand" placeholder="${tt("قرب دوار الماصيون","Near Al-Masyoun roundabout")}"></div>
+      <div class="fg"><label>${tt("الساكنون حالياً (اختياري)","Current occupants (optional)")}</label>
+        <input id="lOcc" placeholder="${tt("طالبتان في جامعة بيرزيت","Two students at Birzeit University")}"></div>
+      <div class="fg"><label>${tt("وصف الغرفة","Room description")}</label>
+        <textarea id="lDesc" placeholder="${tt("المساحة، القفل، المطبخ، المواصلات…","Size, lock, kitchen, transport…")}"></textarea></div>
 
       <div id="lErr"></div>
       <div id="lWrap"><button class="btn acc" style="width:100%" onclick="subListing()">
-        أرسل الإعلان للمراجعة</button></div>
+        ${tt("أرسل الإعلان للمراجعة","Submit listing for review")}</button></div>
       <p style="font-size:13px;color:var(--mut);margin:10px 0 0">
-        بنراجع الإعلان وبنتواصل معك للتوثيق قبل النشر.
-        الإعلان بينتهي تلقائياً بعد ٢١ يوم إلا إذا أكّدت إنه لسا متاح.</p>
+        ${tt("بنراجع الإعلان وبنتواصل معك للتوثيق قبل النشر. الإعلان بينتهي تلقائياً بعد ٢١ يوم إلا إذا أكّدت إنه لسا متاح.",
+          "We review the listing and contact you for verification before publishing. It expires automatically after 21 days unless you confirm it's still available.")}</p>
     </div></div>` : `
-    <div class="mh"><h2>سجّل طلبك للسكن</h2><button class="x" onclick="closeAll()">×</button></div>
+    <div class="mh"><h2>${tt("سجّل طلبك للسكن","Register your housing request")}</h2><button class="x" onclick="closeAll()">×</button></div>
     <div class="mb"><div class="sec">
-      <div class="note">بينعرض اسمك الأول فقط. رقمك وجهة عملك أو دراستك ما بينعرضوا لحدا.</div>
+      <div class="note">${tt("بينعرض اسمك الأول فقط. رقمك وجهة عملك أو دراستك ما بينعرضوا لحدا.",
+        "Only your first name is shown. Your number, workplace, or studies are never shown to anyone.")}</div>
 
-      <div class="fg" style="margin-top:12px"><label>اسمك</label><input id="rName"></div>
-      <div class="fg"><label>رقم الواتساب</label>${telHTML("rDial","rPhone")}</div>
+      <div class="fg" style="margin-top:12px"><label>${tt("اسمك","Your name")}</label><input id="rName"></div>
+      <div class="fg"><label>${tt("رقم الواتساب","WhatsApp number")}</label>${telHTML("rDial","rPhone")}</div>
 
       <div class="f2">
-        <div class="fg"><label>الجنس</label><select id="rG">
-          <option value="female">أنثى</option><option value="male">ذكر</option></select></div>
-        <div class="fg"><label>الحالة</label><select id="rOcc">
-          <option value="student">طالب/ة</option><option value="employee">موظف/ة</option>
-          <option value="other">غير ذلك</option></select></div>
-        <div class="fg"><label>أعلى ميزانية (₪)</label>
-          <input id="rBud" data-num inputmode="numeric" placeholder="مثلاً ٧٠٠"></div>
-        <div class="fg"><label>تاريخ الانتقال</label><input id="rDate" type="date"></div>
-        <div class="fg"><label>نوع السكن المفضّل</label><select id="rKind">
-          <option value="">مرن — أي نوع</option>
+        <div class="fg"><label>${tt("الجنس","Gender")}</label><select id="rG">
+          <option value="female">${tt("أنثى","Female")}</option><option value="male">${tt("ذكر","Male")}</option></select></div>
+        <div class="fg"><label>${tt("الحالة","Status")}</label><select id="rOcc">
+          <option value="student">${OCC.student}</option><option value="employee">${OCC.employee}</option>
+          <option value="other">${OCC.other}</option></select></div>
+        <div class="fg"><label>${tt("أعلى ميزانية (₪)","Max budget (₪)")}</label>
+          <input id="rBud" data-num inputmode="numeric" placeholder="${tt("مثلاً ٧٠٠","e.g. 700")}"></div>
+        <div class="fg"><label>${tt("تاريخ الانتقال","Move-in date")}</label><input id="rDate" type="date"></div>
+        <div class="fg"><label>${tt("نوع السكن المفضّل","Preferred housing type")}</label><select id="rKind">
+          <option value="">${tt("مرن — أي نوع","Flexible — any type")}</option>
           ${Object.entries(KIND).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}
         </select></div>
-        <div class="fg"><label>مفروش؟</label><select id="rFurn">
-          <option value="">مرن</option><option value="true">يفضّل مفروش</option>
-          <option value="false">مش ضروري</option></select></div>
-        <div class="fg"><label>أقل مدة بالشهور (اختياري)</label>
-          <input id="rMin" data-num inputmode="numeric" placeholder="مثلاً ٦"></div>
-        <div class="fg"><label>بتدخّن؟</label><select id="rSmoke">
-          <option value="">ما بحب أحدد</option><option value="false">لا</option>
-          <option value="true">نعم</option></select></div>
+        <div class="fg"><label>${tt("مفروش؟","Furnished?")}</label><select id="rFurn">
+          <option value="">${tt("مرن","Flexible")}</option><option value="true">${tt("يفضّل مفروش","Prefers furnished")}</option>
+          <option value="false">${tt("مش ضروري","Not required")}</option></select></div>
+        <div class="fg"><label>${tt("أقل مدة بالشهور (اختياري)","Min. months (optional)")}</label>
+          <input id="rMin" data-num inputmode="numeric" placeholder="${tt("مثلاً ٦","e.g. 6")}"></div>
+        <div class="fg"><label>${tt("بتدخّن؟","Do you smoke?")}</label><select id="rSmoke">
+          <option value="">${tt("ما بحب أحدد","Prefer not to say")}</option><option value="false">${tt("لا","No")}</option>
+          <option value="true">${tt("نعم","Yes")}</option></select></div>
       </div>
 
-      <div class="fg"><label>المدينة</label>${citySelect("rCity","onReqCity()")}</div>
-      <div class="fg"><label>المناطق المفضّلة</label>
+      <div class="fg"><label>${tt("المدينة","City")}</label>${citySelect("rCity","onReqCity()")}</div>
+      <div class="fg"><label>${tt("المناطق المفضّلة","Preferred areas")}</label>
         <div class="chips-box" id="rAreasBox">
-          <div class="hint">قم باختيار المدينة أولاً.</div></div>
-        <div class="hint">اختر منطقة أو أكتر، أو اتركها فاضية إذا أي منطقة بالمدينة بتناسبك.</div></div>
+          <div class="hint">${tt("قم باختيار المدينة أولاً.","Choose a city first.")}</div></div>
+        <div class="hint">${tt("اختر منطقة أو أكتر، أو اتركها فاضية إذا أي منطقة بالمدينة بتناسبك.","Pick one or more areas, or leave empty if any area in the city works.")}</div></div>
 
-      <div class="fg"><label>صفاتك كساكن</label>
+      <div class="fg"><label>${tt("صفاتك كساكن","Your traits as a housemate")}</label>
         ${chipsHTML("rTags", TAGS)}
-        <div class="hint">بتساعد المالك يعرف إذا بتناسب السكن.</div></div>
+        <div class="hint">${tt("بتساعد المالك يعرف إذا بتناسب السكن.","Helps the owner know if you'll fit the household.")}</div></div>
 
-      <div class="fg"><label>ملاحظات</label>
-        <textarea id="rNote" placeholder="أي إشي تاني بدك المالك يعرفه…"></textarea></div>
+      <div class="fg"><label>${tt("ملاحظات","Notes")}</label>
+        <textarea id="rNote" placeholder="${tt("أي إشي تاني بدك المالك يعرفه…","Anything else you want the owner to know…")}"></textarea></div>
 
       <div id="rErr"></div>
       <div id="rWrap"><button class="btn acc" style="width:100%" onclick="subRequest()">
-        سجّل طلبي</button></div>
+        ${tt("سجّل طلبي","Register my request")}</button></div>
     </div></div>`;
   wireDigits($("modal"));
   if(kind==="listing") restoreDraftIfAny();
@@ -892,8 +989,8 @@ function restoreDraftIfAny(){
     const el = document.querySelector(`input[name="lFeat"][value="${CSS.escape(v)}"]`);
     if(el) el.checked = true;
   });
-  $("draftBanner").innerHTML = `<div class="note">رجّعنا مسودة كنت عم تعبّيها قبل هيك.
-    <button class="linkish" onclick="discardDraft()">امسحها وابدأ من جديد</button></div>`;
+  $("draftBanner").innerHTML = `<div class="note">${tt("رجّعنا مسودة كنت عم تعبّيها قبل هيك.","We restored a draft you were filling in before.")}
+    <button class="linkish" onclick="discardDraft()">${tt("امسحها وابدأ من جديد","Clear it and start over")}</button></div>`;
 }
 function discardDraft(){
   clearDraft();
@@ -925,25 +1022,25 @@ async function subListing(){
     p_min_stay: num("lMin")
   };
   const bad = m => { $("lErr").innerHTML = `<div class="err">${m}</div>`; return null; };
-  if(v.p_name.length < 2)  return bad("اكتب اسمك.");
+  if(v.p_name.length < 2)  return bad(tt("اكتب اسمك.","Enter your name."));
   if(!phone)               return bad(telError("lDial"));
-  if(v.p_title.length < 5) return bad("عنوان الإعلان قصير — اكتب وصف واضح.");
-  if(!$("lCity").value)    return bad("اختر المدينة.");
-  if(!v.p_area)            return bad("اختر المنطقة.");
-  if(!v.p_price)           return bad("اكتب السعر الشهري.");
+  if(v.p_title.length < 5) return bad(tt("عنوان الإعلان قصير — اكتب وصف واضح.","The title is too short — write something clearer."));
+  if(!$("lCity").value)    return bad(tt("اختر المدينة.","Choose a city."));
+  if(!v.p_area)            return bad(tt("اختر المنطقة.","Choose an area."));
+  if(!v.p_price)           return bad(tt("اكتب السعر الشهري.","Enter the monthly price."));
   const btn = $("lWrap").querySelector("button");
-  if(btn){ btn.disabled = true; btn.textContent = selectedImages.length ? "عم يرفع الصور…" : "عم يرسل…"; }
+  if(btn){ btn.disabled = true; btn.textContent = selectedImages.length ? tt("عم يرفع الصور…","Uploading photos…") : tt("عم يرسل…","Sending…"); }
   try{
     v.p_images = await uploadImages();
     const ref = await rpc("submit_listing", v);
-    $("lWrap").innerHTML = `<div class="done">وصلنا إعلانك ✓ رقمه <b>${esc(ref)}</b>.<br>
-      بنتواصل معك خلال ٢٤ ساعة للتوثيق.</div>`;
+    $("lWrap").innerHTML = `<div class="done">${tt("وصلنا إعلانك ✓ رقمه","Your listing is in ✓ its ID is")} <b>${esc(ref)}</b>.<br>
+      ${tt("بنتواصل معك خلال ٢٤ ساعة للتوثيق.","We'll contact you within 24 hours for verification.")}</div>`;
     $("lErr").innerHTML = "";
     selectedImages = [];
     clearDraft();
   }catch(e){
-    $("lErr").innerHTML = '<div class="err">صار خطأ بالإرسال. جرّب مرة ثانية بعد شوي.</div>';
-    if(btn){ btn.disabled = false; btn.textContent = "أرسل الإعلان للمراجعة"; }
+    $("lErr").innerHTML = `<div class="err">${tt("صار خطأ بالإرسال. جرّب مرة ثانية بعد شوي.","Something went wrong sending this. Try again in a bit.")}</div>`;
+    if(btn){ btn.disabled = false; btn.textContent = tt("أرسل الإعلان للمراجعة","Submit listing for review"); }
   }
 }
 
@@ -968,17 +1065,17 @@ async function subRequest(){
     p_smoker: tri("rSmoke")
   };
   const bad = m => { $("rErr").innerHTML = `<div class="err">${m}</div>`; return null; };
-  if(v.p_name.length < 2) return bad("اكتب اسمك.");
+  if(v.p_name.length < 2) return bad(tt("اكتب اسمك.","Enter your name."));
   if(!phone)              return bad(telError("rDial"));
-  if(!v.p_city)           return bad("اختر المدينة.");
-  if(!v.p_budget)         return bad("اكتب أعلى ميزانية.");
+  if(!v.p_city)           return bad(tt("اختر المدينة.","Choose a city."));
+  if(!v.p_budget)         return bad(tt("اكتب أعلى ميزانية.","Enter your max budget."));
   try{
     const ref = await rpc("submit_request", v);
-    $("rWrap").innerHTML = `<div class="done">تم تسجيل طلبك ✓ رقمه <b>${esc(ref)}</b>.<br>
-      بنراجعه وبنخبرك أول ما تنزل غرفة بتناسبك.</div>`;
+    $("rWrap").innerHTML = `<div class="done">${tt("تم تسجيل طلبك ✓ رقمه","Your request is registered ✓ its ID is")} <b>${esc(ref)}</b>.<br>
+      ${tt("بنراجعه وبنخبرك أول ما تنزل غرفة بتناسبك.","We'll review it and notify you as soon as a matching room is listed.")}</div>`;
     $("rErr").innerHTML = "";
   }catch(e){
-    $("rErr").innerHTML = '<div class="err">صار خطأ بالإرسال. جرّب مرة ثانية بعد شوي.</div>';
+    $("rErr").innerHTML = `<div class="err">${tt("صار خطأ بالإرسال. جرّب مرة ثانية بعد شوي.","Something went wrong sending this. Try again in a bit.")}</div>`;
   }
 }
 
@@ -1023,10 +1120,10 @@ async function checkConfirmLink(){
   let ok = false;
   try{ ok = await rpc("confirm_listing_available", {p_ref:ref, p_token:token}); }catch(e){ ok = false; }
   $("modal").innerHTML = `
-    <div class="mh"><h2>تأكيد الإعلان</h2><button class="x" onclick="closeAll()">×</button></div>
+    <div class="mh"><h2>${tt("تأكيد الإعلان","Confirm listing")}</h2><button class="x" onclick="closeAll()">×</button></div>
     <div class="mb">${ok
-      ? '<div class="done">تم تمديد إعلانك ٢١ يوم ✓</div>'
-      : '<div class="err">الرابط غير صالح أو منتهي.</div>'}</div>`;
+      ? `<div class="done">${tt("تم تمديد إعلانك ٢١ يوم ✓","Your listing was extended by 21 days ✓")}</div>`
+      : `<div class="err">${tt("الرابط غير صالح أو منتهي.","This link is invalid or expired.")}</div>`}</div>`;
   $("ov").classList.add("on");
 }
 
@@ -1034,9 +1131,9 @@ async function checkConfirmLink(){
 let REVIEW_REF = null, REVIEW_TOKEN = null;
 
 const ratingSelect = id => `<select id="${id}">
-  <option value="5">٥ — ممتاز</option><option value="4">٤ — جيد جداً</option>
-  <option value="3">٣ — متوسط</option><option value="2">٢ — دون المتوسط</option>
-  <option value="1">١ — ضعيف</option></select>`;
+  <option value="5">${tt("٥ — ممتاز","5 — Excellent")}</option><option value="4">${tt("٤ — جيد جداً","4 — Very good")}</option>
+  <option value="3">${tt("٣ — متوسط","3 — Average")}</option><option value="2">${tt("٢ — دون المتوسط","2 — Below average")}</option>
+  <option value="1">${tt("١ — ضعيف","1 — Poor")}</option></select>`;
 
 async function checkReviewLink(){
   const p = new URLSearchParams(location.search);
@@ -1049,40 +1146,41 @@ async function checkReviewLink(){
 
   if(!info){
     $("modal").innerHTML = `
-      <div class="mh"><h2>رابط التقييم</h2><button class="x" onclick="closeAll()">×</button></div>
-      <div class="mb"><div class="err">الرابط غير صالح.</div></div>`;
+      <div class="mh"><h2>${tt("رابط التقييم","Review link")}</h2><button class="x" onclick="closeAll()">×</button></div>
+      <div class="mb"><div class="err">${tt("الرابط غير صالح.","This link is invalid.")}</div></div>`;
     $("ov").classList.add("on");
     return;
   }
 
   REVIEW_REF = ref; REVIEW_TOKEN = token;
   $("modal").innerHTML = `
-    <div class="mh"><h2>قيّم سكنك</h2><button class="x" onclick="closeAll()">×</button></div>
+    <div class="mh"><h2>${tt("قيّم سكنك","Rate your stay")}</h2><button class="x" onclick="closeAll()">×</button></div>
     <div class="mb"><div class="sec">
-      <div class="note">تقييمك بيساعد باحثين تانيين، وما بيظهر لحدا إلا بعد ما يوصل ٣ تقييمات على نفس الإعلان.</div>
+      <div class="note">${tt("تقييمك بيساعد باحثين تانيين، وما بيظهر لحدا إلا بعد ما يوصل ٣ تقييمات على نفس الإعلان.",
+        "Your review helps other seekers, and only appears once a listing gets 3 reviews.")}</div>
       <div class="fg" style="margin-top:12px"><b>${esc(info.title)}</b> — ${esc(info.area)}, ${esc(info.city)}</div>
 
-      <div class="fg"><label>وضعك هلأ</label><select id="vStage">
-        <option value="day30">سكنت من شهر تقريباً</option>
-        <option value="move_out">طلعت من السكن</option></select></div>
+      <div class="fg"><label>${tt("وضعك هلأ","Your situation now")}</label><select id="vStage">
+        <option value="day30">${tt("سكنت من شهر تقريباً","Been living here about a month")}</option>
+        <option value="move_out">${tt("طلعت من السكن","Moved out")}</option></select></div>
 
       <div class="f2">
-        <div class="fg"><label>الصيانة والاستجابة للأعطال</label>${ratingSelect("vMaint")}</div>
-        <div class="fg"><label>الهدوء بالسكن</label>${ratingSelect("vQuiet")}</div>
-        <div class="fg"><label>دقة وصف الإعلان</label>${ratingSelect("vAcc")}</div>
-        <div class="fg"><label>الأمان بالليل</label>${ratingSelect("vSafe")}</div>
+        <div class="fg"><label>${tt("الصيانة والاستجابة للأعطال","Maintenance & responsiveness")}</label>${ratingSelect("vMaint")}</div>
+        <div class="fg"><label>${tt("الهدوء بالسكن","Quietness")}</label>${ratingSelect("vQuiet")}</div>
+        <div class="fg"><label>${tt("دقة وصف الإعلان","Listing accuracy")}</label>${ratingSelect("vAcc")}</div>
+        <div class="fg"><label>${tt("الأمان بالليل","Safety at night")}</label>${ratingSelect("vSafe")}</div>
       </div>
 
-      <div class="fg"><label>دخل المالك الغرفة بدون إذنك؟</label><select id="vEnter">
-        <option value="">ما بحب أحدد</option><option value="false">لا</option>
-        <option value="true">نعم</option></select></div>
-      <div class="fg"><label>رجّع المالك التأمين كامل؟</label><select id="vDep">
-        <option value="">مش منطبق / لسا</option><option value="true">نعم</option>
-        <option value="false">لا</option></select></div>
+      <div class="fg"><label>${tt("دخل المالك الغرفة بدون إذنك؟","Did the owner enter without your permission?")}</label><select id="vEnter">
+        <option value="">${tt("ما بحب أحدد","Prefer not to say")}</option><option value="false">${tt("لا","No")}</option>
+        <option value="true">${tt("نعم","Yes")}</option></select></div>
+      <div class="fg"><label>${tt("رجّع المالك التأمين كامل؟","Did the owner return the full deposit?")}</label><select id="vDep">
+        <option value="">${tt("مش منطبق / لسا","N/A / not yet")}</option><option value="true">${tt("نعم","Yes")}</option>
+        <option value="false">${tt("لا","No")}</option></select></div>
 
       <div id="vErr"></div>
       <div id="vWrap"><button class="btn acc" style="width:100%" onclick="subReview()">
-        أرسل تقييمي</button></div>
+        ${tt("أرسل تقييمي","Submit my review")}</button></div>
     </div></div>`;
   $("ov").classList.add("on");
 }
@@ -1100,13 +1198,13 @@ async function subReview(){
     p_deposit_returned: tri("vDep")
   };
   const btn = $("vWrap").querySelector("button");
-  if(btn){ btn.disabled = true; btn.textContent = "عم يرسل…"; }
+  if(btn){ btn.disabled = true; btn.textContent = tt("عم يرسل…","Sending…"); }
   try{
     await rpc("submit_review", v);
-    $("vWrap").innerHTML = '<div class="done">وصلنا تقييمك ✓ شكراً إلك.</div>';
+    $("vWrap").innerHTML = `<div class="done">${tt("وصلنا تقييمك ✓ شكراً إلك.","Your review is in ✓ thank you.")}</div>`;
   }catch(e){
-    $("vErr").innerHTML = '<div class="err">صار خطأ بالإرسال. جرّب مرة ثانية بعد شوي.</div>';
-    if(btn){ btn.disabled = false; btn.textContent = "أرسل تقييمي"; }
+    $("vErr").innerHTML = `<div class="err">${tt("صار خطأ بالإرسال. جرّب مرة ثانية بعد شوي.","Something went wrong sending this. Try again in a bit.")}</div>`;
+    if(btn){ btn.disabled = false; btn.textContent = tt("أرسل تقييمي","Submit my review"); }
   }
 }
 
@@ -1119,13 +1217,14 @@ function openSharedListing(){
   const x = L.find(a=>a.ref===ref);
   if(x){ openL(x.id); return; }
   $("modal").innerHTML = `
-    <div class="mh"><h2>الإعلان مو متاح</h2><button class="x" onclick="closeAll()">×</button></div>
-    <div class="mb"><div class="err">هاد الإعلان ما عاد منشور — ممكن انأجّر أو انتهت صلاحيته.</div></div>`;
+    <div class="mh"><h2>${tt("الإعلان مو متاح","Listing unavailable")}</h2><button class="x" onclick="closeAll()">×</button></div>
+    <div class="mb"><div class="err">${tt("هاد الإعلان ما عاد منشور — ممكن انأجّر أو انتهت صلاحيته.","This listing is no longer published — it may have been rented or expired.")}</div></div>`;
   $("ov").classList.add("on");
 }
 
 /* ═══════════════ التحميل ═══════════════ */
 (async () => {
+  paintChrome();
   try{
     /* المدن والمناطق أولاً — الفلاتر والنماذج كلها بتعتمد عليهم */
     [CITIES, AREAS] = await Promise.all([
@@ -1155,7 +1254,7 @@ function openSharedListing(){
     console.error("Supabase error:", e);
     $("count").textContent = "";
     $("grid").innerHTML =
-      '<div class="empty">ما قدرنا نحمّل الإعلانات. تأكد من الاتصال وجرّب تحديث الصفحة.</div>';
+      `<div class="empty">${tt("ما قدرنا نحمّل الإعلانات. تأكد من الاتصال وجرّب تحديث الصفحة.","We couldn't load listings. Check your connection and try refreshing.")}</div>`;
   }
 })();
 </script>
