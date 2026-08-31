@@ -505,7 +505,12 @@ function openL(id){
     ? `<div class="gal">${imgs.map((u,i)=>`<img src="${esc(u)}" alt="${esc(x.title)}" onclick="openLightbox(${i})">`).join("")}</div>` : "";
 
   $("modal").innerHTML = `
-    <div class="mh"><h2>${esc(x.title)}</h2><button class="x" onclick="closeAll()">×</button></div>
+    <div class="mh"><h2>${esc(x.title)}</h2>
+      <div style="display:flex;gap:8px;align-items:center;flex:none">
+        <button class="btn ghost" id="shareBtn" style="padding:8px 12px;font-size:13px"
+          onclick="shareListing('${esc(x.ref)}','${esc(x.title)}')">مشاركة</button>
+        <button class="x" onclick="closeAll()">×</button>
+      </div></div>
     ${gallery}
     <div class="mb">
       <div class="sec">
@@ -546,6 +551,22 @@ function openL(id){
     </div>`;
   wireDigits($("modal"));
   $("ov").classList.add("on");
+}
+
+/* ═══════════════ مشاركة الإعلان ═══════════════ */
+function shareListing(ref, title){
+  const url = location.origin + "/?l=" + ref;
+  if(navigator.share){
+    navigator.share({title, url}).catch(()=>{});
+    return;
+  }
+  navigator.clipboard.writeText(url).then(()=>{
+    const b = $("shareBtn");
+    if(!b) return;
+    const old = b.textContent;
+    b.textContent = "انتسخ الرابط ✓";
+    setTimeout(()=>{ b.textContent = old; }, 1800);
+  }).catch(()=>{});
 }
 
 async function sendContact(id, ref){
@@ -1041,6 +1062,20 @@ async function subReview(){
   }
 }
 
+/* ═══════════════ فتح إعلان مشارَك (?l=REF) ═══════════════ */
+function openSharedListing(){
+  const p = new URLSearchParams(location.search);
+  const ref = p.get("l");
+  if(!ref) return;
+  history.replaceState(null, "", location.pathname);
+  const x = L.find(a=>a.ref===ref);
+  if(x){ openL(x.id); return; }
+  $("modal").innerHTML = `
+    <div class="mh"><h2>الإعلان مو متاح</h2><button class="x" onclick="closeAll()">×</button></div>
+    <div class="mb"><div class="err">هاد الإعلان ما عاد منشور — ممكن انأجّر أو انتهت صلاحيته.</div></div>`;
+  $("ov").classList.add("on");
+}
+
 /* ═══════════════ التحميل ═══════════════ */
 (async () => {
   try{
@@ -1067,6 +1102,7 @@ async function subReview(){
       api("v_requests_public?select=*&order=created_at.desc")
     ]);
     render();
+    openSharedListing();
   }catch(e){
     console.error("Supabase error:", e);
     $("count").textContent = "";
