@@ -371,7 +371,10 @@ function renderFilters(){
     <div><label>المنطقة</label>
       <select id="fArea" onchange="F.area=this.value;render()">${areaOptsFor(F.city,F.area)}</select></div>`;
 
-  $("filters").innerHTML = TAB==="L" ? common + `
+  $("filters").innerHTML = TAB==="L" ? `
+    <div style="grid-column:1/-1"><label>ابحث بالعنوان أو الوصف</label>
+      <input id="fQ" placeholder="مثلاً: مفروشة، قرب بيرزيت…" value="${esc(F.q||"")}"
+        oninput="F.q=this.value;render()"></div>` + common + `
     <div><label>النوع</label><select onchange="F.kind=this.value;render()">
       <option value="">الكل</option>
       ${Object.entries(KIND).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}
@@ -395,12 +398,14 @@ function renderFilters(){
 function render(){
   const grid = $("grid"), count = $("count");
   if(TAB==="L"){
+    const q = (F.q||"").trim().toLowerCase();
     const d = L.filter(x =>
       (!F.city || String(x.city_id)===String(F.city)) &&
       (!F.area || String(x.area_id)===String(F.area)) &&
       (!F.kind || x.kind===F.kind) &&
       (!F.pol  || x.gender_pol===F.pol) &&
-      (!F.max  || Number(x.price) <= Number(toEN(F.max))));
+      (!F.max  || Number(x.price) <= Number(toEN(F.max))) &&
+      (!q || (x.title||"").toLowerCase().includes(q) || (x.description||"").toLowerCase().includes(q)));
     count.textContent = d.length ? `${d.length} غرفة متاحة` : "";
     grid.innerHTML = d.length ? d.map(cardL).join("") :
       `<div class="empty">ما في غرف بتطابق البحث حالياً.<br><br>
