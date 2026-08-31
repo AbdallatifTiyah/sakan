@@ -76,7 +76,7 @@
 20260831170825_staff_auth_foundation
 20260831170837_admin_views_security_invoker
 20260831173555_add_family_listing_kind
-20260831180000_admin_rpc_role_guard
+20260831175234_admin_rpc_role_guard
 ```
 
 > migrations conv9 مسجّلة بطوابع `2026082901…` فبتسبق `…120000` بالترتيب.
