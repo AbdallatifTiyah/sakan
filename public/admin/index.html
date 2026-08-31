@@ -298,6 +298,23 @@ function q(obj){
   return Object.entries(obj).filter(([,v])=>v!=null&&v!=="").map(([k,v])=>k+"="+v).join("&");
 }
 
+/* ── تصدير CSV (بيفتح صح بإكسل — BOM + UTF-8) ───────────── */
+function exportCSV(filename, cols, rows){
+  if(!rows || !rows.length) return toast("ما في بيانات للتصدير.", "bad");
+  const cell = v => {
+    const s = v==null ? "" : String(v);
+    return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+  };
+  const lines = [cols.map(c=>cell(c.label)).join(",")];
+  rows.forEach(r => lines.push(cols.map(c=>cell(c.get(r))).join(",")));
+  const bom = String.fromCharCode(0xFEFF);
+  const blob = new Blob([bom+lines.join("\r\n")], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
+
 /* ── القواميس ─────────────────────────────────────────── */
 const L_STATUS = {draft:"مسودّة",pending:"بانتظار المراجعة",published:"منشور",rejected:"مرفوض",
                   reserved:"محجوز",rented:"مؤجّر",expired:"منتهي"};
@@ -318,6 +335,7 @@ const REJECTS  = ["صور مش مطابقة للواقع","السعر غير و�
 const VIEWS = [
   {id:"dash",    t:"لوحة القيادة",   grp:"التشغيل اليومي", both:true},
   {id:"queue",   t:"بانتظار المراجعة", grp:"", both:true, badge:"pending"},
+  {id:"alerts",  t:"تنبيهات",         grp:"", both:true, badge:"soon"},
   {id:"requests",t:"طلبات الباحثين",   grp:"", both:true, badge:"reqs"},
   {id:"reports", t:"البلاغات",        grp:"", both:false, badge:"reports"},
   {id:"pipeline",t:"مسار التأجير",     grp:"", both:true},
@@ -474,7 +492,7 @@ function go(v){
   if(!VIEWS.some(x => x.id===v && can(x))) v = "dash";
   S.view = v; location.hash = v;
   $("#nav").querySelectorAll("a").forEach(a => a.classList.toggle("on", a.dataset.v===v));
-  ({dash:vDash,queue:vQueue,requests:vRequests,listings:vListings,reports:vReports,
+  ({dash:vDash,queue:vQueue,alerts:vAlerts,requests:vRequests,listings:vListings,reports:vReports,
     pipeline:vPipeline,verify:vVerify,owners:vOwners,seekers:vSeekers,fees:vFees,
     matches:vMatches,activity:vActivity,audit:vAudit,settings:vSettings,
     pages:vPages}[v])();
@@ -487,10 +505,12 @@ async function refreshBadges(){
     const k = (await get("/v_kpi_core?select=awaiting_review,open_reports"))[0] || {};
     const f = await get("/v_admin_fees?select=id&status=eq.due", true);
     const q = await get("/v_admin_requests?select=id&status=eq.pending", true);
+    const s = await get("/v_admin_listings?select=id&status=eq.published&days_left=lte.3&days_left=gte.0", true);
     set("b-pending", k.awaiting_review, "warm");
     set("b-reports", k.open_reports, "hot");
     set("b-fees",    f.__total, "warm");
     set("b-reqs",    q.__total, "warm");
+    set("b-soon",    s.__total, "warm");
   } catch(e){}
   function set(id, n, cls){
     const el = document.getElementById(id);
@@ -587,6 +607,41 @@ async function vDash(){
   }
 }
 
+/* ══════════════ تنبيهات — إعلانات قربت تنتهي ══════════════ */
+async function vAlerts(){
+  loading("تنبيهات");
+  try{
+    const setts = await get("/settings?select=value&key=eq.expiring_soon_days");
+    const days = setts.length ? +String(setts[0].value).replace(/"/g,"") : 3;
+    const rows = await get("/v_admin_listings?select=id,ref,title,owner_name,owner_phone,days_left,confirm_token"
+      +"&status=eq.published&days_left=lte."+days+"&days_left=gte.0&order=days_left.asc");
+
+    $("#main").innerHTML = `
+      <div class="head"><h2>تنبيهات</h2>
+        <span class="note">إعلانات بينتهي نشرها خلال ${days} أيام — ذكّر المالك يأكّد إنها لسا متاحة</span></div>
+      ${!rows.length ? '<div class="empty"><b>ولا إعلان قريب من الانتهاء حالياً</b>تمام، ما في شي يحتاج تذكير.</div>' : `
+      <div class="tw"><table><thead><tr>
+        <th>الرمز</th><th>العنوان</th><th>المالك</th><th>الرقم</th><th>بينتهي بعد</th><th></th>
+      </tr></thead><tbody>
+      ${rows.map(r => {
+        const link = location.origin+"/?confirm="+encodeURIComponent(r.ref)+"&t="+r.confirm_token;
+        const msg = encodeURIComponent("مرحبا "+(r.owner_name||"")+"، غرفتك «"+r.title+"» على سكن بدها تأكيد إنها لسا متاحة"
+          +" خلال "+r.days_left+" يوم، وإلا رح تختفي من الموقع تلقائياً. أكّد من هون:\n"+link);
+        return `<tr data-id="${r.id}">
+          <td class="ref">${esc(r.ref)}</td>
+          <td>${esc(r.title)}</td>
+          <td>${esc(r.owner_name)}</td>
+          <td class="phone">${esc(r.owner_phone)}</td>
+          <td class="num" style="color:var(--warn)">${r.days_left} يوم</td>
+          <td><a class="btn sm" target="_blank" rel="noopener" onclick="event.stopPropagation()"
+            href="https://wa.me/970${esc(String(r.owner_phone||"").replace(/^0/,""))}?text=${msg}">تذكير واتساب</a></td>
+        </tr>`;
+      }).join("")}
+      </tbody></table></div>`}`;
+    wireRows("listing");
+  } catch(e){ fail(e); }
+}
+
 /* ══════════════ ٢. طابور المراجعة ══════════════ */
 async function vQueue(){
   loading("بانتظار المراجعة");
@@ -644,7 +699,12 @@ async function rejectFlow(id){
 async function vListings(){
   const f = S.filters.listings = S.filters.listings || {status:"", city:"", verif:"", search:"", flag:""};
   $("#main").innerHTML = `
-    <div class="head"><h2>كل الإعلانات</h2><span class="note" id="lcount"></span></div>
+    <div class="head"><h2>كل الإعلانات</h2>
+      <div style="display:flex;gap:10px;align-items:center">
+        <span class="note" id="lcount"></span>
+        <button class="btn sm" id="expListings">تصدير CSV</button>
+      </div>
+    </div>
     <div class="bars">
       <input type="search" id="fs" placeholder="بحث برمز أو عنوان أو رقم…" value="${esc(f.search)}">
       <select id="fst"><option value="">كل الحالات</option>
@@ -674,10 +734,21 @@ async function vListings(){
     $("#main").querySelectorAll("[data-flag]").forEach(x=>x.classList.toggle("on", x.dataset.flag===f.flag));
     reload();
   });
+  $("#expListings").onclick = () => exportCSV("sakan-listings.csv", [
+    {label:"الرمز", get:r=>r.ref}, {label:"العنوان", get:r=>r.title},
+    {label:"المدينة", get:r=>r.city}, {label:"المنطقة", get:r=>r.area},
+    {label:"السعر", get:r=>r.price}, {label:"الحالة", get:r=>L_STATUS[r.status]||r.status},
+    {label:"التوثيق", get:r=>L_VERIF[r.verification]||r.verification},
+    {label:"ينتهي بعد (يوم)", get:r=>r.days_left},
+    {label:"طلبات تواصل", get:r=>r.contacts}, {label:"مشاهدات", get:r=>r.view_count},
+    {label:"المالك", get:r=>r.owner_name}, {label:"رقم المالك", get:r=>r.owner_phone},
+    {label:"تاريخ الإنشاء", get:r=>dt(r.created_at)}
+  ], LISTINGS_ROWS);
   reload();
 }
 function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
 
+let LISTINGS_ROWS = [];
 async function loadListings(f){
   let p = "/v_admin_listings?select=*&order=created_at.desc&limit=300";
   // الشرائح السريعة بتغلب على القوائم عشان ما يصير فلترين متعارضين على نفس العمود
@@ -695,6 +766,7 @@ async function loadListings(f){
   }
   try{
     const rows = await get(p, true);
+    LISTINGS_ROWS = rows;
     $("#lcount").textContent = rows.__total + " إعلان";
     if(!rows.length){
       $("#ltable").innerHTML = '<div class="empty"><b>ما في نتائج</b>جرّب توسّع الفلاتر.</div>';
@@ -1261,6 +1333,16 @@ async function drawOwner(id){
       ${isAdmin()?'<button class="btn sm '+(r.is_blocked?"ok":"bad")+'" id="tg">'+
         (r.is_blocked?"إلغاء الإيقاف":"إيقاف الحساب")+"</button>":""}
     </div>
+    <div class="sec">
+      <h4>رابط لوحة المالك</h4>
+      <div class="note">بيوريه كل إعلاناته وطلبات التواصل عليها بدون تسجيل دخول.</div>
+      <div class="ref" style="word-break:break-all;color:var(--text-2);margin-top:6px">
+        ${location.origin}/owner.html?id=${esc(r.id)}&t=${esc(r.owner_token)}</div>
+      <div class="acts" style="margin-top:8px">
+        <button class="btn sm" id="copyOwnerLink">نسخ الرابط</button>
+        <a class="btn sm" target="_blank" rel="noopener" id="waOwnerLink">مشاركة واتساب</a>
+      </div>
+    </div>
     <div class="sec"><h4>إعلاناته (${ls.length})</h4>
       ${ls.map(l=>`<div class="fitem" style="cursor:pointer" data-lid="${l.id}">
         <span class="ts">${dt(l.created_at)}</span>
@@ -1269,6 +1351,13 @@ async function drawOwner(id){
     </div>`;
   $("#dx").onclick = closeDrawer;
   $("#dpanel").querySelectorAll("[data-lid]").forEach(d => d.onclick = () => openDrawer("listing", d.dataset.lid));
+  $("#copyOwnerLink").onclick = () => {
+    navigator.clipboard.writeText(location.origin+"/owner.html?id="+r.id+"&t="+r.owner_token)
+      .then(()=>toast("انتسخ الرابط.", "ok"), ()=>toast("ما زبط النسخ — علّم عليه يدوياً.", "bad"));
+  };
+  $("#waOwnerLink").href = "https://wa.me/?text=" + encodeURIComponent(
+    "أهلاً "+r.first_name+"، هاد رابط لوحتك بموقع سكن — بتشوف فيه كل إعلاناتك وطلبات التواصل عليها:\n"
+    + location.origin+"/owner.html?id="+r.id+"&t="+r.owner_token);
   const tg = $("#tg");
   if(tg) tg.onclick = async () => {
     const on = !r.is_blocked;
@@ -1462,7 +1551,11 @@ async function vFees(){
     const sum = st => rows.filter(r=>r.status===st).reduce((a,b)=>a+Number(b.amount_due||0),0);
     $("#main").innerHTML = `
       <div class="head"><h2>الرسوم</h2>
-        <span class="note">رسم نجاح من المالك · بينحصّل نقداً عبر المندوب</span></div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <span class="note">رسم نجاح من المالك · بينحصّل نقداً عبر المندوب</span>
+          <button class="btn sm" id="expFees">تصدير CSV</button>
+        </div>
+      </div>
       <div class="grid k4" style="margin-bottom:14px">
         <div class="card kpi ${sum("due")>0?"warn":""}"><div class="lab">مستحق</div><div class="val">${money(sum("due"))}</div></div>
         <div class="card kpi"><div class="lab">محصّل</div><div class="val">${money(sum("collected"))}</div></div>
@@ -1485,6 +1578,13 @@ async function vFees(){
         <td style="color:var(--mute)">${ago(r.created_at)}</td>
       </tr>`).join("")}</tbody></table></div>`;
     wireRows("fee");
+    $("#expFees").onclick = () => exportCSV("sakan-fees.csv", [
+      {label:"الإعلان", get:r=>r.listing_ref}, {label:"العنوان", get:r=>r.listing_title},
+      {label:"المالك", get:r=>r.owner_name}, {label:"رقم المالك", get:r=>r.owner_phone},
+      {label:"الأساس", get:r=>r.amount_base}, {label:"كود الخصم", get:r=>r.promo_code},
+      {label:"المستحق", get:r=>r.amount_due}, {label:"الحالة", get:r=>F_STATUS[r.status]||r.status},
+      {label:"أُنشئ", get:r=>dt(r.created_at,true)}, {label:"حُصّل", get:r=>dt(r.collected_at,true)}
+    ], rows);
   } catch(e){ fail(e); }
 }
 async function drawFee(id){

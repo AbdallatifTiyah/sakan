@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>لوحة المالك — سكن</title>
+<meta name="description" content="إعلاناتك وطلبات التواصل عليها — سكن.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#12634E;--brand-d:#0C4839;--accent:#C4682B;--bg:#FAF7F2;--card:#FFFFFF;
+  --ink:#15201C;--mut:#6B7B75;--line:#E4DED4;--warn:#B4531B;--r:14px;
+  --sh:0 1px 2px rgba(20,32,28,.05),0 8px 24px rgba(20,32,28,.06)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,sans-serif;line-height:1.7}
+a{color:var(--brand)}
+.wrap{max-width:820px;margin:0 auto;padding:0 18px}
+header{background:var(--brand);color:#fff}
+.hd{display:flex;align-items:center;justify-content:space-between;padding:16px 0;gap:12px;flex-wrap:wrap}
+.logo{font-size:26px;font-weight:700;letter-spacing:-1px;color:#fff;text-decoration:none}
+.logo span{display:block;font-size:12px;font-weight:400;opacity:.85;letter-spacing:0}
+.back{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:10px;
+  padding:9px 15px;font:inherit;font-weight:600;text-decoration:none}
+.back:hover{background:rgba(255,255,255,.24)}
+h1{font-size:22px;margin:22px 0 4px}
+.sub{color:var(--mut);font-size:13.5px;margin-bottom:20px}
+h2{font-size:16px;margin:26px 0 10px}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:16px;margin-bottom:12px}
+.row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.title{font-weight:600;font-size:15px}
+.ref{font-family:ui-monospace,monospace;font-size:12px;color:var(--mut)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.t{background:#F3F0EA;border-radius:99px;padding:3px 10px;font-size:12px;font-weight:600;color:var(--ink)}
+.t.warn{background:#FBEBDD;color:var(--warn)}
+.t.ok{background:#E3F1E9;color:var(--brand-d)}
+.t.bad{background:#FBE7E4;color:#A5301F}
+.meta{color:var(--mut);font-size:12.5px;margin-top:6px}
+.btn{border:0;border-radius:10px;padding:8px 14px;font:inherit;font-weight:600;cursor:pointer;
+  background:var(--brand);color:#fff;text-decoration:none;display:inline-block;font-size:13px}
+.btn:hover{background:var(--brand-d)}
+.btn.line{background:#fff;color:var(--brand);border:1px solid var(--line)}
+.btn.line:hover{background:#F3F0EA}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.acts{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.empty{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:26px;
+  text-align:center;color:var(--mut)}
+.msg{padding:40px;text-align:center;color:var(--mut)}
+.phone{font-family:ui-monospace,monospace;direction:ltr;display:inline-block}
+footer{background:#101B18;color:#9FB2AC;padding:24px 0;font-size:13px;margin-top:30px}
+footer a{color:#CFE0DA}
+@media(max-width:600px){h1{font-size:20px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap hd">
+    <a class="logo" href="/">سكن<span>غرف وسكن مشترك موثّق</span></a>
+    <a class="back" href="/">الصفحة الرئيسية</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div id="doc"><div class="msg">بيحمّل…</div></div>
+</div>
+
+<footer><div class="wrap">
+  <b style="color:#fff">سكن</b> — هاي لوحة خاصة فيك، الرابط ما بينشارك مع حدا غيرك.
+</div></footer>
+
+<script>
+const SUPABASE_URL = "https://yckteijitcqjtedoyoyv.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlja3RlaWppdGNxanRlZG95b3l2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MjA3MTksImV4cCI6MjEwMzQ5NjcxOX0.mAY5A6ROvtxN4kkD8g1s_tsDlSjGfy4TCNkgbYHeRvo";
+const H = {apikey:SUPABASE_ANON_KEY, Authorization:"Bearer "+SUPABASE_ANON_KEY, "Content-Type":"application/json"};
+
+const esc = s => String(s??"").replace(/[&<>"']/g,
+  c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money = n => n==null ? "—" : Number(n).toLocaleString("ar-EG")+" ₪";
+const dt = d => d ? new Date(d).toLocaleDateString("ar-EG",{day:"numeric",month:"long"}) : "—";
+
+const L_STATUS = {draft:"مسودّة",pending:"بانتظار المراجعة",published:"منشور",rejected:"مرفوض",
+                  reserved:"محجوز",rented:"مؤجّر",expired:"منتهي"};
+const L_VERIF  = {none:"غير موثّق",desk:"توثيق مكتبي",field:"توثيق ميداني"};
+const C_STATUS = {new:"جديد",forwarded:"محوّل إلك",owner_responded:"رديت عليه",
+                  viewing_set:"معاينة محدّدة",rented:"تم التأجير",dead:"مغلق"};
+const statusCls = s => ({published:"ok",rented:"ok",rejected:"bad",dead:"bad"}[s] || "");
+
+async function rpc(fn, body){
+  const r = await fetch(SUPABASE_URL+"/rest/v1/rpc/"+fn, {
+    method:"POST", headers:H, body:JSON.stringify(body)});
+  const txt = await r.text();
+  let data=null; try{ data = txt ? JSON.parse(txt) : null; }catch(e){}
+  if(!r.ok) throw new Error((data&&data.message) || "صار خطأ.");
+  return data;
+}
+
+function listingCard(l){
+  const soon = l.status==="published" && l.days_left!=null && l.days_left<=3;
+  const confirmBtn = l.status==="published"
+    ? `<button class="btn line" data-confirm="${esc(l.ref)}" data-token="${esc(l.confirm_token)}">
+         تأكيد إنها لسا متاحة</button>`
+    : "";
+  return `<div class="card">
+    <div class="row">
+      <div>
+        <div class="title">${esc(l.title)}</div>
+        <div class="ref">${esc(l.ref)} · ${esc(l.city)} — ${esc(l.area)} · ${money(l.price)}/شهر</div>
+      </div>
+      <div class="tags">
+        <span class="t ${statusCls(l.status)}">${esc(L_STATUS[l.status]||l.status)}</span>
+        ${l.verification!=="none"?'<span class="t">'+esc(L_VERIF[l.verification]||l.verification)+"</span>":""}
+      </div>
+    </div>
+    <div class="meta">
+      ${l.status==="published" && l.days_left!=null
+        ? (soon ? '<b style="color:var(--warn)">بدها تأكيد — بتنتهي بعد '+l.days_left+' يوم</b>'
+                : "بتنتهي بعد "+l.days_left+" يوم")
+        : ""}
+      ${l.view_count!=null ? " · "+l.view_count+" مشاهدة" : ""}
+      ${l.status==="rejected" && l.reject_reason ? " · سبب الرفض: "+esc(l.reject_reason) : ""}
+    </div>
+    ${confirmBtn?'<div class="acts">'+confirmBtn+"</div>":""}
+  </div>`;
+}
+
+function requestCard(r){
+  const phone = r.seeker_phone;
+  return `<div class="card">
+    <div class="row">
+      <div>
+        <div class="title">${esc(r.seeker_name||"باحث/ة")}</div>
+        <div class="ref">على إعلانك: ${esc(r.listing_ref)} — ${esc(r.listing_title)} · ${dt(r.created_at)}</div>
+      </div>
+      <span class="t ${statusCls(r.status)}">${esc(C_STATUS[r.status]||r.status)}</span>
+    </div>
+    ${phone ? `<div class="acts">
+      <a class="btn line" href="tel:${esc(phone)}">اتصال <span class="phone">${esc(phone)}</span></a>
+      <a class="btn line" target="_blank" rel="noopener"
+         href="https://wa.me/970${esc(String(phone).replace(/^0/,""))}">واتساب</a>
+    </div>` : '<div class="meta">عم نراجع الطلب — رح يظهر رقمه هون أول ما نحوّله إلك.</div>'}
+  </div>`;
+}
+
+async function confirmListing(ref, token, btn){
+  btn.disabled = true; btn.textContent = "عم يتأكّد…";
+  try{
+    const ok = await rpc("confirm_listing_available", {p_ref:ref, p_token:token});
+    btn.textContent = ok ? "تأكّد ✓" : "الرابط غير صالح";
+  }catch(e){
+    btn.disabled = false; btn.textContent = "صار خطأ — جرّب تاني";
+  }
+}
+
+(async () => {
+  const p = new URLSearchParams(location.search);
+  const id = p.get("id"), token = p.get("t");
+  const doc = document.getElementById("doc");
+  if(!id || !token){
+    doc.innerHTML = '<div class="empty">هاد الرابط ناقصه جزء. تأكد إنك نسخته كامل.</div>';
+    return;
+  }
+  try{
+    const d = await rpc("owner_dashboard", {p_owner_id:id, p_token:token});
+    document.title = "مرحبا " + d.owner_name + " — سكن";
+    const listings = d.listings || [], requests = d.requests || [];
+    doc.innerHTML = `
+      <h1>مرحبا ${esc(d.owner_name)}</h1>
+      <div class="sub">هاي لوحتك — إعلاناتك وطلبات التواصل عليها.</div>
+
+      <h2>إعلاناتك (${listings.length})</h2>
+      ${listings.length ? listings.map(listingCard).join("")
+        : '<div class="empty">ما في إعلانات مسجّلة بعد.</div>'}
+
+      <h2>طلبات التواصل (${requests.length})</h2>
+      ${requests.length ? requests.map(requestCard).join("")
+        : '<div class="empty">لسا ما وصل طلب تواصل.</div>'}
+    `;
+    doc.querySelectorAll("[data-confirm]").forEach(b => b.onclick = () =>
+      confirmListing(b.dataset.confirm, b.dataset.token, b));
+  }catch(e){
+    doc.innerHTML = '<div class="empty">'+esc(e.message||"الرابط غير صالح.")+'</div>';
+  }
+})();
+</script>
+</body>
+</html>

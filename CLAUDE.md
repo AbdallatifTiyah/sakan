@@ -3,7 +3,7 @@
 منصة تأجير غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت.
 واجهة عربية RTL. باك إند Supabase. نشر على Cloudflare Workers.
 
-**آخر تحديث: ١ أيلول ٢٠٢٦ — conv15 (رابط تقييم موقّع + مشاركة إعلان + بحث نصي + robots.txt/sitemap.xml + مسودة الإعلان محلياً + صفحة «كيف بشتغل سكن»)**
+**آخر تحديث: ١ أيلول ٢٠٢٦ — conv15 (رابط تقييم موقّع + مشاركة إعلان + بحث نصي + robots.txt/sitemap.xml + مسودة الإعلان محلياً + صفحة «كيف بشتغل سكن» + تصدير CSV + تنبيهات المندوب + رابط المالك الموقّع)**
 
 ---
 
@@ -11,7 +11,7 @@
 
 | البند | الحالة |
 |---|---|
-| قاعدة البيانات | ✅ ١٧ جدول · ١٤ واجهة · ٢٨ migration (Frankfurt) |
+| قاعدة البيانات | ✅ ١٧ جدول · ١٤ واجهة · ٢٩ migration (Frankfurt) |
 | فخ الـzero-policy على `cities`/`areas` | ✅ **انحلّ** — كان `anon` بيقرأ صفر صفوف بصمت |
 | الرفض التلقائي بسبب الكاميرا | ✅ **انشال** — كان `default false` + مشغّل = رفض أي زيارة الخانة فيها مش متأشّرة |
 | نشر طلبات الباحثين | ✅ **انحلّ** — ما كان في أي RPC تغيّر `seeker_requests.status` |
@@ -26,6 +26,9 @@
 | مشاركة الإعلان | ✅ زر «مشاركة» بتفاصيل الإعلان (`Web Share API`/نسخ) + `?l=SK-123` بيفتح الإعلان مباشرة + `worker.js` بيبدّل meta tags (عنوان/وصف/`og:image`) وقت الطلب لصورة معاينة صحيحة بواتساب |
 | `robots.txt` / `sitemap.xml` | ✅ مولّدة ديناميكياً من `worker.js` — `robots.txt` بدون ذكر `/admin` إطلاقاً (قاعدة ٨)، `sitemap.xml` فيه كل إعلان منشور حالياً |
 | مسودة الإعلان | ✅ `localStorage` — بتنحفظ تلقائياً وقت التعبئة، وبترجع أول ما تفتح «أضف غرفة» تاني، وبتنمسح بعد الإرسال الناجح |
+| تصدير CSV | ✅ زر بقسمَي «كل الإعلانات» و«الرسوم» — بيصدّر الصفوف المعروضة حالياً، بـBOM عشان يفتح صح بإكسل |
+| تنبيهات المندوب | ✅ قسم «تنبيهات» جديد باللوحة — إعلانات بتنتهي خلال `expiring_soon_days` (من `settings`)، بزر تذكير واتساب جاهز لكل مالك |
+| رابط المالك الموقّع | ✅ زر بملف المالك (نسخ/واتساب) — `owner.html?id=..&t=..` بتوكن `profiles.owner_token`، يوريه إعلاناته وطلبات التواصل عليها بدون تسجيل دخول. رقم الباحث ما بيظهر إلا بعد ما الطلب يصير حالته غير `new` (نفس بوابة التحويل اليدوي) |
 | النطاق `sakan.ps` | ❌ بيد أبواللطيف — خارج نطاق مساعدة Claude |
 | البيانات | إعلان منشور واحد · إعلان `pending` · ٤ طلبات باحثين `pending` · ٦ ملفات |
 
@@ -35,12 +38,13 @@
 
 | ملف | الوصف |
 |---|---|
-| `public/index.html` | الموقع العام — ٩٩٨ سطر، صفحة واحدة، بدون build ولا npm. فيها رفع الصور + عارض صور مكبّر (lightbox). |
-| `public/page.html` | سياسة الخصوصية والشروط — بتقرأ من جدول `pages` |
-| `public/admin/index.html` | مركز التحكم — ١٨٦١ سطر، منشور على `/admin`، دخول عبر Supabase Auth |
+| `public/index.html` | الموقع العام — ١١٦٣ سطر، صفحة واحدة، بدون build ولا npm. فيها رفع الصور، عارض صور مكبّر (lightbox)، بحث نصي، مشاركة إعلان، ومسودة محلية لنموذج «أضف غرفة». |
+| `public/page.html` | صفحات المحتوى (كيف بشتغل سكن · سياسة الخصوصية · شروط الاستخدام) — بتقرأ من جدول `pages` |
+| `public/owner.html` | رابط المالك الموقّع — بتوكن `profiles.owner_token`، بدون تسجيل دخول |
+| `public/admin/index.html` | مركز التحكم — ١٩٧٩ سطر، منشور على `/admin`، دخول عبر Supabase Auth |
 | `src/worker.js` | بيمرّر لـ`ASSETS` ويضيف `X-Robots-Tag: noindex` على `/admin`، وعلى `/?l=REF` بيبدّل meta tags (عنوان/وصف/`og:image`) بجلب بيانات الإعلان من `v_listings_public` بمفتاح anon قبل ما يرجّع الصفحة، وبيولّد `/robots.txt` و`/sitemap.xml` ديناميكياً (الأخير فيه كل إعلان منشور) |
 | `wrangler.toml` | `main` + `binding = "ASSETS"` + `run_worker_first = true` |
-| `supabase/migrations/` | ٢٦ ملف — لازم يطابقوا `supabase_migrations` بالحرف |
+| `supabase/migrations/` | ٢٩ ملف — لازم يطابقوا `supabase_migrations` بالحرف |
 
 **Supabase**
 - ref: `yckteijitcqjtedoyoyv` (eu-central-1، Postgres 17.6)
@@ -101,6 +105,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 20260831191905_admin_listing_images_manage
 20260831222144_review_link_and_submit
 20260831224647_seed_how_it_works_page
+20260831225755_owner_dashboard_link
 ```
 
 > migrations conv9 مسجّلة بطوابع `2026082901…` فبتسبق `…120000` بالترتيب.
@@ -117,7 +122,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 |---|---|
 | قراءة | `v_listings_public` · `v_requests_public` · `cities` · `areas` · `pages` |
 | كتابة (insert فقط) | `contact_requests` · `reports` · `events` |
-| دوال | `submit_listing` · `submit_request` · `confirm_listing_available` · `bump_listing_view` · `staff_email_for_username` (تحويل يوزرنيم لإيميل قبل تسجيل الدخول — ما بترجّع غير الإيميل) · `review_link_info` · `submit_review` (رابط التقييم — بدون تسجيل دخول) |
+| دوال | `submit_listing` · `submit_request` · `confirm_listing_available` · `bump_listing_view` · `staff_email_for_username` (تحويل يوزرنيم لإيميل قبل تسجيل الدخول — ما بترجّع غير الإيميل) · `review_link_info` · `submit_review` (رابط التقييم) · `owner_dashboard` (رابط المالك) — كلهن بدون تسجيل دخول |
 
 **`authenticated` (بشرط `is_staff()`/`is_admin()`) + `service_role` — مركز التحكم فقط**
 
@@ -176,12 +181,13 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 
 ---
 
-## مركز التحكم — الأقسام (١٥)
+## مركز التحكم — الأقسام (١٦)
 
 | القسم | المدير | المندوب |
 |---|---|---|
 | لوحة القيادة (KPI + بوابة القرار + قائمة اليوم) | ✅ | ✅ |
 | بانتظار المراجعة | ✅ | ✅ |
+| **تنبيهات (إعلانات قربت تنتهي + تذكير واتساب)** | ✅ | ✅ |
 | **طلبات الباحثين** | ✅ | ✅ |
 | البلاغات | ✅ | ❌ |
 | مسار التأجير | ✅ | ✅ |
@@ -257,11 +263,6 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 ---
 
 ## مهام مفتوحة — بترتيب الأولوية
-
-**بعد أول ٢٠ إعلان**
-- [ ] تصدير CSV/Excel من اللوحة
-- [ ] تنبيهات المندوب (إعلانات قربت تنتهي)
-- [ ] رابط المالك الموقّع — يشوف إعلاناته وطلبات التواصل
 
 **بعد بوابة القرار**
 - [ ] عربي/إنجليزي · شاشات المؤسسات · إشعارات واتساب Business API
