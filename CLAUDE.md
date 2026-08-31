@@ -3,7 +3,7 @@
 منصة تأجير غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت.
 واجهة عربية RTL. باك إند Supabase. نشر على Cloudflare Workers.
 
-**آخر تحديث: ٣١ آب ٢٠٢٦ — conv11 (نظام المستخدمين: Supabase Auth + حارس الأدوار بالدوال الإدارية + شيل Basic Auth + سكن عائلي)**
+**آخر تحديث: ٣١ آب ٢٠٢٦ — conv12 (نظام المستخدمين: Supabase Auth + دخول بيوزرنيم أو إيميل + إصلاح صلاحية `sakan_match_score`)**
 
 ---
 
@@ -19,7 +19,7 @@
 | الموقع العام | ✅ منشور على `sakan.abdallatif-tiyah.workers.dev` |
 | صفحات المحتوى | ✅ `page.html` + جدول `pages` + محرر باللوحة |
 | عدّاد المشاهدات | ✅ `bump_listing_view` — كان عمود ميت |
-| حماية `/admin` | ✅ Supabase Auth (شاشة دخول إيميل/كلمة سر) + حارس `is_staff()`/`is_admin()` جوّا كل دالة إدارية. Basic Auth انشال. |
+| حماية `/admin` | ✅ Supabase Auth (شاشة دخول إيميل أو يوزرنيم + كلمة سر) + حارس `is_staff()`/`is_admin()` جوّا كل دالة إدارية. Basic Auth انشال. |
 | **مفتاح `service_role` بالمتصفح** | ✅ **انحلّ** — الدخول بالمفتاح العام (`anon`) فقط، الصلاحية الفعلية من جدول `staff` |
 | رفع الصور | ❌ `listings.images` فاضي دايماً — أكبر فجوة منتَج |
 | وصول التقييمات للمستأجر | ❌ الجدول موجود، ما في طريق يوصله |
@@ -48,12 +48,18 @@
 **الجداول (١٧)**
 `admin_actions` · `areas` · `cities` · `contact_requests` · `events` · `listing_safety` ·
 `listings` · `owner_fees` · `pages` · `profiles` · `promo_codes` · `reports` ·
-`reviews` · `seeker_requests` · `settings` · `staff` · `verification_log`
+`reviews` · `seeker_requests` · `settings` · `staff` (فيها `username` — اختياري، فريد بدون حساسية لحالة الأحرف) · `verification_log`
 
 **الأنواع (enums) الإضافية**
 `staff_role` (`admin` · `agent`)
 
-**الـmigrations المسجّلة (٢٢ — بالترتيب)**
+**ربط حساب طاقم جديد** (بعد إنشائه من Dashboard بـAuto Confirm):
+```sql
+select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'username');
+```
+لازم `select` قبلها. الترتيب: إيميل، اسم، دور (`admin`/`agent`)، يوزرنيم (اختياري، أو `null`).
+
+**الـmigrations المسجّلة (٢٣ — بالترتيب)**
 ```
 20260828161300_remote_schema
 20260828203602_restore_service_role_grants
@@ -77,6 +83,7 @@
 20260831170837_admin_views_security_invoker
 20260831173555_add_family_listing_kind
 20260831175234_admin_rpc_role_guard
+20260831182131_staff_username_login_and_match_score_grant
 ```
 
 > migrations conv9 مسجّلة بطوابع `2026082901…` فبتسبق `…120000` بالترتيب.
@@ -93,7 +100,7 @@
 |---|---|
 | قراءة | `v_listings_public` · `v_requests_public` · `cities` · `areas` · `pages` |
 | كتابة (insert فقط) | `contact_requests` · `reports` · `events` |
-| دوال | `submit_listing` · `submit_request` · `confirm_listing_available` · `bump_listing_view` |
+| دوال | `submit_listing` · `submit_request` · `confirm_listing_available` · `bump_listing_view` · `staff_email_for_username` (تحويل يوزرنيم لإيميل قبل تسجيل الدخول — ما بترجّع غير الإيميل) |
 
 **`authenticated` (بشرط `is_staff()`/`is_admin()`) + `service_role` — مركز التحكم فقط**
 
@@ -115,6 +122,11 @@
 
 > `auth.uid() is null` (استدعاء من `service_role` أو SQL مباشر) بيعدّي الحارس —
 > مسموح لطوارئ القاعدة، مش للاستخدام العادي.
+
+> **درس:** لما view تصير `security_invoker = on`، أي دالة مستخدَمة **جوّا تعريف الـview نفسه**
+> (مش جوّا دالة إدارية منادية الـview) بتتفحص صلاحيتها على حساب **الفاعل**، مش مالك الـview.
+> `v_reverse_matches` بتنادي `sakan_match_score()` مباشرة — كانت `service_role` بس فطلعت
+> `permission denied` لأي `authenticated`. الإصلاح: منح `execute` صريح لـ`authenticated` عليها.
 
 **Cloudflare**
 - Worker: `sakan` → `sakan.abdallatif-tiyah.workers.dev`
@@ -196,6 +208,8 @@
 | `revoke` نجح بس الصلاحية باقية | المنحة من `PUBLIC` مش من الدور. تحقق بـ`has_function_privilege`. |
 | إجراء باللوحة ما ظهر بالسجل | صار كـ`PATCH` مباشر مش عبر `admin_*` RPC → بينتسجّل `direct` |
 | `create or replace view` بيفشل | ما بتقدر تعيد ترتيب ولا تعيد تسمية أعمدة. **الأعمدة الجديدة بتنضاف بذيل القائمة فقط.** |
+| `permission denied for function X` من واجهة `security_invoker` | دالة مستخدَمة جوّا تعريف الـview نفسه بدون منح `authenticated` — شوف الدرس فوق بقسم «من يقرأ ماذا». |
+| اسم ملف الـmigration المحلي ما بطابق `supabase_migrations` بعد `apply_migration` | أداة الـMCP بتسجّل نسختها الزمنية الخاصة، مش اسم الملف اللي أعطيته. **دايماً** شغّل `list_migrations` بعد التطبيق وسمّي الملف المحلي بنفس الرقم بالضبط. |
 
 ---
 
@@ -230,7 +244,6 @@
 - [ ] **البحث النصي** بالعنوان والوصف.
 - [ ] `robots.txt` + `sitemap.xml`.
 - [ ] **حفظ مسودة الإعلان محلياً** — النموذج طويل.
-- [ ] **حساب المندوب** — لسا بدّه `link_staff(email, name, 'agent')` بعد ما يتعمل حسابه من Dashboard (Auto Confirm).
 
 **بعد أول ٢٠ إعلان**
 - [ ] صفحة «كيف بشتغل سكن» — قابلة للتعديل من `pages`
