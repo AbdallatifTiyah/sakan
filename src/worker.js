@@ -16,6 +16,32 @@ async function fetchListing(ref) {
   return rows[0] || null;
 }
 
+async function fetchPublishedRefs() {
+  const r = await fetch(
+    SUPABASE_URL + "/rest/v1/v_listings_public?select=ref,published_at&order=published_at.desc&limit=2000",
+    { headers: { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY } }
+  );
+  if (!r.ok) return [];
+  return r.json();
+}
+
+// ملف ثابت — بدون /admin إطلاقاً، الحماية الفعلية شاشة الدخول مش robots.txt.
+function robotsTxt(origin) {
+  return "User-agent: *\nAllow: /\n\nSitemap: " + origin + "/sitemap.xml\n";
+}
+
+function sitemapXml(origin, listings) {
+  const staticUrls = [origin + "/", origin + "/page.html?p=privacy", origin + "/page.html?p=terms"];
+  const staticTags = staticUrls.map(u => `<url><loc>${esc(u)}</loc></url>`).join("");
+  const listingTags = listings.map(l => {
+    const loc = origin + "/?l=" + encodeURIComponent(l.ref);
+    const lastmod = l.published_at ? `<lastmod>${String(l.published_at).slice(0, 10)}</lastmod>` : "";
+    return `<url><loc>${esc(loc)}</loc>${lastmod}</url>`;
+  }).join("");
+  return `<?xml version="1.0" encoding="UTF-8"?>\n` +
+    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${staticTags}${listingTags}</urlset>`;
+}
+
 // بيبني كارت مشاركة (WhatsApp/فيسبوك) لإعلان محدّد — بيبدّل meta tags بس، الصفحة نفسها SPA واحدة.
 function withListingMeta(res, listing, canonicalUrl) {
   const title = listing.title + " — سكن";
@@ -53,6 +79,15 @@ export default {
       const out = new Response(res.body, res);
       out.headers.set("X-Robots-Tag", "noindex, nofollow");
       return out;
+    }
+
+    if (p === "/robots.txt") {
+      return new Response(robotsTxt(url.origin), { headers: { "Content-Type": "text/plain; charset=utf-8" } });
+    }
+
+    if (p === "/sitemap.xml") {
+      const listings = await fetchPublishedRefs().catch(() => []);
+      return new Response(sitemapXml(url.origin, listings), { headers: { "Content-Type": "application/xml; charset=utf-8" } });
     }
 
     const ref = url.searchParams.get("l");

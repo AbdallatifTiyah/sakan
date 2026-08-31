@@ -3,7 +3,7 @@
 منصة تأجير غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت.
 واجهة عربية RTL. باك إند Supabase. نشر على Cloudflare Workers.
 
-**آخر تحديث: ١ أيلول ٢٠٢٦ — conv15 (رابط تقييم موقّع + مشاركة إعلان بصورة OG + بحث نصي بالعنوان والوصف)**
+**آخر تحديث: ١ أيلول ٢٠٢٦ — conv15 (رابط تقييم موقّع + مشاركة إعلان بصورة OG + بحث نصي + robots.txt/sitemap.xml)**
 
 ---
 
@@ -24,6 +24,7 @@
 | رفع الصور | ✅ Supabase Storage (`listing-images`) — المالك بيرفع لحد ٦ صور وقت التقديم، والطاقم يقدر يضيف/يحذف/يرتّب من اللوحة |
 | رابط التقييم | ✅ زر باللوحة (نسخ/واتساب) — رابط موقّع بـ`review_token` على الإعلان، يشتغل بدون تسجيل دخول وحتى لمستأجر مو عن طريق المنصة |
 | مشاركة الإعلان | ✅ زر «مشاركة» بتفاصيل الإعلان (`Web Share API`/نسخ) + `?l=SK-123` بيفتح الإعلان مباشرة + `worker.js` بيبدّل meta tags (عنوان/وصف/`og:image`) وقت الطلب لصورة معاينة صحيحة بواتساب |
+| `robots.txt` / `sitemap.xml` | ✅ مولّدة ديناميكياً من `worker.js` — `robots.txt` بدون ذكر `/admin` إطلاقاً (قاعدة ٨)، `sitemap.xml` فيه كل إعلان منشور حالياً |
 | النطاق `sakan.ps` | ❌ بيد أبواللطيف — خارج نطاق مساعدة Claude |
 | البيانات | إعلان منشور واحد · إعلان `pending` · ٤ طلبات باحثين `pending` · ٦ ملفات |
 
@@ -36,7 +37,7 @@
 | `public/index.html` | الموقع العام — ٩٩٨ سطر، صفحة واحدة، بدون build ولا npm. فيها رفع الصور + عارض صور مكبّر (lightbox). |
 | `public/page.html` | سياسة الخصوصية والشروط — بتقرأ من جدول `pages` |
 | `public/admin/index.html` | مركز التحكم — ١٨٦١ سطر، منشور على `/admin`، دخول عبر Supabase Auth |
-| `src/worker.js` | بيمرّر لـ`ASSETS` ويضيف `X-Robots-Tag: noindex` على `/admin`، وعلى `/?l=REF` بيبدّل meta tags (عنوان/وصف/`og:image`) بجلب بيانات الإعلان من `v_listings_public` بمفتاح anon قبل ما يرجّع الصفحة |
+| `src/worker.js` | بيمرّر لـ`ASSETS` ويضيف `X-Robots-Tag: noindex` على `/admin`، وعلى `/?l=REF` بيبدّل meta tags (عنوان/وصف/`og:image`) بجلب بيانات الإعلان من `v_listings_public` بمفتاح anon قبل ما يرجّع الصفحة، وبيولّد `/robots.txt` و`/sitemap.xml` ديناميكياً (الأخير فيه كل إعلان منشور) |
 | `wrangler.toml` | `main` + `binding = "ASSETS"` + `run_worker_first = true` |
 | `supabase/migrations/` | ٢٦ ملف — لازم يطابقوا `supabase_migrations` بالحرف |
 
@@ -256,7 +257,6 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 ## مهام مفتوحة — بترتيب الأولوية
 
 **قبل النزول للميدان**
-- [ ] `robots.txt` + `sitemap.xml`.
 - [ ] **حفظ مسودة الإعلان محلياً** — النموذج طويل.
 
 **بعد أول ٢٠ إعلان**
