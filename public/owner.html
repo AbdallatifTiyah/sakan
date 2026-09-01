@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>لوحة المالك — سكن</title>
-<meta name="description" content="إعلاناتك وطلبات التواصل عليها — سكن.">
+<title>لوحة المالك — موضع</title>
+<meta name="description" content="إعلاناتك وطلبات التواصل عليها — موضع.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -58,7 +58,7 @@ footer a{color:#CFE0DA}
 
 <header>
   <div class="wrap hd">
-    <a class="logo" href="/">سكن<span>غرف وسكن مشترك موثّق</span></a>
+    <a class="logo" href="/">موضع<span>غرف وسكن مشترك موثّق</span></a>
     <a class="back" href="/">الصفحة الرئيسية</a>
   </div>
 </header>
@@ -68,7 +68,7 @@ footer a{color:#CFE0DA}
 </div>
 
 <footer><div class="wrap">
-  <b style="color:#fff">سكن</b> — هاي لوحة خاصة فيك، الرابط ما بينشارك مع حدا غيرك.
+  <b style="color:#fff">موضع</b> — هاي لوحة خاصة فيك، الرابط ما بينشارك مع حدا غيرك.
 </div></footer>
 
 <script>
@@ -164,7 +164,7 @@ async function confirmListing(ref, token, btn){
   }
   try{
     const d = await rpc("owner_dashboard", {p_owner_id:id, p_token:token});
-    document.title = "مرحبا " + d.owner_name + " — سكن";
+    document.title = "مرحبا " + d.owner_name + " — موضع";
     const listings = d.listings || [], requests = d.requests || [];
     doc.innerHTML = `
       <h1>مرحبا ${esc(d.owner_name)}</h1>

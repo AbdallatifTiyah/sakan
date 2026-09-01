@@ -45,9 +45,9 @@ function sitemapXml(origin, listings) {
 
 // بيبني كارت مشاركة (WhatsApp/فيسبوك) لإعلان محدّد — بيبدّل meta tags بس، الصفحة نفسها SPA واحدة.
 function withListingMeta(res, listing, canonicalUrl) {
-  const title = listing.title + " — سكن";
+  const title = listing.title + " — موضع";
   const price = listing.price ? Number(listing.price).toLocaleString("ar-EG") + " ₪/شهر — " : "";
-  const desc = price + listing.city + " · " + listing.area + ". غرفة موثّقة على سكن.";
+  const desc = price + listing.city + " · " + listing.area + ". غرفة موثّقة على موضع.";
   const img = Array.isArray(listing.images) && listing.images[0] ? listing.images[0] : null;
 
   return new HTMLRewriter()

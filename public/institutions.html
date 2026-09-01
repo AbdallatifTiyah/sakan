@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<script>
+try{ var SAKAN_LANG = localStorage.getItem("sakan_lang") === "en" ? "en" : "ar"; }
+catch(e){ var SAKAN_LANG = "ar"; }
+document.documentElement.lang = SAKAN_LANG;
+document.documentElement.dir  = SAKAN_LANG === "en" ? "ltr" : "rtl";
+</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>سكن للمؤسسات — إسكان موظفين وطلاب ومستفيدين</title>
-<meta name="description" content="مؤسستك أو شركتك محتاجة تؤمّن سكن لموظفين أو طلاب أو مستفيدين؟ سكن بتأمّن غرف موثّقة بالجملة برام الله والبيرة وبيرزيت.">
+<title id="pageTitle">موضع للمؤسسات — إسكان موظفين وطلاب ومستفيدين</title>
+<meta id="metaDesc" name="description" content="مؤسستك أو شركتك محتاجة تؤمّن سكن لموظفين أو طلاب أو مستفيدين؟ موضع بتأمّن غرف موثّقة بالجملة برام الله والبيرة وبيرزيت.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -53,42 +59,45 @@ footer a{color:#CFE0DA}
 
 <header>
   <div class="wrap hd">
-    <a class="logo" href="/">سكن<span>غرف وسكن مشترك موثّق</span></a>
-    <a class="back" href="/">الصفحة الرئيسية</a>
+    <a class="logo" href="/" id="logoLink">موضع<span id="tagline">غرف وسكن مشترك موثّق</span></a>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="back" id="langBtn" onclick="toggleLang()" style="cursor:pointer;border:0">EN</button>
+      <a class="back" href="/" id="backLink">الصفحة الرئيسية</a>
+    </div>
   </div>
 </header>
 
 <div class="wrap">
   <section class="hero">
-    <h1>بتوظّف أو بتستضيف ناس محتاجين سكن؟</h1>
-    <p>مؤسستك، جامعتك، أو شركتك بتدفع رسم ثابت لكل غرفة — والمالك ما بيدفع إشي.
+    <h1 id="heroH1">بتوظّف أو بتستضيف ناس محتاجين سكن؟</h1>
+    <p id="heroP">مؤسستك، جامعتك، أو شركتك بتدفع رسم ثابت لكل غرفة — والمالك ما بيدفع إشي.
        بنؤمّنلكم غرف موثّقة بالجملة برام الله والبيرة وبيرزيت، وبنتابع معكم مباشرة.</p>
     <div class="pts">
-      <div><b>٣٠٠–٥٠٠ ₪</b> لكل غرفة — تسعير حسب العدد والمدة</div>
-      <div><b>يدوي بالكامل</b> — مندوب بيتواصل معكم خلال يوم عمل</div>
-      <div><b>بدون التزام</b> — الطلب استفسار أولي بس</div>
+      <div id="pt1"><b>٣٠٠–٥٠٠ ₪</b> لكل غرفة — تسعير حسب العدد والمدة</div>
+      <div id="pt2"><b>يدوي بالكامل</b> — مندوب بيتواصل معكم خلال يوم عمل</div>
+      <div id="pt3"><b>بدون التزام</b> — الطلب استفسار أولي بس</div>
     </div>
   </section>
 
   <div class="card" id="formCard">
-    <div class="note">اتركوا بياناتكم وبنتواصل معكم لنفهم احتياجكم بالتفصيل ونرتّب التسعير.</div>
-    <div class="fg"><label>اسم المؤسسة</label><input id="iOrg" placeholder="مثلاً: جمعية كذا، جامعة كذا"></div>
+    <div class="note" id="noteTxt">اتركوا بياناتكم وبنتواصل معكم لنفهم احتياجكم بالتفصيل ونرتّب التسعير.</div>
+    <div class="fg"><label id="lOrg">اسم المؤسسة</label><input id="iOrg" placeholder="مثلاً: جمعية كذا، جامعة كذا"></div>
     <div class="f2">
-      <div class="fg"><label>نوع الجهة</label><select id="iType">
+      <div class="fg"><label id="lType">نوع الجهة</label><select id="iType">
         <option value="ngo">منظمة غير حكومية</option>
         <option value="university">جامعة</option>
         <option value="company">شركة</option>
         <option value="government">جهة حكومية</option>
         <option value="other">غير ذلك</option></select></div>
-      <div class="fg"><label>المدينة</label><select id="iCity"><option value="">اختر المدينة</option></select></div>
+      <div class="fg"><label id="lCity">المدينة</label><select id="iCity"><option value="">اختر المدينة</option></select></div>
     </div>
     <div class="f2">
-      <div class="fg"><label>اسم شخص التواصل</label><input id="iName" placeholder="اسمك"></div>
-      <div class="fg"><label>رقم الهاتف</label><input id="iPhone" inputmode="tel" placeholder="05XXXXXXXX"></div>
+      <div class="fg"><label id="lName">اسم شخص التواصل</label><input id="iName" placeholder="اسمك"></div>
+      <div class="fg"><label id="lPhone">رقم الهاتف</label><input id="iPhone" inputmode="tel" placeholder="05XXXXXXXX"></div>
     </div>
-    <div class="fg"><label>الإيميل (اختياري)</label><input id="iEmail" type="email" placeholder="name@org.org"></div>
-    <div class="fg"><label>عدد الغرف تقريباً</label><input id="iRooms" inputmode="numeric" placeholder="مثلاً ١٠"></div>
-    <div class="fg"><label>تفاصيل إضافية (اختياري)</label>
+    <div class="fg"><label id="lEmail">الإيميل (اختياري)</label><input id="iEmail" type="email" placeholder="name@org.org"></div>
+    <div class="fg"><label id="lRooms">عدد الغرف تقريباً</label><input id="iRooms" inputmode="numeric" placeholder="مثلاً ١٠"></div>
+    <div class="fg"><label id="lMsg">تفاصيل إضافية (اختياري)</label>
       <textarea id="iMsg" placeholder="مين المستفيدين، لأي مدة، أي متطلبات خاصة…"></textarea></div>
     <div id="iErr"></div>
     <div id="iWrap"><button class="btn" id="iSend">أرسل الطلب</button></div>
@@ -96,7 +105,7 @@ footer a{color:#CFE0DA}
 </div>
 
 <footer><div class="wrap">
-  <b style="color:#fff">سكن</b> — <a href="/">الصفحة الرئيسية</a>
+  <b style="color:#fff">موضع</b> — <a href="/" id="footHome">الصفحة الرئيسية</a>
 </div></footer>
 
 <script>
@@ -116,11 +125,71 @@ async function api(path, opt={}){
 }
 const rpc = (fn, body) => api("rpc/"+fn, {method:"POST", body:JSON.stringify(body)});
 
+/* ═══════════════ اللغة ═══════════════ */
+let LANG = SAKAN_LANG;
+const tt = (ar, en) => LANG === "en" ? en : ar;
+function toggleLang(){
+  const next = LANG === "ar" ? "en" : "ar";
+  try{ localStorage.setItem("sakan_lang", next); }catch(e){}
+  location.reload();
+}
+const ORG_TYPES = LANG === "en" ? {
+  ngo:"Non-governmental organization", university:"University", company:"Company",
+  government:"Government entity", other:"Other"
+} : {
+  ngo:"منظمة غير حكومية", university:"جامعة", company:"شركة",
+  government:"جهة حكومية", other:"غير ذلك"
+};
+let CITIES = [];
+const localeName = c => c ? tt(c.name_ar, c.name_en || c.name_ar) : "—";
+
+function paintChrome(){
+  $("langBtn").textContent = LANG === "ar" ? "EN" : "عربي";
+  $("pageTitle").textContent = tt(
+    "موضع للمؤسسات — إسكان موظفين وطلاب ومستفيدين",
+    "Mawdi for institutions — housing for staff, students & beneficiaries");
+  $("metaDesc").content = tt(
+    "مؤسستك أو شركتك محتاجة تؤمّن سكن لموظفين أو طلاب أو مستفيدين؟ موضع بتأمّن غرف موثّقة بالجملة برام الله والبيرة وبيرزيت.",
+    "Does your institution or company need housing for staff, students, or beneficiaries? Mawdi sources verified rooms in bulk in Ramallah, Al-Bireh and Birzeit.");
+  $("tagline").textContent = tt("غرف وسكن مشترك موثّق", "Verified rooms & shared housing");
+  $("backLink").textContent = tt("الصفحة الرئيسية", "Home");
+  $("footHome").textContent = tt("الصفحة الرئيسية", "Home");
+  $("heroH1").textContent = tt("بتوظّف أو بتستضيف ناس محتاجين سكن؟", "Housing staff, students, or beneficiaries?");
+  $("heroP").textContent = tt(
+    "مؤسستك، جامعتك، أو شركتك بتدفع رسم ثابت لكل غرفة — والمالك ما بيدفع إشي. بنؤمّنلكم غرف موثّقة بالجملة برام الله والبيرة وبيرزيت، وبنتابع معكم مباشرة.",
+    "Your institution, university, or company pays a flat fee per room — the owner pays nothing. We source verified rooms in bulk in Ramallah, Al-Bireh and Birzeit, and follow up with you directly.");
+  $("pt1").innerHTML = tt("<b>٣٠٠–٥٠٠ ₪</b> لكل غرفة — تسعير حسب العدد والمدة", "<b>300–500 ₪</b> per room — priced by count and duration");
+  $("pt2").innerHTML = tt("<b>يدوي بالكامل</b> — مندوب بيتواصل معكم خلال يوم عمل", "<b>Fully manual</b> — an agent contacts you within one business day");
+  $("pt3").innerHTML = tt("<b>بدون التزام</b> — الطلب استفسار أولي بس", "<b>No commitment</b> — the request is just an initial inquiry");
+  $("noteTxt").textContent = tt(
+    "اتركوا بياناتكم وبنتواصل معكم لنفهم احتياجكم بالتفصيل ونرتّب التسعير.",
+    "Leave your details and we'll reach out to understand your needs and arrange pricing.");
+  $("lOrg").textContent = tt("اسم المؤسسة", "Organization name");
+  $("iOrg").placeholder = tt("مثلاً: جمعية كذا، جامعة كذا", "e.g. XYZ association, XYZ university");
+  $("lType").textContent = tt("نوع الجهة", "Organization type");
+  $("iType").innerHTML = Object.entries(ORG_TYPES).map(([v,l])=>`<option value="${v}">${esc(l)}</option>`).join("");
+  $("lCity").textContent = tt("المدينة", "City");
+  $("lName").textContent = tt("اسم شخص التواصل", "Contact person's name");
+  $("iName").placeholder = tt("اسمك", "Your name");
+  $("lPhone").textContent = tt("رقم الهاتف", "Phone number");
+  $("lEmail").textContent = tt("الإيميل (اختياري)", "Email (optional)");
+  $("lRooms").textContent = tt("عدد الغرف تقريباً", "Approximate number of rooms");
+  $("iRooms").placeholder = tt("مثلاً ١٠", "e.g. 10");
+  $("lMsg").textContent = tt("تفاصيل إضافية (اختياري)", "Additional details (optional)");
+  $("iMsg").placeholder = tt("مين المستفيدين، لأي مدة، أي متطلبات خاصة…", "Who the beneficiaries are, for how long, any special requirements…");
+  $("iSend").textContent = tt("أرسل الطلب", "Send request");
+  renderCityOptions();
+}
+function renderCityOptions(){
+  $("iCity").innerHTML = `<option value="">${tt("اختر المدينة","Choose a city")}</option>` +
+    CITIES.map(c=>`<option value="${c.id}">${esc(localeName(c))}</option>`).join("");
+}
+paintChrome();
+
 (async () => {
   try{
-    const cities = await api("cities?select=id,name_ar&is_active=eq.true&order=id");
-    $("iCity").innerHTML = '<option value="">اختر المدينة</option>' +
-      cities.map(c=>`<option value="${c.id}">${esc(c.name_ar)}</option>`).join("");
+    CITIES = await api("cities?select=id,name_ar,name_en&is_active=eq.true&order=id");
+    renderCityOptions();
   }catch(e){}
 })();
 
@@ -139,19 +208,19 @@ $("iSend").onclick = async () => {
     p_message: $("iMsg").value.trim() || null
   };
   const bad = m => { $("iErr").innerHTML = `<div class="err">${m}</div>`; return null; };
-  if(orgName.length < 2)     return bad("اكتب اسم المؤسسة.");
-  if(contactName.length < 2) return bad("اكتب اسم شخص التواصل.");
-  if(contactPhone.length < 9)return bad("اكتب رقم هاتف صحيح.");
+  if(orgName.length < 2)     return bad(tt("اكتب اسم المؤسسة.","Enter the organization's name."));
+  if(contactName.length < 2) return bad(tt("اكتب اسم شخص التواصل.","Enter the contact person's name."));
+  if(contactPhone.length < 9)return bad(tt("اكتب رقم هاتف صحيح.","Enter a valid phone number."));
   const btn = $("iSend");
-  btn.disabled = true; btn.textContent = "عم يرسل…";
+  btn.disabled = true; btn.textContent = tt("عم يرسل…","Sending…");
   try{
     await rpc("submit_institution_lead", v);
     $("iWrap").innerHTML = '';
     document.querySelectorAll("#formCard > *:not(.done)").forEach(el=>el.remove());
-    $("formCard").innerHTML = '<div class="done">وصلنا طلبكم ✓<br>بنتواصل معكم خلال يوم عمل لنرتّب التفاصيل.</div>';
+    $("formCard").innerHTML = `<div class="done">${tt("وصلنا طلبكم ✓","Your request has been received ✓")}<br>${tt("بنتواصل معكم خلال يوم عمل لنرتّب التفاصيل.","We'll reach out within one business day to arrange the details.")}</div>`;
   }catch(e){
-    $("iErr").innerHTML = '<div class="err">صار خطأ بالإرسال. جرّب مرة ثانية بعد شوي.</div>';
-    btn.disabled = false; btn.textContent = "أرسل الطلب";
+    $("iErr").innerHTML = `<div class="err">${tt("صار خطأ بالإرسال. جرّب مرة ثانية بعد شوي.","Something went wrong sending this. Try again in a bit.")}</div>`;
+    btn.disabled = false; btn.textContent = tt("أرسل الطلب","Send request");
   }
 };
 </script>

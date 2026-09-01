@@ -11,9 +11,9 @@ document.documentElement.dir  = SAKAN_LANG === "en" ? "ltr" : "rtl";
 </script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title id="pageTitle">سكن — غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت</title>
+<title id="pageTitle">موضع — غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت</title>
 <meta id="metaDesc" name="description" content="غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت. كل إعلان موثّق هاتفياً، وقسم كبير منها زارها مندوبنا شخصياً. أرقام الهواتف محمية.">
-<meta id="ogTitle" property="og:title" content="سكن — غرف وسكن مشترك موثّق">
+<meta id="ogTitle" property="og:title" content="موضع — غرف وسكن مشترك موثّق">
 <meta id="ogDesc" property="og:description" content="غرف موثّقة في رام الله والبيرة وبيرزيت.">
 <meta id="ogLocale" property="og:locale" content="ar_PS">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -163,7 +163,7 @@ footer a,footer .linkish{color:#CFE0DA}
 
 <header>
   <div class="wrap hd">
-    <div class="logo">سكن<span id="tagline">غرف وسكن مشترك موثّق</span></div>
+    <div class="logo">موضع<span id="tagline">غرف وسكن مشترك موثّق</span></div>
     <div class="cta">
       <button class="btn ghost" id="btnAddRoom" onclick="openForm('listing')">أضف غرفة</button>
       <button class="btn ghost" id="btnFindHome" onclick="openForm('request')">أبحث عن سكن</button>
@@ -209,10 +209,10 @@ footer a,footer .linkish{color:#CFE0DA}
 
 <footer>
   <div class="wrap">
-    <b style="color:#fff">سكن</b> — <span id="footTagline">منصة تأجير غرف وسكن مشترك موثّق.</span><br>
+    <b style="color:#fff">موضع</b> — <span id="footTagline">منصة تأجير غرف وسكن مشترك موثّق.</span><br>
     <span id="footPrivacy">الخصوصية أولاً: ما بننشر أرقام هواتف ولا عناوين دقيقة ولا جهات عمل على الموقع أبداً.</span><br>
     <button class="linkish" id="footContact" onclick="openReport(null,null)">تواصل معنا أو قدّم شكوى</button>
-    &nbsp;·&nbsp; <a href="/page.html?p=how-it-works" id="footHow">كيف بشتغل سكن</a>
+    &nbsp;·&nbsp; <a href="/page.html?p=how-it-works" id="footHow">كيف بشتغل موضع</a>
     &nbsp;·&nbsp; <a href="/institutions.html" id="footInst">لمؤسستك أو شركتك</a>
     &nbsp;·&nbsp; <a href="/page.html?p=privacy" id="footPriv">سياسة الخصوصية</a>
     &nbsp;·&nbsp; <a href="/page.html?p=terms" id="footTerms">شروط الاستخدام</a>
@@ -235,12 +235,12 @@ function paintChrome(){
   document.getElementById("langBtn").textContent = LANG === "ar" ? "EN" : "عربي";
 
   $("pageTitle").textContent = tt(
-    "سكن — غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت",
-    "Sakan — Verified rooms & shared housing in Ramallah, Al-Bireh & Birzeit");
+    "موضع — غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت",
+    "Mawdi — Verified rooms & shared housing in Ramallah, Al-Bireh & Birzeit");
   $("metaDesc").content = tt(
     "غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت. كل إعلان موثّق هاتفياً، وقسم كبير منها زارها مندوبنا شخصياً. أرقام الهواتف محمية.",
     "Verified rooms and shared housing in Ramallah, Al-Bireh and Birzeit. Every listing is phone-verified, many visited in person. Phone numbers stay private.");
-  $("ogTitle").content = tt("سكن — غرف وسكن مشترك موثّق", "Sakan — Verified shared housing");
+  $("ogTitle").content = tt("موضع — غرف وسكن مشترك موثّق", "Mawdi — Verified shared housing");
   $("ogDesc").content = tt("غرف موثّقة في رام الله والبيرة وبيرزيت.", "Verified rooms in Ramallah, Al-Bireh and Birzeit.");
   $("ogLocale").content = LANG === "en" ? "en_US" : "ar_PS";
 
@@ -266,7 +266,7 @@ function paintChrome(){
     "الخصوصية أولاً: ما بننشر أرقام هواتف ولا عناوين دقيقة ولا جهات عمل على الموقع أبداً.",
     "Privacy first: we never publish phone numbers, exact addresses, or workplaces on the site.");
   $("footContact").textContent = tt("تواصل معنا أو قدّم شكوى", "Contact us / report an issue");
-  $("footHow").textContent = tt("كيف بشتغل سكن", "How Sakan works");
+  $("footHow").textContent = tt("كيف بشتغل موضع", "How Mawdi works");
   $("footInst").textContent = tt("لمؤسستك أو شركتك", "For institutions & companies");
   $("footPriv").textContent = tt("سياسة الخصوصية", "Privacy policy");
   $("footTerms").textContent = tt("شروط الاستخدام", "Terms of use");
@@ -323,16 +323,44 @@ const OCC  = LANG === "en" ? {student:"Student", employee:"Employee", other:"Oth
 const VER  = LANG === "en" ? {field:"Field-verified", desk:"Phone-verified", none:"Not verified"}
                             : {field:"موثّق ميدانياً", desk:"موثّق هاتفياً", none:"غير موثّق"};
 
-/* مواصفات الغرفة — بتنحفظ بعمود listings.features كنص عربي حرفي (هي القيمة
-   المخزّنة نفسها، مش مجرد تسمية عرض)، فبتضل عربي بوضع الإنجليزي كمان —
-   ترجمتها بتحتاج فصل قيمة/تسمية وmigration بيانات، خارج نطاق هاي الدفعة. */
-const FEATURES = ["واي فاي","مطبخ","حمام خاص","غسالة","تدفئة","مكيّف","ماء ساخن",
-                  "بلكونة","موقف سيارة","مصعد","قريب مواصلات","مسموح الطبخ",
-                  "مدخل مستقل","قفل على باب الغرفة"];
+/* مواصفات الغرفة — بتنحفظ بعمود listings.features كـslug ثابت (مش نص عرض)،
+   فالتسمية بتنعرض عربي/إنجليزي حسب اللغة. الـslug نفسه هو القيمة المخزّنة. */
+const FEATURES = [
+  {slug:"wifi",             ar:"واي فاي",              en:"WiFi"},
+  {slug:"kitchen",          ar:"مطبخ",                 en:"Kitchen access"},
+  {slug:"private_bathroom", ar:"حمام خاص",              en:"Private bathroom"},
+  {slug:"washer",           ar:"غسالة",                en:"Washing machine"},
+  {slug:"heating",          ar:"تدفئة",                en:"Heating"},
+  {slug:"ac",               ar:"مكيّف",                 en:"Air conditioning"},
+  {slug:"hot_water",        ar:"ماء ساخن",              en:"Hot water"},
+  {slug:"balcony",          ar:"بلكونة",                en:"Balcony"},
+  {slug:"parking",          ar:"موقف سيارة",            en:"Parking"},
+  {slug:"elevator",         ar:"مصعد",                 en:"Elevator"},
+  {slug:"near_transport",   ar:"قريب مواصلات",          en:"Near public transport"},
+  {slug:"cooking_allowed",  ar:"مسموح الطبخ",           en:"Cooking allowed"},
+  {slug:"private_entrance", ar:"مدخل مستقل",            en:"Private entrance"},
+  {slug:"room_lock",        ar:"قفل على باب الغرفة",     en:"Lock on room door"}
+];
+const FEATURE_LABEL = slug => {
+  const f = FEATURES.find(x=>x.slug===slug);
+  return f ? tt(f.ar, f.en) : slug;
+};
 
-/* صفات الباحث — نفس ملاحظة FEATURES، محفوظة بـseeker_requests.lifestyle_tags */
-const TAGS = ["هادئ/ة","غير مدخّن/ة","بشتغل من البيت","دوام جامعي","بحب النظام",
-              "ملتزم/ة دينياً","ما بستقبل ضيوف","صاحي/ة بكير"];
+/* صفات الباحث — نفس فكرة FEATURES، محفوظة بـseeker_requests.lifestyle_tags */
+const TAGS = [
+  {slug:"quiet",             ar:"هادئ/ة",           en:"Quiet"},
+  {slug:"non_smoker",        ar:"غير مدخّن/ة",        en:"Non-smoker"},
+  {slug:"wfh",               ar:"بشتغل من البيت",     en:"Works from home"},
+  {slug:"university_hours",  ar:"دوام جامعي",        en:"University schedule"},
+  {slug:"tidy",              ar:"بحب النظام",         en:"Tidy / organized"},
+  {slug:"religious",         ar:"ملتزم/ة دينياً",      en:"Religiously observant"},
+  {slug:"no_guests",         ar:"ما بستقبل ضيوف",     en:"Doesn't host guests"},
+  {slug:"early_riser",       ar:"صاحي/ة بكير",       en:"Early riser"}
+];
+const TAG_LABEL = slug => {
+  const t = TAGS.find(x=>x.slug===slug);
+  return t ? tt(t.ar, t.en) : slug;
+};
 
 const REPORT_CATS = LANG === "en" ? {
   fake_listing:"Fake listing or false information",
@@ -390,9 +418,11 @@ function wireDigits(root){
   });
 }
 
-const areaName = id => (AREAS.find(a=>a.id===Number(id))||{}).name_ar || "—";
+/* المدن والمناطق: name_en اختياري وبيتعبّى يدوياً من اللوحة — لو فاضي منرجع للعربي */
+const localeName = o => o ? tt(o.name_ar, o.name_en || o.name_ar) : "—";
+const areaName = id => localeName(AREAS.find(a=>a.id===Number(id)));
 const areaCity = id => (AREAS.find(a=>a.id===Number(id))||{}).city_id || null;
-const cityName = id => (CITIES.find(c=>c.id===Number(id))||{}).name_ar || "—";
+const cityName = id => localeName(CITIES.find(c=>c.id===Number(id)));
 
 /* ═══════════════ الهاتف ═══════════════ */
 function telHTML(idSel, idNum){
@@ -445,13 +475,13 @@ function setTab(t){
 }
 function cityOpts(sel){
   return `<option value="">${tt("كل المدن","All cities")}</option>` +
-    CITIES.map(c=>`<option value="${c.id}"${String(sel)===String(c.id)?" selected":""}>${esc(c.name_ar)}</option>`).join("");
+    CITIES.map(c=>`<option value="${c.id}"${String(sel)===String(c.id)?" selected":""}>${esc(localeName(c))}</option>`).join("");
 }
 /* المنطقة بتتفلتر حسب المدينة المختارة — فصل كامل بين الخانتين */
 function areaOptsFor(cityId, sel){
   const list = AREAS.filter(a => !cityId || String(a.city_id)===String(cityId));
   return `<option value="">${cityId?tt("كل مناطق المدينة","All areas in city"):tt("كل المناطق","All areas")}</option>` +
-    list.map(a=>`<option value="${a.id}"${String(sel)===String(a.id)?" selected":""}>${esc(a.name_ar)}</option>`).join("");
+    list.map(a=>`<option value="${a.id}"${String(sel)===String(a.id)?" selected":""}>${esc(localeName(a))}</option>`).join("");
 }
 function onCityFilter(v){
   F.city = v || "";
@@ -546,7 +576,7 @@ function cardR(x){
         <span class="t">${POL[x.gender]||""}</span>
         ${x.kind_pref?`<span class="t">${KIND[x.kind_pref]}</span>`:""}
         ${x.smoker===false?`<span class="t">${tt("غير مدخّن/ة","Non-smoker")}</span>`:""}
-        ${(x.lifestyle_tags||[]).slice(0,3).map(t=>`<span class="t">${esc(t)}</span>`).join("")}
+        ${(x.lifestyle_tags||[]).slice(0,3).map(t=>`<span class="t">${esc(TAG_LABEL(t))}</span>`).join("")}
         <span class="t">${tt("من","From")} ${dt(x.move_in_date)}</span></div>
     </div></div>`;
 }
@@ -597,7 +627,7 @@ function openL(id){
     </div>` : "";
 
   const feats = (x.features||[]).length ? `<div class="sec"><h4>${tt("مواصفات الغرفة","Room features")}</h4>
-      <div class="tags">${x.features.map(f=>`<span class="t">${esc(f)}</span>`).join("")}</div></div>` : "";
+      <div class="tags">${x.features.map(f=>`<span class="t">${esc(FEATURE_LABEL(f))}</span>`).join("")}</div></div>` : "";
 
   const imgs = Array.isArray(x.images) ? x.images : [];
   CUR_IMGS = imgs;
@@ -705,7 +735,7 @@ function openR(id){
       <div class="row"><span>${tt("أقل مدة","Min. stay")}</span><span>${x.min_stay_months?x.min_stay_months+" "+tt("شهر","months"):"—"}</span></div>
       <div class="row"><span>${tt("التدخين","Smoking")}</span><span>${x.smoker===null||x.smoker===undefined?"—":(x.smoker?tt("مدخّن/ة","Smoker"):tt("غير مدخّن/ة","Non-smoker"))}</span></div>
       ${(x.lifestyle_tags||[]).length?`<div class="tags" style="margin-top:10px">
-        ${x.lifestyle_tags.map(t=>`<span class="t">${esc(t)}</span>`).join("")}</div>`:""}
+        ${x.lifestyle_tags.map(t=>`<span class="t">${esc(TAG_LABEL(t))}</span>`).join("")}</div>`:""}
       ${x.note?`<div class="note">${esc(x.note)}</div>`:""}
       <p style="font-size:14px;color:var(--mut);margin-top:14px">
         ${tt("عندك غرفة بتناسبه/ا؟ اترك بياناتك وبنوصلك فيه/ا مباشرة.","Have a room that fits? Leave your info and we'll connect you directly.")}</p>
@@ -784,7 +814,7 @@ async function sendReport(listingId){
 function citySelect(id, onchange){
   return `<select id="${id}" onchange="${onchange}">
     <option value="">${tt("اختر المدينة","Choose a city")}</option>
-    ${CITIES.map(c=>`<option value="${c.id}">${esc(c.name_ar)}</option>`).join("")}</select>`;
+    ${CITIES.map(c=>`<option value="${c.id}">${esc(localeName(c))}</option>`).join("")}</select>`;
 }
 /* نموذج الإعلان: مدينة ← منطقة واحدة */
 function onFormCity(){
@@ -792,7 +822,7 @@ function onFormCity(){
   const list = AREAS.filter(a=>String(a.city_id)===String(cid));
   $("lArea").innerHTML = cid
     ? `<option value="">${tt("اختر المنطقة","Choose an area")}</option>` +
-      list.map(a=>`<option value="${a.id}">${esc(a.name_ar)}</option>`).join("")
+      list.map(a=>`<option value="${a.id}">${esc(localeName(a))}</option>`).join("")
     : `<option value="">${tt("اختر المدينة أولاً","Choose a city first")}</option>`;
 }
 /* نموذج الباحث: مدينة ← شرائح مناطق (بدل الـmultiple select و«0 item») */
@@ -801,7 +831,7 @@ function onReqCity(){
   const list = AREAS.filter(a=>String(a.city_id)===String(cid));
   $("rAreasBox").innerHTML = cid
     ? (list.length
-        ? chipsHTML("rAreas", list, {val:a=>a.id, lbl:a=>a.name_ar})
+        ? chipsHTML("rAreas", list, {val:a=>a.id, lbl:localeName})
         : `<div class="hint">${tt("ما في مناطق مسجّلة لهاي المدينة بعد.","No areas registered for this city yet.")}</div>`)
     : `<div class="hint">${tt("قم باختيار المدينة أولاً.","Choose a city first.")}</div>`;
 }
@@ -891,7 +921,7 @@ function openForm(kind){
       </div>
 
       <div class="fg"><label>${tt("مواصفات الغرفة والسكن","Room & housing features")}</label>
-        ${chipsHTML("lFeat", FEATURES)}
+        ${chipsHTML("lFeat", FEATURES, {val:f=>f.slug, lbl:f=>tt(f.ar,f.en)})}
         <div class="hint">${tt("أشّر على كل اللي متوفر. هاد أكتر إشي بيسأل عنه الباحثون.","Check everything that's available — this is what seekers ask about most.")}</div></div>
 
       <div class="fg"><label>${tt("علامة مميزة قريبة (اختياري)","Nearby landmark (optional)")}</label>
@@ -946,7 +976,7 @@ function openForm(kind){
         <div class="hint">${tt("اختر منطقة أو أكتر، أو اتركها فاضية إذا أي منطقة بالمدينة بتناسبك.","Pick one or more areas, or leave empty if any area in the city works.")}</div></div>
 
       <div class="fg"><label>${tt("صفاتك كساكن","Your traits as a housemate")}</label>
-        ${chipsHTML("rTags", TAGS)}
+        ${chipsHTML("rTags", TAGS, {val:t=>t.slug, lbl:t=>tt(t.ar,t.en)})}
         <div class="hint">${tt("بتساعد المالك يعرف إذا بتناسب السكن.","Helps the owner know if you'll fit the household.")}</div></div>
 
       <div class="fg"><label>${tt("ملاحظات","Notes")}</label>
@@ -1228,14 +1258,14 @@ function openSharedListing(){
   try{
     /* المدن والمناطق أولاً — الفلاتر والنماذج كلها بتعتمد عليهم */
     [CITIES, AREAS] = await Promise.all([
-      api("cities?select=id,name_ar,slug&is_active=eq.true&order=id"),
-      api("areas?select=id,city_id,name_ar,slug,sort_order&is_active=eq.true&order=city_id,sort_order")
+      api("cities?select=id,name_ar,name_en,slug&is_active=eq.true&order=id"),
+      api("areas?select=id,city_id,name_ar,name_en,slug,sort_order&is_active=eq.true&order=city_id,sort_order")
     ]);
     if(!CITIES.length){
-      console.error("Sakan: cities returned empty — تحقق من سياسات RLS على cities/areas");
+      console.error("Mawdi: cities returned empty — تحقق من سياسات RLS على cities/areas");
     }
   }catch(e){
-    console.error("Sakan: تعذّر تحميل المدن والمناطق", e);
+    console.error("Mawdi: تعذّر تحميل المدن والمناطق", e);
     CITIES = []; AREAS = [];
   }
 

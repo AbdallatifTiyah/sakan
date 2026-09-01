@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>سكن — مركز التحكم</title>
+<title>موضع — مركز التحكم</title>
 <style>
 /* ═══════════════ الرموز ═══════════════ */
 :root{
@@ -170,7 +170,7 @@ tbody tr:hover{background:#182234;cursor:pointer}
 <!-- ═══════════════ بوابة الدخول ═══════════════ -->
 <div id="gate">
   <div class="gate-box">
-    <h1>سكن — مركز التحكم</h1>
+    <h1>موضع — مركز التحكم</h1>
     <p class="sub">سجّل دخول بحساب الطاقم. الاسم والدور بيجوا من القاعدة تلقائياً.</p>
     <div class="field">
       <label for="gEmail">الإيميل أو اسم المستخدم</label>
@@ -188,7 +188,7 @@ tbody tr:hover{background:#182234;cursor:pointer}
 <!-- ═══════════════ التطبيق ═══════════════ -->
 <div id="app">
   <aside>
-    <div class="brand"><b>سكن</b><span>مركز التحكم</span></div>
+    <div class="brand"><b>موضع</b><span>مركز التحكم</span></div>
     <nav id="nav"></nav>
     <div class="who" id="who"></div>
   </aside>
@@ -201,7 +201,7 @@ tbody tr:hover{background:#182234;cursor:pointer}
 <script>
 "use strict";
 /* ══════════════════════════════════════════════════════════
-   سكن — لوحة الإدارة
+   موضع — لوحة الإدارة
    صفحة واحدة · vanilla JS · بدون أي حزم خارجية
    ممنوع كتابة أي مفتاح هنا. المفتاح بينلصق يدوياً وبينحفظ بـsessionStorage.
    ══════════════════════════════════════════════════════════ */
@@ -262,6 +262,12 @@ async function errText(r){
 const $  = s => document.querySelector(s);
 const esc = s => String(s==null?"":s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const num = n => n==null ? "—" : Number(n).toLocaleString("en-US");
+/* seeker_requests.lifestyle_tags بينحفظ كـslug (نفس تخزين الموقع العام) —
+   هون بنعرض العربي دايماً، اللوحة كلها عربي. */
+const TAG_LABELS_AR = {quiet:"هادئ/ة", non_smoker:"غير مدخّن/ة", wfh:"بشتغل من البيت",
+  university_hours:"دوام جامعي", tidy:"بحب النظام", religious:"ملتزم/ة دينياً",
+  no_guests:"ما بستقبل ضيوف", early_riser:"صاحي/ة بكير"};
+const tagLabel = slug => TAG_LABELS_AR[slug] || slug;
 const money = n => n==null ? "—" : Number(n).toLocaleString("en-US",{maximumFractionDigits:0})+" ₪";
 
 function dt(s, withTime){
@@ -631,7 +637,7 @@ async function vAlerts(){
       </tr></thead><tbody>
       ${rows.map(r => {
         const link = location.origin+"/?confirm="+encodeURIComponent(r.ref)+"&t="+r.confirm_token;
-        const msg = encodeURIComponent("مرحبا "+(r.owner_name||"")+"، غرفتك «"+r.title+"» على سكن بدها تأكيد إنها لسا متاحة"
+        const msg = encodeURIComponent("مرحبا "+(r.owner_name||"")+"، غرفتك «"+r.title+"» على موضع بدها تأكيد إنها لسا متاحة"
           +" خلال "+r.days_left+" يوم، وإلا رح تختفي من الموقع تلقائياً. أكّد من هون:\n"+link);
         return `<tr data-id="${r.id}">
           <td class="ref">${esc(r.ref)}</td>
@@ -1363,7 +1369,7 @@ async function drawOwner(id){
       .then(()=>toast("انتسخ الرابط.", "ok"), ()=>toast("ما زبط النسخ — علّم عليه يدوياً.", "bad"));
   };
   $("#waOwnerLink").href = "https://wa.me/?text=" + encodeURIComponent(
-    "أهلاً "+r.first_name+"، هاد رابط لوحتك بموقع سكن — بتشوف فيه كل إعلاناتك وطلبات التواصل عليها:\n"
+    "أهلاً "+r.first_name+"، هاد رابط لوحتك بموقع موضع — بتشوف فيه كل إعلاناتك وطلبات التواصل عليها:\n"
     + location.origin+"/owner.html?id="+r.id+"&t="+r.owner_token);
   const tg = $("#tg");
   if(tg) tg.onclick = async () => {
@@ -1510,7 +1516,7 @@ async function drawRequest(id){
     </dl>
 
     ${(r.lifestyle_tags||[]).length?`<div class="sec"><h4>صفاته كساكن</h4>
-      <div>${r.lifestyle_tags.map(t=>'<span class="tag">'+esc(t)+"</span>").join(" ")}</div></div>`:""}
+      <div>${r.lifestyle_tags.map(t=>'<span class="tag">'+esc(tagLabel(t))+"</span>").join(" ")}</div></div>`:""}
     ${r.note?`<div class="sec"><h4>ملاحظاته</h4><div style="font-size:13px">${esc(r.note)}</div></div>`:""}
 
     <div class="acts">
@@ -1845,17 +1851,22 @@ async function vSettings(){
 
       <div class="card">
         <h3>المدن والمناطق</h3>
-        <table><thead><tr><th>المدينة</th><th>الحالة</th><th></th></tr></thead>
+        <table><thead><tr><th>المدينة</th><th>بالإنجليزي</th><th>الحالة</th><th></th></tr></thead>
         <tbody>${cities.map(c=>{
           const a = areas.filter(x=>x.city_id===c.id);
           return `<tr style="cursor:default">
             <td>${esc(c.name_ar)} <span class="ref">${esc(c.slug)}</span>
               <div style="color:var(--text-2);font-size:12px;margin-top:2px">
                 ${a.length?a.map(x=>esc(x.name_ar)+(x.is_active?"":" (معطّلة)")).join(" · "):"ما في مناطق بعد"}</div></td>
+            <td><div class="bars" style="flex-wrap:nowrap">
+              <input class="enn" data-en-city="${c.id}" value="${esc(c.name_en||"")}"
+                placeholder="English name" style="width:140px;padding:5px 9px">
+              <button class="btn sm" data-save-en-city="${c.id}">حفظ</button>
+            </div></td>
             <td>${c.is_active?'<span class="tag t-published">مفعّلة</span>':'<span class="tag t-expired">معطّلة</span>'}</td>
             <td style="white-space:nowrap">
               <button class="btn sm" data-ct="${c.id}" data-nm="${esc(c.name_ar)}"
-                data-sl="${esc(c.slug)}" data-on="${c.is_active}"
+                data-sl="${esc(c.slug)}" data-nmen="${esc(c.name_en||"")}" data-on="${c.is_active}"
                 ${!c.is_active&&a.filter(x=>x.is_active).length===0?"disabled title='ضيف منطقة مفعّلة قبل التفعيل'":""}>
                 ${c.is_active?"تعطيل":"تفعيل"}</button>
             </td>
@@ -1864,20 +1875,26 @@ async function vSettings(){
         <div class="bars" style="margin-top:12px">
           <input id="ncn" placeholder="اسم المدينة بالعربي" style="width:190px">
           <input id="ncs" placeholder="slug بالإنجليزي" style="width:150px">
+          <input id="ncnEn" placeholder="الاسم بالإنجليزي (اختياري)" style="width:180px">
           <button class="btn sm primary" id="addCity">إضافة مدينة</button>
         </div>
 
         <h3 style="margin-top:18px">المناطق</h3>
-        <table><thead><tr><th>المنطقة</th><th>المدينة</th><th>الترتيب</th><th>الحالة</th><th></th></tr></thead>
+        <table><thead><tr><th>المنطقة</th><th>بالإنجليزي</th><th>المدينة</th><th>الترتيب</th><th>الحالة</th><th></th></tr></thead>
         <tbody>${areas.map(a=>{
           const c = cities.find(x=>x.id===a.city_id) || {};
           return `<tr style="cursor:default">
             <td>${esc(a.name_ar)} <span class="ref">${esc(a.slug)}</span></td>
+            <td><div class="bars" style="flex-wrap:nowrap">
+              <input class="enn" data-en-area="${a.id}" value="${esc(a.name_en||"")}"
+                placeholder="English name" style="width:140px;padding:5px 9px">
+              <button class="btn sm" data-save-en-area="${a.id}">حفظ</button>
+            </div></td>
             <td>${esc(c.name_ar||"—")}</td>
             <td class="num">${a.sort_order}</td>
             <td>${a.is_active!==false?'<span class="tag t-published">مفعّلة</span>':'<span class="tag t-expired">معطّلة</span>'}</td>
             <td><button class="btn sm" data-at="${a.id}" data-city="${a.city_id}"
-                  data-nm="${esc(a.name_ar)}" data-sl="${esc(a.slug)}"
+                  data-nm="${esc(a.name_ar)}" data-sl="${esc(a.slug)}" data-nmen="${esc(a.name_en||"")}"
                   data-so="${a.sort_order}" data-on="${a.is_active!==false}">
                   ${a.is_active!==false?"تعطيل":"تفعيل"}</button></td>
           </tr>`;}).join("")}</tbody></table>
@@ -1888,6 +1905,7 @@ async function vSettings(){
           <input id="nan" placeholder="اسم المنطقة بالعربي" style="width:190px">
           <input id="nas" placeholder="slug بالإنجليزي" style="width:150px">
           <input id="nao" type="number" placeholder="ترتيب" style="width:90px">
+          <input id="nanEn" placeholder="الاسم بالإنجليزي (اختياري)" style="width:180px">
           <button class="btn sm primary" id="addArea">إضافة منطقة</button>
         </div>
 
@@ -1895,6 +1913,7 @@ async function vSettings(){
           تفعيل مدينة أو منطقة بيفتحها فوراً بالموقع العام وبنموذج الإعلان.
           لا تفعّل مدينة قبل ما يكون فيها مندوب يقدر يزور.
           التعطيل ما بيمسح الإعلانات القديمة — بس بيمنع إعلانات جديدة عليها.
+          الاسم بالإنجليزي اختياري — الموقع بيرجع للعربي لو فاضي.
         </div>
       </div>`;
 
@@ -1944,7 +1963,7 @@ async function vSettings(){
       if(!on && !confirm("تعطيل المدينة بيخفيها من الموقع العام ونموذج الإعلان. متأكد؟")) return;
       try{
         await rpc("admin_city_save", {p_id:+b.dataset.ct, p_name:b.dataset.nm,
-          p_slug:b.dataset.sl, p_active:on});
+          p_slug:b.dataset.sl, p_active:on, p_name_en:b.dataset.nmen || null});
         toast("تحدّثت المدينة.", "ok"); vSettings();
       } catch(e){ toast(e.message, "bad"); }
     });
@@ -1955,8 +1974,33 @@ async function vSettings(){
       try{
         await rpc("admin_area_save", {p_id:+b.dataset.at, p_city:+b.dataset.city,
           p_name:b.dataset.nm, p_slug:b.dataset.sl, p_sort:+b.dataset.so,
-          p_active:on});
+          p_active:on, p_name_en:b.dataset.nmen || null});
         toast("تحدّثت المنطقة.", "ok"); vSettings();
+      } catch(e){ toast(e.message, "bad"); }
+    });
+
+    /* حفظ الاسم بالإنجليزي لوحده — بيرسل نفس الاسم العربي والـslug والحالة
+       الحاليين بدون تغيير، عشان admin_city_save/admin_area_save بيستبدلوا
+       كل الحقول مش بس المرسلة. */
+    $("#main").querySelectorAll("[data-save-en-city]").forEach(b => b.onclick = async () => {
+      const id = +b.dataset.saveEnCity;
+      const c = cities.find(x=>x.id===id); if(!c) return;
+      const en = $("#main").querySelector(`[data-en-city="${id}"]`).value.trim();
+      try{
+        await rpc("admin_city_save", {p_id:id, p_name:c.name_ar, p_slug:c.slug,
+          p_active:c.is_active, p_name_en:en || null});
+        toast("انحفظ الاسم بالإنجليزي.", "ok"); vSettings();
+      } catch(e){ toast(e.message, "bad"); }
+    });
+
+    $("#main").querySelectorAll("[data-save-en-area]").forEach(b => b.onclick = async () => {
+      const id = +b.dataset.saveEnArea;
+      const a = areas.find(x=>x.id===id); if(!a) return;
+      const en = $("#main").querySelector(`[data-en-area="${id}"]`).value.trim();
+      try{
+        await rpc("admin_area_save", {p_id:id, p_city:a.city_id, p_name:a.name_ar,
+          p_slug:a.slug, p_sort:a.sort_order, p_active:a.is_active!==false, p_name_en:en || null});
+        toast("انحفظ الاسم بالإنجليزي.", "ok"); vSettings();
       } catch(e){ toast(e.message, "bad"); }
     });
 
@@ -1966,7 +2010,7 @@ async function vSettings(){
       if(!slugOk(s)) return toast("الـslug لازم يكون حروف إنجليزية صغيرة وأرقام وشرطات.", "bad");
       try{
         await rpc("admin_city_save", {p_id:null, p_name:n, p_slug:s,
-          p_active:false});
+          p_active:false, p_name_en:$("#ncnEn").value.trim() || null});
         toast("انضافت المدينة — معطّلة. ضيف مناطق ثم فعّلها.", "ok"); vSettings();
       } catch(e){ toast(e.message, "bad"); }
     };
@@ -1979,7 +2023,7 @@ async function vSettings(){
       if(!slugOk(s)) return toast("الـslug لازم يكون حروف إنجليزية صغيرة وأرقام وشرطات.", "bad");
       try{
         await rpc("admin_area_save", {p_id:null, p_city:city, p_name:n, p_slug:s,
-          p_sort:so, p_active:true});
+          p_sort:so, p_active:true, p_name_en:$("#nanEn").value.trim() || null});
         toast("انضافت المنطقة.", "ok"); vSettings();
       } catch(e){ toast(e.message, "bad"); }
     };
@@ -2017,9 +2061,16 @@ async function vPages(){
              href="/page.html?p=${encodeURIComponent(d.key)}">معاينة بالموقع</a>
         </div>
 
-        <textarea id="pgBody" rows="26" spellcheck="false"
+        <textarea id="pgBody" rows="22" spellcheck="false"
           style="width:100%;font-family:ui-monospace,monospace;font-size:13px;line-height:1.8"
           >${esc(d.body_md)}</textarea>
+
+        <h3 style="margin-top:18px">بالإنجليزي (اختياري)</h3>
+        <div class="note" style="margin-bottom:8px">لو فاضي، صفحة page.html بترجع للعربي بوضع الإنجليزي.</div>
+        <input id="pgTitleEn" value="${esc(d.title_en||"")}" placeholder="English title" style="width:280px;margin-bottom:10px">
+        <textarea id="pgBodyEn" rows="22" spellcheck="false" placeholder="English body (Markdown)"
+          style="width:100%;font-family:ui-monospace,monospace;font-size:13px;line-height:1.8"
+          >${esc(d.body_en||"")}</textarea>
 
         <div class="bars" style="margin-top:10px">
           <button class="btn sm primary" id="pgSave">حفظ</button>
@@ -2045,7 +2096,8 @@ async function vPages(){
       sv.disabled = true;
       try{
         await rpc("admin_page_save", {p_key:d.key, p_title:$("#pgTitle").value.trim(),
-          p_body:body, p_published:$("#pgPub").checked});
+          p_body:body, p_published:$("#pgPub").checked,
+          p_title_en:$("#pgTitleEn").value.trim() || null, p_body_en:$("#pgBodyEn").value.trim() || null});
         toast("انحفظت الصفحة — صارت ظاهرة بالموقع.", "ok");
         S.page = d.key; vPages();
       } catch(e){ toast(e.message, "bad"); sv.disabled = false; }

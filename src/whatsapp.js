@@ -11,10 +11,10 @@
 // 4. Permanent access token (System User token) — مش الـtoken المؤقت اللي بينتهي بـ٢٤ ساعة.
 // 5. Phone Number ID (رقم داخلي من لوحة Meta، مش رقم الهاتف نفسه).
 // 6. اعتماد قوالب الرسائل (message templates) — أي رسالة المنصة تبدأها (مش رد على رسالة
-//    العميل خلال ٢٤ ساعة) لازم تكون بقالب معتمد من Meta مسبقاً. القوالب المطلوبة لسكن:
-//      - sakan_listing_expiring  (تذكير المالك: إعلانه بدو تأكيد)
-//      - sakan_owner_dashboard   (رابط لوحة المالك لأول مرة)
-//      - sakan_institution_ack   (تأكيد استلام طلب مؤسسة)
+//    العميل خلال ٢٤ ساعة) لازم تكون بقالب معتمد من Meta مسبقاً. القوالب المطلوبة لموضع:
+//      - mawdi_listing_expiring  (تذكير المالك: إعلانه بدو تأكيد)
+//      - mawdi_owner_dashboard   (رابط لوحة المالك لأول مرة)
+//      - mawdi_institution_ack   (تأكيد استلام طلب مؤسسة)
 //    تقديم القوالب وموافقة Meta عليها بياخذ من ساعات لأيام، خصوصاً أول مرة.
 //
 // ═══ بعد ما يصير الحساب جاهز ═══
@@ -32,7 +32,7 @@ const GRAPH_VERSION = "v20.0";
  * يبعث رسالة قالب معتمد عبر WhatsApp Cloud API.
  * @param {object} env - Worker env (لازم فيه WHATSAPP_TOKEN و WHATSAPP_PHONE_ID)
  * @param {string} to - رقم المستلم بصيغة دولية بدون + (مثلاً "970599123456")
- * @param {string} templateName - اسم القالب المعتمد من Meta (زي sakan_listing_expiring)
+ * @param {string} templateName - اسم القالب المعتمد من Meta (زي mawdi_listing_expiring)
  * @param {string[]} params - القيم اللي بتعبّي متغيرات القالب بالترتيب ({{1}}, {{2}}, ...)
  * @param {string} [langCode] - كود اللغة المعتمد للقالب (افتراضي: ar)
  */
