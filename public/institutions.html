@@ -114,6 +114,7 @@ async function api(path, opt={}){
   if(!r.ok) throw {status:r.status, data, txt};
   return data;
 }
+const rpc = (fn, body) => api("rpc/"+fn, {method:"POST", body:JSON.stringify(body)});
 
 (async () => {
   try{
@@ -125,24 +126,26 @@ async function api(path, opt={}){
 
 $("iSend").onclick = async () => {
   $("iErr").innerHTML = "";
+  const orgName = $("iOrg").value.trim(), contactName = $("iName").value.trim(),
+        contactPhone = $("iPhone").value.trim();
   const v = {
-    org_name: $("iOrg").value.trim(),
-    org_type: $("iType").value,
-    city_id: $("iCity").value || null,
-    contact_name: $("iName").value.trim(),
-    contact_phone: $("iPhone").value.trim(),
-    contact_email: $("iEmail").value.trim() || null,
-    rooms_needed: $("iRooms").value ? Number($("iRooms").value) : null,
-    message: $("iMsg").value.trim() || null
+    p_org_name: orgName,
+    p_org_type: $("iType").value,
+    p_city: $("iCity").value ? Number($("iCity").value) : null,
+    p_contact_name: contactName,
+    p_contact_phone: contactPhone,
+    p_contact_email: $("iEmail").value.trim() || null,
+    p_rooms_needed: $("iRooms").value ? Number($("iRooms").value) : null,
+    p_message: $("iMsg").value.trim() || null
   };
   const bad = m => { $("iErr").innerHTML = `<div class="err">${m}</div>`; return null; };
-  if(v.org_name.length < 2)   return bad("اكتب اسم المؤسسة.");
-  if(v.contact_name.length<2) return bad("اكتب اسم شخص التواصل.");
-  if(v.contact_phone.length<9)return bad("اكتب رقم هاتف صحيح.");
+  if(orgName.length < 2)     return bad("اكتب اسم المؤسسة.");
+  if(contactName.length < 2) return bad("اكتب اسم شخص التواصل.");
+  if(contactPhone.length < 9)return bad("اكتب رقم هاتف صحيح.");
   const btn = $("iSend");
   btn.disabled = true; btn.textContent = "عم يرسل…";
   try{
-    await api("institution_leads", {method:"POST", headers:{Prefer:"return=minimal"}, body:JSON.stringify(v)});
+    await rpc("submit_institution_lead", v);
     $("iWrap").innerHTML = '';
     document.querySelectorAll("#formCard > *:not(.done)").forEach(el=>el.remove());
     $("formCard").innerHTML = '<div class="done">وصلنا طلبكم ✓<br>بنتواصل معكم خلال يوم عمل لنرتّب التفاصيل.</div>';

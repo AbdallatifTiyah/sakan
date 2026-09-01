@@ -3,7 +3,7 @@
 منصة تأجير غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت.
 واجهة عربية RTL. باك إند Supabase. نشر على Cloudflare Workers.
 
-**آخر تحديث: ١ أيلول ٢٠٢٦ — conv17 (فحص وإصلاح كود الخصم — كان حساس لحالة الأحرف)**
+**آخر تحديث: ١ أيلول ٢٠٢٦ — conv18 (فحص وإصلاح كود الخصم + submit_institution_lead بدل الـinsert المباشر)**
 
 ---
 
@@ -11,7 +11,7 @@
 
 | البند | الحالة |
 |---|---|
-| قاعدة البيانات | ✅ ١٨ جدول · ١٤ واجهة · ٣١ migration (Frankfurt) |
+| قاعدة البيانات | ✅ ١٨ جدول · ١٤ واجهة · ٣٢ migration (Frankfurt) |
 | كود الخصم (`SAKAN50`) | ✅ **مين بيستخدمه:** الطاقم فقط (مدير أو مندوب)، من قسم «الرسوم» باللوحة وقت التحصيل — المالك بيحكي الكود شفهياً/واتساب، ما في إدخال ذاتي (متوافق مع نموذج التحصيل النقدي، بدون بوابة دفع). **إصلاح:** كان `admin_fee_promo` حساس لحالة الأحرف — "sakan50" بيفشل بخطأ FK خام لأن الكود محفوظ Uppercase. صار `upper(trim())` + رسائل خطأ عربية واضحة (غير موجود/منتهي/وصل الحد الأقصى). اتفحص مباشرة على القاعدة. |
 | عربي/إنجليزي | 🟡 `public/index.html` بالكامل (زر EN/عربي بالهيدر، `localStorage`، بدون reload وحدة، أرقام/تواريخ محلية بكل لغة) — **جزئي**: مواصفات الغرفة/صفات الباحث (`FEATURES`/`TAGS`) وأسماء المدن والمناطق بتضل عربي لأنها قيم مخزّنة بالقاعدة نفسها (`listings.features`, `cities.name_ar`) مش مجرد تسمية عرض. `page.html`/`institutions.html`/`owner.html`/مركز التحكم لسا عربي بس فقط. |
 | فخ الـzero-policy على `cities`/`areas` | ✅ **انحلّ** — كان `anon` بيقرأ صفر صفوف بصمت |
@@ -45,7 +45,7 @@
 | `public/index.html` | الموقع العام — صفحة واحدة، بدون build ولا npm. فيها رفع الصور، عارض صور مكبّر (lightbox)، بحث نصي، مشاركة إعلان، مسودة محلية لنموذج «أضف غرفة»، وعربي/إنجليزي (`toggleLang()` بيحفظ باللغة بـ`localStorage` مفتاح `sakan_lang` ويعمل `location.reload()` — كل النصوص الثابتة عن طريق `tt(ar, en)` جنب مكان استخدامها، مش قاموس مركزي). |
 | `public/page.html` | صفحات المحتوى (كيف بشتغل سكن · سياسة الخصوصية · شروط الاستخدام) — بتقرأ من جدول `pages` |
 | `public/owner.html` | رابط المالك الموقّع — بتوكن `profiles.owner_token`، بدون تسجيل دخول |
-| `public/institutions.html` | نموذج التقاط طلبات المؤسسات/NGOs — insert مباشر على `institution_leads` |
+| `public/institutions.html` | نموذج التقاط طلبات المؤسسات/NGOs — عبر `submit_institution_lead` |
 | `public/admin/index.html` | مركز التحكم — منشور على `/admin`، دخول عبر Supabase Auth |
 | `src/whatsapp.js` | `sendWhatsAppTemplate()` — مجهّز، غير مستدعى من أي مكان لحد ما يصير حساب Meta جاهز |
 | `src/worker.js` | بيمرّر لـ`ASSETS` ويضيف `X-Robots-Tag: noindex` على `/admin`، وعلى `/?l=REF` بيبدّل meta tags (عنوان/وصف/`og:image`) بجلب بيانات الإعلان من `v_listings_public` بمفتاح anon قبل ما يرجّع الصفحة، وبيولّد `/robots.txt` و`/sitemap.xml` ديناميكياً (الأخير فيه كل إعلان منشور) |
@@ -114,6 +114,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 20260831225755_owner_dashboard_link
 20260831231136_institution_leads
 20260901061542_fix_promo_code_case_and_errors
+20260901065043_submit_institution_lead_rpc
 ```
 
 > migrations conv9 مسجّلة بطوابع `2026082901…` فبتسبق `…120000` بالترتيب.
@@ -129,8 +130,8 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 | نوع | الأسماء |
 |---|---|
 | قراءة | `v_listings_public` · `v_requests_public` · `cities` · `areas` · `pages` |
-| كتابة (insert فقط) | `contact_requests` · `reports` · `events` · `institution_leads` |
-| دوال | `submit_listing` · `submit_request` · `confirm_listing_available` · `bump_listing_view` · `staff_email_for_username` (تحويل يوزرنيم لإيميل قبل تسجيل الدخول — ما بترجّع غير الإيميل) · `review_link_info` · `submit_review` (رابط التقييم) · `owner_dashboard` (رابط المالك) — كلهن بدون تسجيل دخول |
+| كتابة (insert فقط) | `contact_requests` · `reports` · `events` |
+| دوال | `submit_listing` · `submit_request` · `confirm_listing_available` · `bump_listing_view` · `staff_email_for_username` (تحويل يوزرنيم لإيميل قبل تسجيل الدخول — ما بترجّع غير الإيميل) · `review_link_info` · `submit_review` (رابط التقييم) · `owner_dashboard` (رابط المالك) · `submit_institution_lead` — كلهن بدون تسجيل دخول |
 
 **`authenticated` (بشرط `is_staff()`/`is_admin()`) + `service_role` — مركز التحكم فقط**
 
