@@ -2,15 +2,18 @@
 <html lang="ar" dir="rtl">
 <head>
 <script>
-try{ var SAKAN_LANG = localStorage.getItem("sakan_lang") === "en" ? "en" : "ar"; }
-catch(e){ var SAKAN_LANG = "ar"; }
-document.documentElement.lang = SAKAN_LANG;
-document.documentElement.dir  = SAKAN_LANG === "en" ? "ltr" : "rtl";
+try{ var MAWDI_LANG = localStorage.getItem("mawdi_lang") === "en" ? "en" : "ar"; }
+catch(e){ var MAWDI_LANG = "ar"; }
+document.documentElement.lang = MAWDI_LANG;
+document.documentElement.dir  = MAWDI_LANG === "en" ? "ltr" : "rtl";
 </script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>موضع</title>
-<meta name="description" content="سياسة الخصوصية وشروط الاستخدام — منصة موضع.">
+<title id="pageTitle">موضع</title>
+<meta id="metaDesc" name="description" content="سياسة الخصوصية وشروط الاستخدام — منصة موضع.">
+<meta id="ogTitle" property="og:title" content="موضع">
+<meta id="ogDesc" property="og:description" content="سياسة الخصوصية وشروط الاستخدام — منصة موضع.">
+<meta id="ogSiteName" property="og:site_name" content="موضع">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -135,11 +138,11 @@ function md(src){
   return out;
 }
 
-let LANG = SAKAN_LANG;
+let LANG = MAWDI_LANG;
 const tt = (ar, en) => LANG === "en" ? en : ar;
 function toggleLang(){
   const next = LANG === "ar" ? "en" : "ar";
-  try{ localStorage.setItem("sakan_lang", next); }catch(e){}
+  try{ localStorage.setItem("mawdi_lang", next); }catch(e){}
   location.reload();
 }
 function paintChrome(){
@@ -151,6 +154,7 @@ function paintChrome(){
   document.getElementById("tPrivacy").textContent = tt("سياسة الخصوصية", "Privacy policy");
   document.getElementById("tTerms").textContent = tt("شروط الاستخدام", "Terms of use");
   document.getElementById("loadingMsg").textContent = tt("بيحمّل…", "Loading…");
+  document.getElementById("ogSiteName").content = tt("موضع", "Mawdi");
 }
 paintChrome();
 
@@ -173,6 +177,9 @@ const KEYS = {"how-it-works":"tHow", privacy:"tPrivacy", terms:"tTerms"};
     const title = LANG === "en" && d.title_en ? d.title_en : d.title_ar;
     const body  = LANG === "en" && d.body_en  ? d.body_en  : d.body_md;
     document.title = title + " — " + tt("موضع","Mawdi");
+    document.getElementById("metaDesc").content = title + " — " + tt("موضع","Mawdi");
+    document.getElementById("ogTitle").content = title + " — " + tt("موضع","Mawdi");
+    document.getElementById("ogDesc").content = title + " — " + tt("موضع","Mawdi");
     document.getElementById("doc").innerHTML =
       `<h1>${esc(title)}</h1>
        <div class="upd">${tt("آخر تحديث","Last updated")}: ${new Date(d.updated_at)

@@ -746,7 +746,7 @@ async function vListings(){
     $("#main").querySelectorAll("[data-flag]").forEach(x=>x.classList.toggle("on", x.dataset.flag===f.flag));
     reload();
   });
-  $("#expListings").onclick = () => exportCSV("sakan-listings.csv", [
+  $("#expListings").onclick = () => exportCSV("mawdi-listings.csv", [
     {label:"الرمز", get:r=>r.ref}, {label:"العنوان", get:r=>r.title},
     {label:"المدينة", get:r=>r.city}, {label:"المنطقة", get:r=>r.area},
     {label:"السعر", get:r=>r.price}, {label:"الحالة", get:r=>L_STATUS[r.status]||r.status},
@@ -1666,7 +1666,7 @@ async function vFees(){
         <td style="color:var(--mute)">${ago(r.created_at)}</td>
       </tr>`).join("")}</tbody></table></div>`;
     wireRows("fee");
-    $("#expFees").onclick = () => exportCSV("sakan-fees.csv", [
+    $("#expFees").onclick = () => exportCSV("mawdi-fees.csv", [
       {label:"الإعلان", get:r=>r.listing_ref}, {label:"العنوان", get:r=>r.listing_title},
       {label:"المالك", get:r=>r.owner_name}, {label:"رقم المالك", get:r=>r.owner_phone},
       {label:"الأساس", get:r=>r.amount_base}, {label:"كود الخصم", get:r=>r.promo_code},
@@ -1690,7 +1690,7 @@ async function drawFee(id){
       <dt>حُصّل</dt><dd>${dt(r.collected_at,true)}</dd>
     </dl>
     <div class="sec"><h4>كود الخصم</h4>
-      <div class="bars"><input id="pc" placeholder="SAKAN50" value="${esc(r.promo_code)}">
+      <div class="bars"><input id="pc" placeholder="MAWDI50" value="${esc(r.promo_code)}">
         <button class="btn sm" id="applyPc">تطبيق</button></div>
       <div style="font-size:11.5px;color:var(--mute)">عدّاد الاستخدام بيزيد لحظة تعليم الرسم "محصّل".</div>
     </div>

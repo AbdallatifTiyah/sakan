@@ -2,15 +2,18 @@
 <html lang="ar" dir="rtl">
 <head>
 <script>
-try{ var SAKAN_LANG = localStorage.getItem("sakan_lang") === "en" ? "en" : "ar"; }
-catch(e){ var SAKAN_LANG = "ar"; }
-document.documentElement.lang = SAKAN_LANG;
-document.documentElement.dir  = SAKAN_LANG === "en" ? "ltr" : "rtl";
+try{ var MAWDI_LANG = localStorage.getItem("mawdi_lang") === "en" ? "en" : "ar"; }
+catch(e){ var MAWDI_LANG = "ar"; }
+document.documentElement.lang = MAWDI_LANG;
+document.documentElement.dir  = MAWDI_LANG === "en" ? "ltr" : "rtl";
 </script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title id="pageTitle">موضع للمؤسسات — إسكان موظفين وطلاب ومستفيدين</title>
 <meta id="metaDesc" name="description" content="مؤسستك أو شركتك محتاجة تؤمّن سكن لموظفين أو طلاب أو مستفيدين؟ موضع بتأمّن غرف موثّقة بالجملة برام الله والبيرة وبيرزيت.">
+<meta id="ogTitle" property="og:title" content="موضع للمؤسسات — إسكان موظفين وطلاب ومستفيدين">
+<meta id="ogDesc" property="og:description" content="مؤسستك أو شركتك محتاجة تؤمّن سكن لموظفين أو طلاب أو مستفيدين؟ موضع بتأمّن غرف موثّقة بالجملة برام الله والبيرة وبيرزيت.">
+<meta id="ogSiteName" property="og:site_name" content="موضع">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -126,11 +129,11 @@ async function api(path, opt={}){
 const rpc = (fn, body) => api("rpc/"+fn, {method:"POST", body:JSON.stringify(body)});
 
 /* ═══════════════ اللغة ═══════════════ */
-let LANG = SAKAN_LANG;
+let LANG = MAWDI_LANG;
 const tt = (ar, en) => LANG === "en" ? en : ar;
 function toggleLang(){
   const next = LANG === "ar" ? "en" : "ar";
-  try{ localStorage.setItem("sakan_lang", next); }catch(e){}
+  try{ localStorage.setItem("mawdi_lang", next); }catch(e){}
   location.reload();
 }
 const ORG_TYPES = LANG === "en" ? {
@@ -151,6 +154,13 @@ function paintChrome(){
   $("metaDesc").content = tt(
     "مؤسستك أو شركتك محتاجة تؤمّن سكن لموظفين أو طلاب أو مستفيدين؟ موضع بتأمّن غرف موثّقة بالجملة برام الله والبيرة وبيرزيت.",
     "Does your institution or company need housing for staff, students, or beneficiaries? Mawdi sources verified rooms in bulk in Ramallah, Al-Bireh and Birzeit.");
+  $("ogTitle").content = tt(
+    "موضع للمؤسسات — إسكان موظفين وطلاب ومستفيدين",
+    "Mawdi for institutions — housing for staff, students & beneficiaries");
+  $("ogDesc").content = tt(
+    "مؤسستك أو شركتك محتاجة تؤمّن سكن لموظفين أو طلاب أو مستفيدين؟ موضع بتأمّن غرف موثّقة بالجملة برام الله والبيرة وبيرزيت.",
+    "Does your institution or company need housing for staff, students, or beneficiaries? Mawdi sources verified rooms in bulk in Ramallah, Al-Bireh and Birzeit.");
+  $("ogSiteName").content = tt("موضع", "Mawdi");
   $("tagline").textContent = tt("غرف وسكن مشترك موثّق", "Verified rooms & shared housing");
   $("backLink").textContent = tt("الصفحة الرئيسية", "Home");
   $("footHome").textContent = tt("الصفحة الرئيسية", "Home");

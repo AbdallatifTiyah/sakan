@@ -4,10 +4,10 @@
 <script>
 /* لازم يشتغل قبل أي رسم — عشان ما يصير فلاش اتجاه غلط لحظة التحميل */
 try{
-  var SAKAN_LANG = localStorage.getItem("sakan_lang") === "en" ? "en" : "ar";
-}catch(e){ var SAKAN_LANG = "ar"; }
-document.documentElement.lang = SAKAN_LANG;
-document.documentElement.dir  = SAKAN_LANG === "en" ? "ltr" : "rtl";
+  var MAWDI_LANG = localStorage.getItem("mawdi_lang") === "en" ? "en" : "ar";
+}catch(e){ var MAWDI_LANG = "ar"; }
+document.documentElement.lang = MAWDI_LANG;
+document.documentElement.dir  = MAWDI_LANG === "en" ? "ltr" : "rtl";
 </script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,6 +15,7 @@ document.documentElement.dir  = SAKAN_LANG === "en" ? "ltr" : "rtl";
 <meta id="metaDesc" name="description" content="غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت. كل إعلان موثّق هاتفياً، وقسم كبير منها زارها مندوبنا شخصياً. أرقام الهواتف محمية.">
 <meta id="ogTitle" property="og:title" content="موضع — غرف وسكن مشترك موثّق">
 <meta id="ogDesc" property="og:description" content="غرف موثّقة في رام الله والبيرة وبيرزيت.">
+<meta id="ogSiteName" property="og:site_name" content="موضع">
 <meta id="ogLocale" property="og:locale" content="ar_PS">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -174,8 +175,8 @@ footer a,footer .linkish{color:#CFE0DA}
 
 <section class="hero">
   <div class="wrap">
-    <h1 id="heroH1">غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت</h1>
-    <p id="heroP">كل إعلان موثّق هاتفياً، وقسم كبير منها زارها مندوبنا شخصياً. الإعلان بينتهي تلقائياً بعد ٢١ يوم إذا ما أكّد المالك إنه لسا متاح.</p>
+    <h1 id="heroH1">دور على موضعك.</h1>
+    <p id="heroP">مكانك الموثوق.</p>
     <div class="trust">
       <div id="trust1">✓ <b>توثيق هاتفي</b> لكل إعلان</div>
       <div id="trust2">✓ <b>رقمك محمي</b> — ما بينعرض لحدا</div>
@@ -221,13 +222,13 @@ footer a,footer .linkish{color:#CFE0DA}
 
 <script>
 /* ═══════════════ اللغة ═══════════════ */
-let LANG = SAKAN_LANG; // معرّف مسبقاً بالسكربت المبكر بالـ<head>
+let LANG = MAWDI_LANG; // معرّف مسبقاً بالسكربت المبكر بالـ<head>
 /* ar/en بدل مفتاح إنجليزي مركزي كبير — الترجمة جنب مكان استخدامها مباشرة */
 const tt = (ar, en) => LANG === "en" ? en : ar;
 
 function toggleLang(){
   const next = LANG === "ar" ? "en" : "ar";
-  try{ localStorage.setItem("sakan_lang", next); }catch(e){}
+  try{ localStorage.setItem("mawdi_lang", next); }catch(e){}
   location.reload();
 }
 
@@ -242,18 +243,15 @@ function paintChrome(){
     "Verified rooms and shared housing in Ramallah, Al-Bireh and Birzeit. Every listing is phone-verified, many visited in person. Phone numbers stay private.");
   $("ogTitle").content = tt("موضع — غرف وسكن مشترك موثّق", "Mawdi — Verified shared housing");
   $("ogDesc").content = tt("غرف موثّقة في رام الله والبيرة وبيرزيت.", "Verified rooms in Ramallah, Al-Bireh and Birzeit.");
+  $("ogSiteName").content = tt("موضع", "Mawdi");
   $("ogLocale").content = LANG === "en" ? "en_US" : "ar_PS";
 
   $("tagline").textContent = tt("غرف وسكن مشترك موثّق", "Verified rooms & shared housing");
   $("btnAddRoom").textContent = tt("أضف غرفة", "List a room");
   $("btnFindHome").textContent = tt("أبحث عن سكن", "Looking for a room");
 
-  $("heroH1").textContent = tt(
-    "غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت",
-    "Verified rooms & shared housing in Ramallah, Al-Bireh & Birzeit");
-  $("heroP").textContent = tt(
-    "كل إعلان موثّق هاتفياً، وقسم كبير منها زارها مندوبنا شخصياً. الإعلان بينتهي تلقائياً بعد ٢١ يوم إذا ما أكّد المالك إنه لسا متاح.",
-    "Every listing is phone-verified, and many are visited in person by our field agent. Listings expire automatically after 21 days unless the owner confirms it's still available.");
+  $("heroH1").textContent = tt("دور على موضعك.", "Find your place.");
+  $("heroP").textContent = tt("مكانك الموثوق.", "Your trusted place.");
   $("trust1").innerHTML = tt("✓ <b>توثيق هاتفي</b> لكل إعلان", "✓ <b>Phone-verified</b> listings");
   $("trust2").innerHTML = tt("✓ <b>رقمك محمي</b> — ما بينعرض لحدا", "✓ <b>Your number stays private</b>");
   $("trust3").innerHTML = tt("✓ <b>بدون إعلانات ميتة</b>", "✓ <b>No dead listings</b>");
@@ -587,10 +585,10 @@ function cardR(x){
    يوقف عرض الإعلان. */
 function countView(id){
   try{
-    const seen = JSON.parse(sessionStorage.getItem("sakan_seen") || "[]");
+    const seen = JSON.parse(sessionStorage.getItem("mawdi_seen") || "[]");
     if(seen.includes(id)) return;
     seen.push(id);
-    sessionStorage.setItem("sakan_seen", JSON.stringify(seen));
+    sessionStorage.setItem("mawdi_seen", JSON.stringify(seen));
   }catch(e){ /* التخزين معطّل — بنكمّل وبنعدّ */ }
   rpc("bump_listing_view", {p_id:id}).catch(()=>{});
 }
@@ -992,7 +990,7 @@ function openForm(kind){
 }
 
 /* ═══════════════ مسودة الإعلان (محلياً — النموذج طويل) ═══════════════ */
-const DRAFT_KEY = "sakan_listing_draft";
+const DRAFT_KEY = "mawdi_listing_draft";
 const DRAFT_FIELDS = ["lName","lDial","lPhone","lTitle","lCity","lArea","lPrice","lDep",
   "lKind","lPol","lFurn","lBills","lRooms","lMin","lFrom","lLand","lOcc","lDesc"];
 
