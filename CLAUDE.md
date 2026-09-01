@@ -3,7 +3,12 @@
 منصة تأجير غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت.
 واجهة عربية RTL. باك إند Supabase. نشر على Cloudflare Workers.
 
-**آخر تحديث: ١ أيلول ٢٠٢٦ — conv18 (فحص وإصلاح كود الخصم + submit_institution_lead بدل الـinsert المباشر)**
+> **الاسم التجاري صار «موضع» (Mawdi)** — النصوص بالواجهات اتبدّلت (`owner.html`,
+> `institutions.html`, `page.html`, `index.html`, `whatsapp.js`, `worker.js`). البنية التحتية
+> (اسم الـWorker `sakan`، النطاق `sakan.abdallatif-tiyah.workers.dev`، اسم المستودع) **ما تغيّرت**
+> — لسا "سكن" بكل مكان تقني. لا تخلط بين الاسمين لما تدور بالكود.
+
+**آخر تحديث: ١ أيلول ٢٠٢٦ — conv19 (استكمال عربي/إنجليزي: page.html + institutions.html + name_en للمدن/المناطق + فصل FEATURES/TAGS لـslugs)**
 
 ---
 
@@ -11,9 +16,9 @@
 
 | البند | الحالة |
 |---|---|
-| قاعدة البيانات | ✅ ١٨ جدول · ١٤ واجهة · ٣٢ migration (Frankfurt) |
+| قاعدة البيانات | ✅ ١٨ جدول · ١٤ واجهة · ٣٧ migration (Frankfurt) |
 | كود الخصم (`SAKAN50`) | ✅ **مين بيستخدمه:** الطاقم فقط (مدير أو مندوب)، من قسم «الرسوم» باللوحة وقت التحصيل — المالك بيحكي الكود شفهياً/واتساب، ما في إدخال ذاتي (متوافق مع نموذج التحصيل النقدي، بدون بوابة دفع). **إصلاح:** كان `admin_fee_promo` حساس لحالة الأحرف — "sakan50" بيفشل بخطأ FK خام لأن الكود محفوظ Uppercase. صار `upper(trim())` + رسائل خطأ عربية واضحة (غير موجود/منتهي/وصل الحد الأقصى). اتفحص مباشرة على القاعدة. |
-| عربي/إنجليزي | 🟡 `public/index.html` بالكامل (زر EN/عربي بالهيدر، `localStorage`، بدون reload وحدة، أرقام/تواريخ محلية بكل لغة) — **جزئي**: مواصفات الغرفة/صفات الباحث (`FEATURES`/`TAGS`) وأسماء المدن والمناطق بتضل عربي لأنها قيم مخزّنة بالقاعدة نفسها (`listings.features`, `cities.name_ar`) مش مجرد تسمية عرض. `page.html`/`institutions.html`/`owner.html`/مركز التحكم لسا عربي بس فقط. |
+| عربي/إنجليزي | ✅ **مكتمل على كل الصفحات العامة**: `index.html` + `page.html` + `institutions.html` (نفس نمط `toggleLang()`/`tt(ar,en)`/`sakan_lang` بـ`localStorage`). المدن/المناطق صار فيهن عمود `name_en` (اختياري، بيتعبّى من قسم «الإعدادات» باللوحة — فاضي = رجوع للعربي). `listings.features`/`seeker_requests.lifestyle_tags` صاروا يخزّنوا **slug** ثابت (`wifi`, `quiet`, …) بدل نص عربي حرفي، والتسمية بتترجم حسب اللغة عبر `FEATURE_LABEL`/`TAG_LABEL`. صفحات `pages` فيها `title_en`/`body_en` اختياريين ومترجَمين فعلياً للصفحات الثلاث. **لسا عربي بس:** `owner.html` ومركز التحكم بالكامل (قرار: لوحة داخلية للطاقم، مش أولوية). |
 | فخ الـzero-policy على `cities`/`areas` | ✅ **انحلّ** — كان `anon` بيقرأ صفر صفوف بصمت |
 | الرفض التلقائي بسبب الكاميرا | ✅ **انشال** — كان `default false` + مشغّل = رفض أي زيارة الخانة فيها مش متأشّرة |
 | نشر طلبات الباحثين | ✅ **انحلّ** — ما كان في أي RPC تغيّر `seeker_requests.status` |
@@ -42,15 +47,15 @@
 
 | ملف | الوصف |
 |---|---|
-| `public/index.html` | الموقع العام — صفحة واحدة، بدون build ولا npm. فيها رفع الصور، عارض صور مكبّر (lightbox)، بحث نصي، مشاركة إعلان، مسودة محلية لنموذج «أضف غرفة»، وعربي/إنجليزي (`toggleLang()` بيحفظ باللغة بـ`localStorage` مفتاح `sakan_lang` ويعمل `location.reload()` — كل النصوص الثابتة عن طريق `tt(ar, en)` جنب مكان استخدامها، مش قاموس مركزي). |
-| `public/page.html` | صفحات المحتوى (كيف بشتغل سكن · سياسة الخصوصية · شروط الاستخدام) — بتقرأ من جدول `pages` |
-| `public/owner.html` | رابط المالك الموقّع — بتوكن `profiles.owner_token`، بدون تسجيل دخول |
-| `public/institutions.html` | نموذج التقاط طلبات المؤسسات/NGOs — عبر `submit_institution_lead` |
-| `public/admin/index.html` | مركز التحكم — منشور على `/admin`، دخول عبر Supabase Auth |
+| `public/index.html` | الموقع العام — صفحة واحدة، بدون build ولا npm. فيها رفع الصور، عارض صور مكبّر (lightbox)، بحث نصي، مشاركة إعلان، مسودة محلية لنموذج «أضف غرفة»، وعربي/إنجليزي (`toggleLang()` بيحفظ باللغة بـ`localStorage` مفتاح `sakan_lang` ويعمل `location.reload()` — كل النصوص الثابتة عن طريق `tt(ar, en)` جنب مكان استخدامها، مش قاموس مركزي). `FEATURES`/`TAGS` كائنات `{slug, ar, en}` — الـslug هو المخزّن بالقاعدة، `FEATURE_LABEL()`/`TAG_LABEL()` بيترجموه وقت العرض. |
+| `public/page.html` | صفحات المحتوى (كيف بشتغل موضع · سياسة الخصوصية · شروط الاستخدام) — بتقرأ من جدول `pages`. ثنائي اللغة (نفس نمط `index.html`) — `title_en`/`body_en` لو فاضيين بترجع للعربي. |
+| `public/owner.html` | رابط المالك الموقّع — بتوكن `profiles.owner_token`، بدون تسجيل دخول. عربي بس (لوحة داخلية للمالك، مش أولوية ترجمة). |
+| `public/institutions.html` | نموذج التقاط طلبات المؤسسات/NGOs — عبر `submit_institution_lead`. ثنائي اللغة. |
+| `public/admin/index.html` | مركز التحكم — منشور على `/admin`، دخول عبر Supabase Auth. عربي بس دايماً (أداة داخلية للطاقم). |
 | `src/whatsapp.js` | `sendWhatsAppTemplate()` — مجهّز، غير مستدعى من أي مكان لحد ما يصير حساب Meta جاهز |
 | `src/worker.js` | بيمرّر لـ`ASSETS` ويضيف `X-Robots-Tag: noindex` على `/admin`، وعلى `/?l=REF` بيبدّل meta tags (عنوان/وصف/`og:image`) بجلب بيانات الإعلان من `v_listings_public` بمفتاح anon قبل ما يرجّع الصفحة، وبيولّد `/robots.txt` و`/sitemap.xml` ديناميكياً (الأخير فيه كل إعلان منشور) |
 | `wrangler.toml` | `main` + `binding = "ASSETS"` + `run_worker_first = true` |
-| `supabase/migrations/` | ٢٩ ملف — لازم يطابقوا `supabase_migrations` بالحرف |
+| `supabase/migrations/` | ٣٧ ملف — لازم يطابقوا `supabase_migrations` بالحرف |
 
 **Supabase**
 - ref: `yckteijitcqjtedoyoyv` (eu-central-1، Postgres 17.6)
@@ -81,7 +86,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 ```
 لازم `select` قبلها. الترتيب: إيميل، اسم، دور (`admin`/`agent`)، يوزرنيم (اختياري، أو `null`).
 
-**الـmigrations المسجّلة (٢٦ — بالترتيب)**
+**الـmigrations المسجّلة (٣٧ — بالترتيب)**
 ```
 20260828161300_remote_schema
 20260828203602_restore_service_role_grants
@@ -115,6 +120,11 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 20260831231136_institution_leads
 20260901061542_fix_promo_code_case_and_errors
 20260901065043_submit_institution_lead_rpc
+20260901133919_bilingual_content_columns
+20260901133957_seed_bilingual_content
+20260901134015_admin_bilingual_editor_rpcs
+20260901134042_drop_old_admin_save_overloads
+20260901134100_migrate_features_tags_to_slugs
 ```
 
 > migrations conv9 مسجّلة بطوابع `2026082901…` فبتسبق `…120000` بالترتيب.
@@ -252,6 +262,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 | `permission denied for function X` من واجهة `security_invoker` | دالة مستخدَمة جوّا تعريف الـview نفسه بدون منح `authenticated` — شوف الدرس فوق بقسم «من يقرأ ماذا». |
 | اسم ملف الـmigration المحلي ما بطابق `supabase_migrations` بعد `apply_migration` | أداة الـMCP بتسجّل نسختها الزمنية الخاصة، مش اسم الملف اللي أعطيته. **دايماً** شغّل `list_migrations` بعد التطبيق وسمّي الملف المحلي بنفس الرقم بالضبط. |
 | حذف من `storage.objects` بـSQL مباشر بيرفض حتى بـ`service_role` | `protect_delete` trigger مقصود. احذف عبر Storage API (`DELETE /storage/v1/object/<bucket>/<path>`) بمفتاح عنده صلاحية `delete` على الـbucket. |
+| `function is not unique` وقت استدعاء دالة إدارية بمعطيات مسمّاة | `create or replace function` بمعطيات إضافية (حتى لو كلها بـ`default`) بتغيّر التوقيع (argument type list) وبتخلق **overload جديد** بدل ما تستبدل القديمة. لازم `drop function if exists <old signature exact types>` صريح قبلها، وبعدين `revoke`/`grant` من جديد على التوقيع الجديد (المنح ما بينورث تلقائياً). صار مع `admin_page_save`/`admin_city_save`/`admin_area_save` وقت إضافة الحقول الإنجليزية. |
 
 ---
 
@@ -279,11 +290,9 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 
 ## مهام مفتوحة — بترتيب الأولوية
 
-**استكمال عربي/إنجليزي** (البداية بـ`index.html` صارت — ١ أيلول ٢٠٢٦)
-- [ ] `page.html` (كيف بشتغل سكن/الخصوصية/الشروط) — يحتاج عمودَي `title_en`/`body_en` بجدول `pages` + محرر ثنائي اللغة باللوحة
-- [ ] `institutions.html`
-- [ ] أسماء المدن والمناطق بالإنجليزي — يحتاج عمود `name_en` + تعبئته يدوياً من اللوحة
-- [ ] `FEATURES`/`TAGS` (مواصفات الغرفة/صفات الباحث) — محتاجة فصل قيمة مخزّنة/تسمية عرض بدل النص العربي الحرفي كقيمة، وmigration بيانات للإعلانات والطلبات الموجودة
+**عربي/إنجليزي — مكتمل ١ أيلول ٢٠٢٦** (`index.html` → `page.html`/`institutions.html`/`name_en`/`FEATURES`-`TAGS` بنفس الدفعة). المتبقي:
+- [ ] تعبئة `name_en` يدوياً للمدن/المناطق الجديدة لما تنضاف (الموجودة حالياً معبّاة)
+- [ ] `owner.html` ومركز التحكم — قرار مفتوح إذا بدهم ترجمة أصلاً (لوحات داخلية)
 
 **بعد بوابة القرار**
 - [ ] ربط النطاق `sakan.ps` — أبواللطيف
