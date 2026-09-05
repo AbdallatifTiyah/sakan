@@ -9,6 +9,7 @@ document.documentElement.dir  = MAWDI_LANG === "en" ? "ltr" : "rtl";
 </script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <title id="pageTitle">موضع</title>
 <meta id="metaDesc" name="description" content="سياسة الخصوصية وشروط الاستخدام — منصة موضع.">
 <meta id="ogTitle" property="og:title" content="موضع">
@@ -16,20 +17,32 @@ document.documentElement.dir  = MAWDI_LANG === "en" ? "ltr" : "rtl";
 <meta id="ogSiteName" property="og:site_name" content="موضع">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Archivo:wght@600;700&display=swap" rel="stylesheet">
 <style>
-:root{--brand:#12634E;--brand-d:#0C4839;--accent:#C4682B;--bg:#FAF7F2;--card:#FFFFFF;
-  --ink:#15201C;--mut:#6B7B75;--line:#E4DED4;--r:14px;--sh:0 1px 2px rgba(20,32,28,.05),0 8px 24px rgba(20,32,28,.06)}
+:root{
+  --blue-700:#12309B; --blue-600:#1E45D6; --blue-500:#3A63F0;
+  --blue-100:#E4EAFF; --blue-050:#F2F5FF;
+  --amber:#F5A524; --amber-ink:#9A5B00;
+  --navy:#080F2E; --ink:#080F2E; --mut:#6B748F;
+  --bg:#F2F5FF; --card:#FFFFFF; --line:#E1E6F5;
+  --ok:#12A150; --warn:#C2410C; --danger:#DC2626;
+  --footer-text:#AEB8D6; --footer-link:#D7DDF3;
+  --r-sm:8px; --r:14px; --r-lg:20px; --r-pill:999px;
+  --sh:0 10px 30px rgba(8,15,46,.10);
+}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);
   font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,sans-serif;line-height:1.85}
-a{color:var(--brand)}
+a{color:var(--blue-600)}
 .wrap{max-width:760px;margin:0 auto;padding:0 18px}
-header{background:var(--brand);color:#fff}
+header{background:var(--blue-700);color:#fff}
 .hd{display:flex;align-items:center;justify-content:space-between;padding:16px 0;gap:12px;flex-wrap:wrap}
-.logo{font-size:26px;font-weight:700;letter-spacing:-1px;color:#fff;text-decoration:none}
-.logo span{display:block;font-size:12px;font-weight:400;opacity:.85;letter-spacing:0}
-.back{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:10px;
+.logo{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none}
+.logo svg{width:30px;height:30px;flex:none}
+.logo .wordwrap{display:flex;flex-direction:column;line-height:1.1}
+.logo .word{font-size:24px;font-weight:700}
+.logo .sub{font-size:10.5px;font-weight:600;letter-spacing:.18em;color:rgba(255,255,255,.75);font-family:'Archivo',sans-serif}
+.back{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:var(--r-sm);
   padding:9px 15px;font:inherit;font-weight:600;text-decoration:none}
 .back:hover{background:rgba(255,255,255,.24)}
 main{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);
@@ -38,7 +51,7 @@ h1{font-size:27px;margin:0 0 4px;line-height:1.4}
 .upd{color:var(--mut);font-size:13px;margin-bottom:20px}
 main h2{font-size:19px;margin:28px 0 8px;padding-top:14px;border-top:1px solid var(--line)}
 main h2:first-of-type{border-top:0;padding-top:0}
-main h3{font-size:16px;margin:18px 0 6px;color:var(--brand-d)}
+main h3{font-size:16px;margin:18px 0 6px;color:var(--blue-700)}
 main p{margin:0 0 12px}
 main ul{margin:0 0 12px;padding-inline-start:22px}
 main li{margin-bottom:5px}
@@ -46,14 +59,14 @@ main strong{font-weight:600}
 main hr{border:0;border-top:1px solid var(--line);margin:22px 0}
 main table{width:100%;border-collapse:collapse;margin:6px 0 16px;font-size:14.5px}
 main th,main td{border:1px solid var(--line);padding:9px 11px;text-align:start}
-main th{background:#F3F0EA;font-weight:600}
+main th{background:var(--blue-050);font-weight:600}
 .tabs{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
-.tabs a{background:#fff;border:1px solid var(--line);border-radius:99px;
+.tabs a{background:#fff;border:1px solid var(--line);border-radius:var(--r-pill);
   padding:7px 15px;font-size:14px;font-weight:600;text-decoration:none}
-.tabs a.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.tabs a.on{background:var(--blue-600);border-color:var(--blue-600);color:#fff}
 .msg{padding:40px;text-align:center;color:var(--mut)}
-footer{background:#101B18;color:#9FB2AC;padding:24px 0;font-size:13px}
-footer a{color:#CFE0DA}
+footer{background:var(--navy);color:var(--footer-text);padding:24px 0;font-size:13px}
+footer a{color:var(--footer-link)}
 @media(max-width:600px){main{padding:22px 18px}h1{font-size:23px}}
 </style>
 </head>
@@ -61,7 +74,13 @@ footer a{color:#CFE0DA}
 
 <header>
   <div class="wrap hd">
-    <a class="logo" href="/" id="logoLink">موضع<span id="tagline">غرف وسكن مشترك موثّق</span></a>
+    <a class="logo" href="/" id="logoLink">
+      <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g fill="#FFFFFF"><path d="M6 28h8v14H6z"/><path d="M17 18l11-6v30H17z"/><path d="M31 24l10-3v21H31z"/></g>
+        <rect x="20" y="24" width="6" height="6" fill="var(--amber)"/>
+      </svg>
+      <span class="wordwrap"><span class="word">موضع</span><span class="sub" id="tagline">MAWDI</span></span>
+    </a>
     <div style="display:flex;gap:8px;align-items:center">
       <button class="back" id="langBtn" onclick="toggleLang()" style="cursor:pointer">EN</button>
       <a class="back" href="/" id="backLink">رجوع للموقع</a>
@@ -147,13 +166,12 @@ function toggleLang(){
 }
 function paintChrome(){
   document.getElementById("langBtn").textContent = LANG === "ar" ? "EN" : "عربي";
-  document.getElementById("tagline").textContent = tt("غرف وسكن مشترك موثّق", "Verified rooms & shared housing");
   document.getElementById("backLink").textContent = tt("رجوع للموقع", "Back to site");
   document.getElementById("footHome").textContent = tt("الصفحة الرئيسية", "Home");
-  document.getElementById("tHow").textContent = tt("كيف بشتغل موضع", "How it works");
+  document.getElementById("tHow").textContent = tt("كيف يعمل موضع", "How it works");
   document.getElementById("tPrivacy").textContent = tt("سياسة الخصوصية", "Privacy policy");
   document.getElementById("tTerms").textContent = tt("شروط الاستخدام", "Terms of use");
-  document.getElementById("loadingMsg").textContent = tt("بيحمّل…", "Loading…");
+  document.getElementById("loadingMsg").textContent = tt("جارِ التحميل…", "Loading…");
   document.getElementById("ogSiteName").content = tt("موضع", "Mawdi");
 }
 paintChrome();
@@ -188,7 +206,7 @@ const KEYS = {"how-it-works":"tHow", privacy:"tPrivacy", terms:"tTerms"};
   }catch(e){
     console.error("Mawdi page load:", e);
     document.getElementById("doc").innerHTML =
-      `<div class="msg">${tt("ما قدرنا نحمّل الصفحة. جرّب تحديث الصفحة، أو ارجع للموقع.",
+      `<div class="msg">${tt("تعذّر تحميل الصفحة. حاول تحديث الصفحة، أو ارجع للموقع.",
         "We couldn't load this page. Try refreshing, or go back to the site.")}</div>`;
   }
 })();

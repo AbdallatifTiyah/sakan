@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<script>
+try{ var MAWDI_LANG = localStorage.getItem("mawdi_lang") === "en" ? "en" : "ar"; }
+catch(e){ var MAWDI_LANG = "ar"; }
+document.documentElement.lang = MAWDI_LANG;
+document.documentElement.dir  = MAWDI_LANG === "en" ? "ltr" : "rtl";
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<title id="pageTitle">حسابي — موضع</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Archivo:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue-700:#12309B; --blue-600:#1E45D6; --blue-500:#3A63F0;
+  --blue-100:#E4EAFF; --blue-050:#F2F5FF;
+  --amber:#F5A524; --amber-ink:#9A5B00;
+  --navy:#080F2E; --ink:#080F2E; --mut:#6B748F;
+  --bg:#F2F5FF; --card:#FFFFFF; --line:#E1E6F5;
+  --ok:#12A150; --warn:#C2410C; --danger:#DC2626;
+  --ok-bg:#E1F5EA; --warn-bg:#FBEBDD; --danger-bg:#FCE9E8; --danger-ink:#9F1D18;
+  --amber-hover:#E2941C; --footer-text:#AEB8D6; --footer-link:#D7DDF3;
+  --r-sm:8px; --r:14px; --r-pill:999px;
+  --sh:0 10px 30px rgba(8,15,46,.10);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,sans-serif;line-height:1.7}
+a{color:var(--blue-600);text-decoration:none}
+.wrap{max-width:820px;margin:0 auto;padding:0 18px}
+header{background:var(--blue-700);color:#fff}
+.hd{display:flex;align-items:center;justify-content:space-between;padding:16px 0;gap:12px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none}
+.logo svg{width:30px;height:30px;flex:none}
+.logo .wordwrap{display:flex;flex-direction:column;line-height:1.1}
+.logo .word{font-size:24px;font-weight:700}
+.logo .sub{font-size:10.5px;font-weight:600;letter-spacing:.18em;color:rgba(255,255,255,.75);font-family:'Archivo',sans-serif}
+.hd .cta{display:flex;gap:8px;align-items:center}
+.btn{border:0;border-radius:var(--r-sm);padding:10px 16px;font:inherit;font-weight:600;cursor:pointer;
+  background:var(--blue-600);color:#fff;transition:.15s}
+.btn:hover{background:var(--blue-700)}
+.btn.ghost{background:rgba(255,255,255,.14);color:#fff}
+.btn.ghost:hover{background:rgba(255,255,255,.24)}
+.btn.line{background:#fff;color:var(--blue-600);border:1px solid var(--line)}
+.btn.line:hover{background:var(--blue-050)}
+.btn.acc{background:var(--amber);color:var(--navy)} .btn.acc:hover{background:var(--amber-hover)}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.btn.sm{padding:8px 12px;font-size:13px}
+.bell{position:relative;background:rgba(255,255,255,.14);border:0;color:#fff;width:38px;height:38px;
+  border-radius:var(--r-sm);cursor:pointer;font-size:18px}
+.bell .dot{position:absolute;top:2px;left:2px;background:var(--amber);color:var(--navy);
+  border-radius:var(--r-pill);font-size:10px;font-weight:700;min-width:16px;height:16px;
+  display:flex;align-items:center;justify-content:center;padding:0 3px}
+
+h1{font-size:22px;margin:22px 0 4px}
+.sub{color:var(--mut);font-size:13.5px;margin-bottom:20px}
+h2{font-size:16px;margin:26px 0 10px}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:16px;margin-bottom:12px}
+.row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.title{font-weight:600;font-size:15px}
+.ref{font-family:ui-monospace,monospace;font-size:12px;color:var(--mut)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.t{background:var(--blue-050);border-radius:var(--r-pill);padding:3px 10px;font-size:12px;font-weight:600;color:var(--ink)}
+.t.warn{background:var(--warn-bg);color:var(--warn)}
+.t.ok{background:var(--ok-bg);color:var(--ok)}
+.t.bad{background:var(--danger-bg);color:var(--danger)}
+.meta{color:var(--mut);font-size:12.5px;margin-top:6px}
+.acts{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.empty{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:26px;
+  text-align:center;color:var(--mut)}
+.msg{padding:40px;text-align:center;color:var(--mut)}
+.phone{font-family:ui-monospace,monospace;direction:ltr;display:inline-block}
+.tabs{display:flex;gap:6px;margin:18px 0 4px}
+.tab{border:0;background:transparent;font:inherit;font-weight:600;color:var(--mut);
+  padding:10px 16px;border-radius:10px 10px 0 0;cursor:pointer}
+.tab.on{background:var(--card);color:var(--ink);box-shadow:var(--sh)}
+.fg{margin-bottom:14px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+label{display:block;font-size:13px;color:var(--mut);margin-bottom:4px;font-weight:500}
+input,select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-sm);
+  font:inherit;background:#fff;color:var(--ink)}
+.note{background:var(--blue-050);border-radius:var(--r-sm);padding:10px 12px;font-size:13px;color:var(--blue-700);margin-bottom:14px}
+.err{background:var(--danger-bg);color:var(--danger-ink);border-radius:var(--r-sm);padding:10px 12px;font-size:13.5px;margin-top:10px}
+.done{background:var(--ok-bg);color:var(--ok);border-radius:var(--r-sm);padding:14px;font-size:14px;text-align:center;margin-top:10px}
+.linkish{background:none;border:0;color:var(--blue-600);font:inherit;font-weight:600;cursor:pointer;padding:0;text-decoration:underline}
+.roleChoice{display:flex;gap:10px;margin-bottom:14px}
+.roleChoice label{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:var(--r-sm);
+  padding:10px 14px;cursor:pointer;flex:1;font-weight:600;color:var(--ink)}
+.roleChoice input{width:auto}
+.nWrap{position:fixed;inset:0;background:rgba(8,15,46,.4);display:none;z-index:60;padding:70px 14px 14px}
+.nWrap.on{display:block}
+.nPanel{max-width:420px;margin-inline-start:auto;background:var(--card);border-radius:var(--r);box-shadow:var(--sh);
+  max-height:70vh;overflow-y:auto}
+.nItem{padding:12px 16px;border-bottom:1px solid var(--line);font-size:13.5px}
+.nItem.unread{background:var(--blue-050)}
+.nItem b{display:block;font-size:14px;margin-bottom:2px}
+footer{background:var(--navy);color:var(--footer-text);padding:24px 0;font-size:13px;margin-top:30px}
+footer a{color:var(--footer-link)}
+@media(max-width:600px){h1{font-size:20px}.f2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap hd">
+    <a class="logo" href="/">
+      <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g fill="#FFFFFF"><path d="M6 28h8v14H6z"/><path d="M17 18l11-6v30H17z"/><path d="M31 24l10-3v21H31z"/></g>
+        <rect x="20" y="24" width="6" height="6" fill="var(--amber)"/>
+      </svg>
+      <span class="wordwrap"><span class="word">موضع</span><span class="sub">MAWDI</span></span>
+    </a>
+    <div class="cta">
+      <button class="bell" id="bellBtn" onclick="toggleNotifPanel()" style="display:none">🔔<span class="dot" id="bellCount" style="display:none">0</span></button>
+      <button class="btn ghost sm" id="langBtn" onclick="toggleLang()">EN</button>
+      <button class="btn ghost sm" id="logoutBtn" onclick="doLogout()" style="display:none">تسجيل خروج</button>
+      <a class="btn ghost sm" href="/">الصفحة الرئيسية</a>
+    </div>
+  </div>
+</header>
+
+<div class="nWrap" id="nWrap" onclick="if(event.target===this)toggleNotifPanel()">
+  <div class="nPanel" id="nPanel"></div>
+</div>
+
+<div class="wrap">
+  <div id="doc"><div class="msg" id="loadingMsg">جارِ التحميل…</div></div>
+</div>
+
+<footer><div class="wrap">
+  <b style="color:#fff">موضع</b> — <span id="footNote">حسابك اختياري: التصفّح وإضافة الإعلانات وطلبات البحث تعمل دائماً بدون تسجيل دخول.</span>
+</div></footer>
+
+<script>
+const SUPABASE_URL = "https://yckteijitcqjtedoyoyv.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlja3RlaWppdGNxanRlZG95b3l2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MjA3MTksImV4cCI6MjEwMzQ5NjcxOX0.mAY5A6ROvtxN4kkD8g1s_tsDlSjGfy4TCNkgbYHeRvo";
+
+let LANG = MAWDI_LANG;
+const tt = (ar, en) => LANG === "en" ? en : ar;
+function toggleLang(){
+  const next = LANG === "ar" ? "en" : "ar";
+  try{ localStorage.setItem("mawdi_lang", next); }catch(e){}
+  location.reload();
+}
+const esc = s => String(s??"").replace(/[&<>"']/g,
+  c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const $ = id => document.getElementById(id);
+const money = n => n==null ? "—" : Number(n).toLocaleString(LANG==="en"?"en-US":"ar-EG")+" ₪";
+const dt = d => d ? new Date(d).toLocaleDateString(LANG==="en"?"en-US":"ar-EG",{day:"numeric",month:"long"}) : "—";
+
+/* ═══════════════ الجلسة — access_token/refresh_token بـsessionStorage فقط ═══════════════ */
+const SESSION_KEY = "mawdi_session";
+function getSession(){
+  try{ return JSON.parse(sessionStorage.getItem(SESSION_KEY) || "null"); }catch(e){ return null; }
+}
+function setSession(s){
+  try{ sessionStorage.setItem(SESSION_KEY, JSON.stringify(s)); }catch(e){}
+}
+function clearSession(){
+  try{ sessionStorage.removeItem(SESSION_KEY); }catch(e){}
+}
+
+async function authFetch(path, opt={}){
+  const s = getSession();
+  const token = (s && s.access_token) || SUPABASE_ANON_KEY;
+  const r = await fetch(SUPABASE_URL+path, {...opt, headers:{
+    apikey: SUPABASE_ANON_KEY, Authorization:"Bearer "+token,
+    "Content-Type":"application/json", ...(opt.headers||{})
+  }});
+  const txt = await r.text();
+  let data=null; try{ data = txt ? JSON.parse(txt) : null; }catch(e){}
+  if(!r.ok) throw {status:r.status, data};
+  return data;
+}
+const rpc = (fn, body={}) => authFetch("/rest/v1/rpc/"+fn, {method:"POST", body:JSON.stringify(body)});
+
+async function doSignup(email, password){
+  return authFetch("/auth/v1/signup", {method:"POST", body:JSON.stringify({email, password})});
+}
+async function doLogin(email, password){
+  return authFetch("/auth/v1/token?grant_type=password", {method:"POST", body:JSON.stringify({email, password})});
+}
+async function doLogout(){
+  try{ await authFetch("/auth/v1/logout", {method:"POST"}); }catch(e){}
+  clearSession();
+  location.reload();
+}
+
+/* ═══════════════ الإشعارات ═══════════════ */
+async function loadNotifCount(){
+  const s = getSession(); if(!s) return;
+  try{
+    const rows = await authFetch(`/rest/v1/notifications?select=id&account_uid=eq.${s.user.id}&is_read=eq.false`);
+    const n = rows.length;
+    $("bellBtn").style.display = "";
+    if(n > 0){ $("bellCount").style.display = "flex"; $("bellCount").textContent = n; }
+    else $("bellCount").style.display = "none";
+  }catch(e){}
+}
+async function toggleNotifPanel(){
+  const w = $("nWrap");
+  if(w.classList.contains("on")){ w.classList.remove("on"); return; }
+  w.classList.add("on");
+  const s = getSession(); if(!s) return;
+  $("nPanel").innerHTML = `<div class="msg">${tt("جارِ التحميل…","Loading…")}</div>`;
+  try{
+    const rows = await authFetch(`/rest/v1/notifications?select=*&account_uid=eq.${s.user.id}&order=created_at.desc&limit=30`);
+    $("nPanel").innerHTML = rows.length ? rows.map(n => `
+      <div class="nItem${n.is_read?"":" unread"}">
+        <b>${esc(n.title)}</b>${n.body?esc(n.body):""}
+        <div class="meta">${dt(n.created_at)}</div>
+      </div>`).join("") : `<div class="msg">${tt("لا توجد إشعارات بعد.","No notifications yet.")}</div>`;
+    const unreadIds = rows.filter(n=>!n.is_read).map(n=>n.id);
+    if(unreadIds.length){
+      await authFetch(`/rest/v1/notifications?id=in.(${unreadIds.join(",")})`,
+        {method:"PATCH", headers:{Prefer:"return=minimal"}, body:JSON.stringify({is_read:true})});
+      $("bellCount").style.display = "none";
+    }
+  }catch(e){
+    $("nPanel").innerHTML = `<div class="msg">${tt("تعذّر تحميل الإشعارات.","Couldn't load notifications.")}</div>`;
+  }
+}
+
+/* ═══════════════ نماذج الدخول والتسجيل ═══════════════ */
+function authFormHTML(){
+  return `
+  <h1>${tt("حسابي","My account")}</h1>
+  <div class="sub">${tt("الحساب اختياري — يعطيك متابعة إعلاناتك وطلباتك وإشعارات فورية.","An account is optional — it gives you tracking for your listings, requests, and instant notifications.")}</div>
+  <div class="note">${tt("لست بحاجة لحساب لتصفّح السكن أو إضافة إعلان أو تسجيل طلب — هذه كلها تعمل بدون تسجيل دخول.",
+    "You don't need an account to browse housing, add a listing, or register a request — all of that works without logging in.")}</div>
+  <div class="tabs">
+    <button class="tab on" id="tabLogin" onclick="setAuthTab('login')">${tt("دخول","Log in")}</button>
+    <button class="tab" id="tabSignup" onclick="setAuthTab('signup')">${tt("إنشاء حساب","Sign up")}</button>
+  </div>
+  <div class="card" id="authCard"></div>`;
+}
+let AUTH_TAB = "login";
+function setAuthTab(t){
+  AUTH_TAB = t;
+  $("tabLogin").classList.toggle("on", t==="login");
+  $("tabSignup").classList.toggle("on", t==="signup");
+  renderAuthCard();
+}
+function renderAuthCard(){
+  $("authCard").innerHTML = AUTH_TAB === "login" ? `
+    <div class="fg"><label>${tt("البريد الإلكتروني","Email")}</label><input id="loEmail" type="email"></div>
+    <div class="fg"><label>${tt("كلمة السر","Password")}</label><input id="loPass" type="password"></div>
+    <div id="loErr"></div>
+    <button class="btn acc" style="width:100%" onclick="submitLogin()">${tt("دخول","Log in")}</button>
+  ` : `
+    <div class="fg"><label>${tt("البريد الإلكتروني","Email")}</label><input id="suEmail" type="email"></div>
+    <div class="fg"><label>${tt("كلمة السر (٦ أحرف على الأقل)","Password (at least 6 characters)")}</label><input id="suPass" type="password"></div>
+    <div id="suErr"></div>
+    <button class="btn acc" style="width:100%" onclick="submitSignup()">${tt("إنشاء حساب","Sign up")}</button>
+  `;
+}
+async function submitLogin(){
+  $("loErr").innerHTML = "";
+  const email = $("loEmail").value.trim(), pass = $("loPass").value;
+  if(!email || !pass) return $("loErr").innerHTML = `<div class="err">${tt("أدخل البريد وكلمة السر.","Enter your email and password.")}</div>`;
+  try{
+    const s = await doLogin(email, pass);
+    setSession(s);
+    location.reload();
+  }catch(e){
+    $("loErr").innerHTML = `<div class="err">${tt("بيانات الدخول غير صحيحة.","Invalid login credentials.")}</div>`;
+  }
+}
+async function submitSignup(){
+  $("suErr").innerHTML = "";
+  const email = $("suEmail").value.trim(), pass = $("suPass").value;
+  if(!email || pass.length < 6) return $("suErr").innerHTML = `<div class="err">${tt("أدخل بريداً صحيحاً وكلمة سر ٦ أحرف على الأقل.","Enter a valid email and a password of at least 6 characters.")}</div>`;
+  try{
+    const r = await doSignup(email, pass);
+    if(r && r.access_token){
+      setSession(r);
+      location.reload();
+    }else{
+      $("authCard").innerHTML = `<div class="done">${tt("تم إنشاء الحساب ✓ تحقّق من بريدك لتأكيده، ثم سجّل الدخول.","Account created ✓ Check your email to confirm it, then log in.")}</div>`;
+    }
+  }catch(e){
+    $("suErr").innerHTML = `<div class="err">${tt("تعذّر إنشاء الحساب. ربما البريد مستخدم مسبقاً.","Couldn't create the account. The email may already be in use.")}</div>`;
+  }
+}
+
+/* ═══════════════ ربط صفة جديدة (مالك/باحث) ═══════════════ */
+function linkRoleFormHTML(role){
+  const label = role === "owner" ? tt("مالك","Owner") : tt("باحث/ة","Seeker");
+  return `<div class="card">
+    <h2 style="margin-top:0">${tt("فعّل صفة ","Activate role: ")}${label}</h2>
+    <div class="fg"><label>${tt("اسمك","Your name")}</label><input id="lr_name_${role}"></div>
+    <div class="fg"><label>${tt("رقم الهاتف","Phone number")}</label><input id="lr_phone_${role}" placeholder="+970599123456"></div>
+    <div id="lr_err_${role}"></div>
+    <button class="btn acc" onclick="submitLinkRole('${role}')">${tt("تفعيل","Activate")}</button>
+  </div>`;
+}
+async function submitLinkRole(role){
+  const name = $(`lr_name_${role}`).value.trim(), phone = $(`lr_phone_${role}`).value.trim();
+  const errEl = $(`lr_err_${role}`);
+  errEl.innerHTML = "";
+  if(name.length < 2 || phone.length < 8){
+    errEl.innerHTML = `<div class="err">${tt("اكتب اسمك ورقم هاتفك.","Enter your name and phone number.")}</div>`;
+    return;
+  }
+  try{
+    await rpc("link_account_role", {p_role:role, p_name:name, p_phone:phone});
+    renderDashboard();
+  }catch(e){
+    errEl.innerHTML = `<div class="err">${tt("حدث خطأ. حاول مرة أخرى.","Something went wrong. Try again.")}</div>`;
+  }
+}
+
+/* ═══════════════ لوحة المالك ═══════════════ */
+const L_STATUS = LANG==="en" ? {draft:"Draft",pending:"Pending review",published:"Published",rejected:"Rejected",
+  reserved:"Reserved",rented:"Rented",expired:"Expired"} :
+  {draft:"مسودّة",pending:"بانتظار المراجعة",published:"منشور",rejected:"مرفوض",
+   reserved:"محجوز",rented:"مؤجّر",expired:"منتهي"};
+const L_VERIF = LANG==="en" ? {none:"Not verified",desk:"Phone-verified",field:"Field-verified"} :
+  {none:"غير موثّق",desk:"توثيق مكتبي",field:"توثيق ميداني"};
+const C_STATUS = LANG==="en" ? {new:"New",forwarded:"Forwarded to you",owner_responded:"You replied",
+  viewing_set:"Viewing arranged",rented:"Rented",dead:"Closed"} :
+  {new:"جديد",forwarded:"محوّل إلك",owner_responded:"رديت عليه",
+   viewing_set:"معاينة محدّدة",rented:"تم التأجير",dead:"مغلق"};
+const statusCls = s => ({published:"ok",rented:"ok",rejected:"bad",dead:"bad"}[s] || "");
+
+function listingCard(l){
+  const soon = l.status==="published" && l.days_left!=null && l.days_left<=3;
+  const confirmBtn = l.status==="published"
+    ? `<a class="btn line sm" href="/?confirm=${esc(l.ref)}&t=${esc(l.confirm_token)}">${tt("تأكيد أنها ما زالت متاحة","Confirm still available")}</a>`
+    : "";
+  return `<div class="card">
+    <div class="row">
+      <div>
+        <div class="title">${esc(l.title)}</div>
+        <div class="ref">${esc(l.ref)} · ${esc(l.city)} — ${esc(l.area)} · ${money(l.price)}/${tt("شهر","mo")}</div>
+      </div>
+      <div class="tags">
+        <span class="t ${statusCls(l.status)}">${esc(L_STATUS[l.status]||l.status)}</span>
+        ${l.verification!=="none"?'<span class="t">'+esc(L_VERIF[l.verification]||l.verification)+"</span>":""}
+      </div>
+    </div>
+    <div class="meta">
+      ${l.status==="published" && l.days_left!=null
+        ? (soon ? `<b style="color:var(--warn)">${tt("بحاجة لتأكيد — تنتهي بعد","Needs confirmation — expires in")} ${l.days_left} ${tt("يوم","days")}</b>`
+                : `${tt("تنتهي بعد","Expires in")} ${l.days_left} ${tt("يوم","days")}`)
+        : ""}
+      ${l.view_count!=null ? " · "+l.view_count+" "+tt("مشاهدة","views") : ""}
+      ${l.status==="rejected" && l.reject_reason ? " · "+tt("سبب الرفض: ","Reason: ")+esc(l.reject_reason) : ""}
+    </div>
+    ${confirmBtn?'<div class="acts">'+confirmBtn+"</div>":""}
+  </div>`;
+}
+function requestCard(r){
+  const phone = r.seeker_phone;
+  return `<div class="card">
+    <div class="row">
+      <div>
+        <div class="title">${esc(r.seeker_name||tt("باحث/ة","Seeker"))}</div>
+        <div class="ref">${tt("على إعلانك:","On your listing:")} ${esc(r.listing_ref)} — ${esc(r.listing_title)} · ${dt(r.created_at)}</div>
+      </div>
+      <span class="t ${statusCls(r.status)}">${esc(C_STATUS[r.status]||r.status)}</span>
+    </div>
+    ${phone ? `<div class="acts">
+      <a class="btn line sm" href="tel:${esc(phone)}">${tt("اتصال","Call")} <span class="phone">${esc(phone)}</span></a>
+      <a class="btn line sm" target="_blank" rel="noopener"
+         href="https://wa.me/${esc(String(phone).replace(/^\+/,""))}">WhatsApp</a>
+    </div>` : `<div class="meta">${tt("الطلب قيد المراجعة — سيظهر رقمه هنا فور تحويله إليك.","Request under review — the number appears here once forwarded to you.")}</div>`}
+  </div>`;
+}
+
+async function renderOwnerSection(){
+  let d;
+  try{ d = await rpc("my_owner_dashboard"); }catch(e){ return `<div class="empty">${tt("تعذّر تحميل لوحة المالك.","Couldn't load the owner dashboard.")}</div>`; }
+  const listings = d.listings || [], requests = d.requests || [];
+  return `
+    <h2>${tt("إعلاناتك","Your listings")} (${listings.length})</h2>
+    ${listings.length ? listings.map(listingCard).join("") : `<div class="empty">${tt("لا توجد إعلانات مسجّلة بعد.","No listings registered yet.")}</div>`}
+    <h2>${tt("طلبات التواصل","Contact requests")} (${requests.length})</h2>
+    ${requests.length ? requests.map(requestCard).join("") : `<div class="empty">${tt("لم يصل أي طلب تواصل بعد.","No contact requests yet.")}</div>`}
+  `;
+}
+async function renderSeekerSection(){
+  let d;
+  try{ d = await rpc("my_seeker_dashboard"); }catch(e){ return `<div class="empty">${tt("تعذّر تحميل لوحة الباحث.","Couldn't load the seeker dashboard.")}</div>`; }
+  const requests = d.requests || [], saved = d.saved || [];
+  return `
+    <h2>${tt("طلباتك","Your requests")} (${requests.length})</h2>
+    ${requests.length ? requests.map(r => `<div class="card">
+      <div class="row"><div class="title">${esc(r.city||"")}</div>
+        <span class="t ${r.status==='published'?'ok':''}">${esc(r.status)}</span></div>
+      <div class="meta">${tt("حتى","Up to")} ${money(r.budget_max)} · ${dt(r.created_at)}</div>
+    </div>`).join("") : `<div class="empty">${tt("لا توجد طلبات مسجّلة بعد.","No requests registered yet.")}</div>`}
+    <h2>${tt("الوحدات المحفوظة","Saved housing")} (${saved.length})</h2>
+    ${saved.length ? saved.map(s => `<div class="card">
+      <div class="title">${esc(s.title||tt("إعلان محذوف","Removed listing"))}</div>
+      <div class="meta">${esc(s.city||"")} ${s.area?"— "+esc(s.area):""} ${s.price?"· "+money(s.price):""}</div>
+    </div>`).join("") : `<div class="empty">${tt("لم تحفظ أي إعلان بعد.","You haven't saved any listing yet.")}</div>`}
+  `;
+}
+
+/* ═══════════════ التوجيه العام ═══════════════ */
+async function renderDashboard(){
+  const doc = $("doc");
+  doc.innerHTML = `<div class="msg">${tt("جارِ التحميل…","Loading…")}</div>`;
+  let profiles = [];
+  try{ profiles = await rpc("my_profile"); }catch(e){
+    clearSession(); location.reload(); return;
+  }
+  const hasOwner = profiles.some(p=>p.role==="owner");
+  const hasSeeker = profiles.some(p=>p.role==="seeker");
+
+  let html = `<h1>${tt("مرحباً بك","Welcome")}</h1>
+    <div class="sub">${tt("هذه لوحتك الشخصية.","This is your personal dashboard.")}</div>`;
+
+  if(!hasOwner && !hasSeeker){
+    html += `<div class="note">${tt("فعّل صفتك لتظهر لوحتك — يمكنك تفعيل الاثنتين.","Activate a role to see your dashboard — you can activate both.")}</div>`;
+    html += linkRoleFormHTML("owner") + linkRoleFormHTML("seeker");
+  }else{
+    if(hasOwner) html += await renderOwnerSection();
+    else html += `<div class="card">${linkRoleFormHTML("owner")}</div>`;
+    if(hasSeeker) html += await renderSeekerSection();
+    else html += `<div class="card">${linkRoleFormHTML("seeker")}</div>`;
+  }
+  doc.innerHTML = html;
+  loadNotifCount();
+}
+
+/* ═══════════════ الإقلاع ═══════════════ */
+(function(){
+  $("pageTitle").textContent = tt("حسابي — موضع","My account — Mawdi");
+  $("langBtn").textContent = LANG === "ar" ? "EN" : "عربي";
+  $("logoutBtn").textContent = tt("تسجيل خروج","Log out");
+  $("footNote").textContent = tt(
+    "حسابك اختياري: التصفّح وإضافة الإعلانات وطلبات البحث تعمل دائماً بدون تسجيل دخول.",
+    "Your account is optional: browsing, adding listings, and registering requests always work without logging in.");
+
+  const s = getSession();
+  if(s && s.access_token){
+    $("logoutBtn").style.display = "";
+    renderDashboard();
+  }else{
+    $("doc").innerHTML = authFormHTML();
+    renderAuthCard();
+  }
+})();
+</script>
+</body>
+</html>

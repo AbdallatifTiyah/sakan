@@ -11,49 +11,72 @@ document.documentElement.dir  = MAWDI_LANG === "en" ? "ltr" : "rtl";
 </script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title id="pageTitle">موضع — غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت</title>
-<meta id="metaDesc" name="description" content="غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت. كل إعلان موثّق هاتفياً، وقسم كبير منها زارها مندوبنا شخصياً. أرقام الهواتف محمية.">
-<meta id="ogTitle" property="og:title" content="موضع — غرف وسكن مشترك موثّق">
-<meta id="ogDesc" property="og:description" content="غرف موثّقة في رام الله والبيرة وبيرزيت.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<title id="pageTitle">موضع — سكن موثّق في رام الله والبيرة وبيرزيت</title>
+<meta id="metaDesc" name="description" content="سكن موثّق في رام الله والبيرة وبيرزيت. كل إعلان موثّق هاتفياً، وقسم كبير منه تمت زيارته ميدانياً من مندوبنا. أرقام الهواتف تبقى محمية دائماً.">
+<meta id="ogTitle" property="og:title" content="موضع — سكن موثّق">
+<meta id="ogDesc" property="og:description" content="سكن موثّق في رام الله والبيرة وبيرزيت.">
 <meta id="ogSiteName" property="og:site_name" content="موضع">
 <meta id="ogLocale" property="og:locale" content="ar_PS">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Archivo:wght@600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --brand:#12634E; --brand-d:#0C4839; --accent:#C4682B;
-  --bg:#FAF7F2; --card:#FFFFFF; --ink:#15201C; --mut:#6B7B75;
-  --line:#E4DED4; --ok:#1B7F4C; --warn:#B4531B;
-  --r:14px; --sh:0 1px 2px rgba(20,32,28,.05), 0 8px 24px rgba(20,32,28,.06);
+  /* الأساسي */
+  --blue-700:#12309B; --blue-600:#1E45D6; --blue-500:#3A63F0;
+  --blue-100:#E4EAFF; --blue-050:#F2F5FF;
+  /* التمييز — الوحيد */
+  --amber:#F5A524; --amber-ink:#9A5B00;
+  /* المحايدة */
+  --navy:#080F2E; --ink:#080F2E; --mut:#6B748F;
+  --bg:#F2F5FF; --card:#FFFFFF; --line:#E1E6F5;
+  /* الدلالية */
+  --ok:#12A150; --warn:#C2410C; --danger:#DC2626;
+  --ok-bg:#E1F5EA; --ok-ink:#0B7A3D; --warn-bg:#FBEBDD; --danger-bg:#FCE9E8; --danger-ink:#9F1D18;
+  --amber-hover:#E2941C; --footer-link:#D7DDF3; --footer-text:#AEB8D6;
+  /* الشكل */
+  --r-sm:8px; --r:14px; --r-lg:20px; --r-xl:28px; --r-pill:999px;
+  --sh:0 10px 30px rgba(8,15,46,.10);
+  /* المسافات */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);
   font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,sans-serif;line-height:1.7}
-a{color:var(--brand);text-decoration:none}
+a{color:var(--blue-600);text-decoration:none}
 .wrap{max-width:1080px;margin:0 auto;padding:0 18px}
+.lat{font-family:'Archivo',sans-serif}
 
-header{background:var(--brand);color:#fff}
+header{background:var(--blue-700);color:#fff}
 .hd{display:flex;align-items:center;justify-content:space-between;padding:16px 0;gap:12px;flex-wrap:wrap}
-.logo{font-size:28px;font-weight:700;letter-spacing:-1px}
-.logo span{display:block;font-size:12px;font-weight:400;opacity:.85;letter-spacing:0}
+.brandmark{display:flex;align-items:center;gap:10px}
+.brandmark svg{width:36px;height:36px;flex:none}
+.brandmark .wordwrap{display:flex;flex-direction:column;line-height:1.1}
+.brandmark .word{font-size:28px;font-weight:700}
+.brandmark .sub{font-size:11px;font-weight:600;letter-spacing:.18em;color:rgba(255,255,255,.75)}
 .hd .cta{display:flex;gap:8px;align-items:center}
-.btn{border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer;
-  background:var(--brand);color:#fff;transition:.15s}
-.btn:hover{background:var(--brand-d)}
+.btn{border:0;border-radius:var(--r-sm);padding:10px 16px;font:inherit;font-weight:600;cursor:pointer;
+  background:var(--blue-600);color:#fff;transition:.15s}
+.btn:hover{background:var(--blue-700)}
 .btn.ghost{background:rgba(255,255,255,.14);color:#fff}
 .btn.ghost:hover{background:rgba(255,255,255,.24)}
-.btn.line{background:#fff;color:var(--brand);border:1px solid var(--line)}
-.btn.line:hover{background:#F3F0EA}
-.btn.acc{background:var(--accent)} .btn.acc:hover{background:#A9551F}
+.btn.line{background:#fff;color:var(--blue-600);border:1px solid var(--line)}
+.btn.line:hover{background:var(--blue-050)}
+.btn.acc{background:var(--amber);color:var(--navy)} .btn.acc:hover{background:var(--amber-hover)}
 .btn[disabled]{opacity:.55;cursor:not-allowed}
 .btn.sm{padding:8px 12px;font-size:13px}
 
-.hero{padding:26px 0 30px;background:var(--brand);color:#fff}
+.hero{padding:26px 0 30px;background:var(--blue-700);color:#fff}
 .hero h1{margin:0 0 8px;font-size:26px;line-height:1.4}
 .hero p{margin:0;opacity:.9;font-size:15px}
 .trust{display:flex;gap:18px;flex-wrap:wrap;margin-top:16px;font-size:13px;opacity:.95}
 .trust b{font-weight:600}
+
+.modeSwitch{display:inline-flex;background:var(--blue-050);border-radius:var(--r-pill);padding:4px;gap:4px;margin-top:14px}
+.modeBtn{border:0;background:transparent;font:inherit;font-weight:600;color:var(--blue-700);
+  padding:10px 20px;border-radius:var(--r-pill);cursor:pointer}
+.modeBtn.on{background:var(--blue-600);color:#fff}
 
 nav.tabs{display:flex;gap:6px;padding:14px 0 0}
 .tab{border:0;background:transparent;font:inherit;font-weight:600;color:var(--mut);
@@ -62,7 +85,7 @@ nav.tabs{display:flex;gap:6px;padding:14px 0 0}
 
 .filters{background:var(--card);border-radius:0 var(--r) var(--r) var(--r);padding:14px;
   box-shadow:var(--sh);display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-select,input,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+select,input,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-sm);
   font:inherit;background:#fff;color:var(--ink)}
 textarea{min-height:80px;resize:vertical}
 label{display:block;font-size:13px;color:var(--mut);margin-bottom:4px;font-weight:500}
@@ -77,24 +100,32 @@ html[dir="ltr"] .tel input{text-align:left}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
 .chip{position:relative;display:inline-flex}
 .chip input{position:absolute;opacity:0;width:0;height:0}
-.chip span{display:inline-block;padding:7px 13px;border:1px solid var(--line);border-radius:99px;
+.chip span{display:inline-block;padding:7px 13px;border:1px solid var(--line);border-radius:var(--r-pill);
   background:#fff;font-size:13.5px;cursor:pointer;user-select:none;transition:.12s;line-height:1.5}
-.chip input:checked + span{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:600}
-.chip input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
-.chips-box{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff;
+.chip input:checked + span{background:var(--blue-600);border-color:var(--blue-600);color:#fff;font-weight:600}
+.chip input:focus-visible + span{outline:2px solid var(--blue-500);outline-offset:2px}
+.chip-btn{border:1px solid var(--line);border-radius:var(--r-pill);background:#fff;font:inherit;
+  font-size:13.5px;padding:8px 15px;cursor:pointer;color:var(--ink)}
+.chip-btn.on{background:var(--blue-600);border-color:var(--blue-600);color:#fff;font-weight:600}
+.chips-box{border:1px solid var(--line);border-radius:var(--r-sm);padding:10px;background:#fff;
   max-height:190px;overflow-y:auto}
 .hint{font-size:12.5px;color:var(--mut);margin-top:6px}
 
 .count{padding:16px 0 8px;color:var(--mut);font-size:14px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px;padding-bottom:40px}
+.grid{display:flex;flex-direction:column;gap:14px;padding-bottom:40px}
 .card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;
-  cursor:pointer;transition:.15s;border:1px solid transparent}
-.card:hover{transform:translateY(-2px);border-color:var(--line)}
-.thumb{height:120px;background:linear-gradient(135deg,#DDE9E4,#EFE7DA);
-  display:flex;align-items:center;justify-content:center;font-size:34px;color:var(--brand);opacity:.8;
+  cursor:pointer;transition:.15s;border:1px solid transparent;display:flex}
+.card:hover{border-color:var(--line)}
+.thumb{width:220px;flex:none;background:linear-gradient(135deg,var(--blue-050),var(--blue-100));
+  display:flex;align-items:center;justify-content:center;font-size:34px;color:var(--blue-600);opacity:.85;
   background-size:cover;background-position:center}
 .gal{display:flex;gap:2px;overflow-x:auto;scroll-snap-type:x mandatory;background:#000}
 .gal img{width:100%;max-width:100%;height:230px;object-fit:cover;flex:0 0 100%;scroll-snap-align:start;cursor:zoom-in}
+.thumbstrip{display:flex;gap:6px;padding:8px;background:#000}
+.thumbstrip img{width:56px;height:56px;object-fit:cover;border-radius:8px;cursor:pointer;flex:none;opacity:.7}
+.thumbstrip img.cur{opacity:1;outline:2px solid var(--amber)}
+.thumbstrip .more{width:56px;height:56px;border-radius:8px;background:rgba(255,255,255,.15);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:700;flex:none;cursor:pointer;font-size:13px}
 .lightbox{position:fixed;inset:0;background:rgba(8,12,10,.94);z-index:80;display:none;
   align-items:center;justify-content:center}
 .lightbox.on{display:flex}
@@ -114,28 +145,31 @@ html[dir="ltr"] .tel input{text-align:left}
 .imgp img{width:100%;height:100%;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
 .imgp button{position:absolute;top:-6px;left:-6px;width:20px;height:20px;border-radius:50%;
   border:1px solid var(--line);background:#fff;cursor:pointer;font-size:12px;line-height:1;padding:0}
-.card .b{padding:14px}
+.card .b{padding:14px;flex:1;min-width:0}
 .card h3{margin:0 0 6px;font-size:17px;line-height:1.5}
 .meta{color:var(--mut);font-size:13px;margin-bottom:10px}
-.price{font-size:20px;font-weight:700;color:var(--brand)}
+.price{font-size:20px;font-weight:700;color:var(--blue-700)}
 .price small{font-size:12px;font-weight:400;color:var(--mut)}
 .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.t{font-size:12px;padding:3px 9px;border-radius:99px;background:#F1EEE8;color:var(--mut)}
-.t.v{background:#E4F1EA;color:var(--ok);font-weight:600}
-.t.d{background:#FBEFE3;color:var(--warn);font-weight:600}
+.t{font-size:12px;padding:3px 9px;border-radius:var(--r-pill);background:var(--blue-050);color:var(--mut)}
+.t.v{background:var(--ok-bg);color:var(--ok);font-weight:600}
+.t.d{background:var(--blue-100);color:var(--blue-700);font-weight:600}
 
 .empty{background:var(--card);border-radius:var(--r);padding:40px;text-align:center;color:var(--mut);
-  box-shadow:var(--sh);grid-column:1/-1}
+  box-shadow:var(--sh)}
 
-.ov{position:fixed;inset:0;background:rgba(16,26,22,.55);display:none;z-index:50;
+.safe-cam{background:var(--blue-050);border:1px solid var(--blue-100);border-radius:var(--r-sm);
+  padding:10px 14px;display:flex;gap:8px;align-items:center;font-weight:600;color:var(--blue-700);margin-bottom:10px}
+
+.ov{position:fixed;inset:0;background:rgba(8,15,46,.55);display:none;z-index:50;
   overflow-y:auto;padding:24px 14px}
 .ov.on{display:block}
-.modal{background:var(--bg);max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden}
-.mh{background:var(--brand);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.modal{background:var(--bg);max-width:600px;margin:0 auto;border-radius:var(--r-lg);overflow:hidden}
+.mh{background:var(--blue-700);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .mh h2{margin:0;font-size:19px}
 .x{background:rgba(255,255,255,.16);border:0;color:#fff;width:32px;height:32px;border-radius:8px;
   font-size:20px;cursor:pointer;flex:none}
-.mb{padding:20px}
+.mb{padding:20px 20px 90px}
 .sec{background:var(--card);border-radius:var(--r);padding:16px;margin-bottom:14px;box-shadow:var(--sh)}
 .sec h4{margin:0 0 10px;font-size:15px}
 .row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line);font-size:14px;gap:10px}
@@ -144,30 +178,46 @@ html[dir="ltr"] .tel input{text-align:left}
 .row span:last-child{text-align:end}
 .chk{display:flex;align-items:center;gap:8px;font-size:14px;padding:4px 0}
 .chk i{font-style:normal;width:20px;flex:none}
-.yes{color:var(--ok)} .no{color:#B00020} .unk{color:var(--mut)}
-.note{background:#FBF6EE;border-inline-start:3px solid var(--accent);padding:10px 12px;border-radius:8px;
-  font-size:13px;color:#6B4A2C;margin-top:10px}
-.err{background:#FDECEC;border-inline-start:3px solid #B00020;padding:10px 12px;border-radius:8px;
-  font-size:13px;color:#8A0018;margin-top:10px}
-.done{background:#E8F5EE;border-inline-start:3px solid var(--ok);padding:14px;border-radius:8px;
-  font-size:14px;color:#0E5C36;margin-top:10px}
+.yes{color:var(--ok)} .no{color:var(--danger)} .unk{color:var(--mut)}
+.note{background:var(--blue-050);border-inline-start:3px solid var(--blue-500);padding:10px 12px;border-radius:var(--r-sm);
+  font-size:13px;color:var(--blue-700);margin-top:10px}
+.err{background:var(--danger-bg);border-inline-start:3px solid var(--danger);padding:10px 12px;border-radius:var(--r-sm);
+  font-size:13px;color:var(--danger-ink);margin-top:10px}
+.done{background:var(--ok-bg);border-inline-start:3px solid var(--ok);padding:14px;border-radius:var(--r-sm);
+  font-size:14px;color:var(--ok-ink);margin-top:10px}
 .f2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .fg{margin-bottom:12px}
-.linkish{background:none;border:0;color:var(--brand);font:inherit;font-weight:600;
+.linkish{background:none;border:0;color:var(--blue-600);font:inherit;font-weight:600;
   cursor:pointer;padding:0;text-decoration:underline}
-footer{background:#101B18;color:#9FB2AC;padding:26px 0;font-size:13px;margin-top:20px}
-footer a,footer .linkish{color:#CFE0DA}
-@media(max-width:640px){.f2{grid-template-columns:1fr}.hero h1{font-size:22px}.tel select{flex:0 0 108px}}
+footer{background:var(--navy);color:var(--footer-text);padding:26px 0;font-size:13px;margin-top:20px}
+footer a,footer .linkish{color:var(--footer-link)}
+.stickyBar{display:none}
+@media(max-width:640px){
+  .f2{grid-template-columns:1fr}
+  .hero h1{font-size:22px}
+  .tel select{flex:0 0 108px}
+  .card{flex-direction:column}
+  .thumb{width:100%;height:150px}
+  .stickyBar{display:flex;position:fixed;bottom:0;inset-inline:0;background:var(--card);
+    box-shadow:0 -4px 16px rgba(8,15,46,.14);padding:10px 14px;align-items:center;
+    justify-content:space-between;gap:12px;z-index:90}
+}
 </style>
 </head>
 <body>
 
 <header>
   <div class="wrap hd">
-    <div class="logo">موضع<span id="tagline">غرف وسكن مشترك موثّق</span></div>
+    <div class="brandmark">
+      <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g fill="#FFFFFF"><path d="M6 28h8v14H6z"/><path d="M17 18l11-6v30H17z"/><path d="M31 24l10-3v21H31z"/></g>
+        <rect x="20" y="24" width="6" height="6" fill="var(--amber)"/>
+      </svg>
+      <div class="wordwrap"><span class="word">موضع</span><span class="sub lat">MAWDI</span></div>
+    </div>
     <div class="cta">
-      <button class="btn ghost" id="btnAddRoom" onclick="openForm('listing')">أضف غرفة</button>
-      <button class="btn ghost" id="btnFindHome" onclick="openForm('request')">أبحث عن سكن</button>
+      <button class="btn ghost" id="btnAddRoom" onclick="openForm('listing')">أضف عقارك</button>
+      <button class="btn ghost" id="btnFindHome" onclick="openForm('request')">ابحث عن سكن</button>
       <button class="btn ghost" id="langBtn" onclick="toggleLang()">EN</button>
     </div>
   </div>
@@ -175,19 +225,23 @@ footer a,footer .linkish{color:#CFE0DA}
 
 <section class="hero">
   <div class="wrap">
-    <h1 id="heroH1">دور على موضعك.</h1>
-    <p id="heroP">مكانك الموثوق.</p>
+    <h1 id="heroH1">ابحث عن موضعك.</h1>
+    <p id="heroP">سكن موثّق في رام الله والبيرة وبيرزيت.</p>
     <div class="trust">
       <div id="trust1">✓ <b>توثيق هاتفي</b> لكل إعلان</div>
-      <div id="trust2">✓ <b>رقمك محمي</b> — ما بينعرض لحدا</div>
-      <div id="trust3">✓ <b>بدون إعلانات ميتة</b></div>
+      <div id="trust2">✓ <b>رقم هاتفك لا يظهر</b> لأي مستخدم</div>
+      <div id="trust3">✓ <b>بدون إعلانات منتهية الصلاحية</b></div>
+    </div>
+    <div class="modeSwitch" role="tablist">
+      <button class="modeBtn on" id="modeSearch" onclick="setMode('search')">ابحث عن سكن</button>
+      <button class="modeBtn" id="modeAdd" onclick="setMode('add')">أضف عقارك</button>
     </div>
   </div>
 </section>
 
 <div class="wrap">
   <nav class="tabs">
-    <button class="tab on" id="tabL" onclick="setTab('L')">غرف متاحة</button>
+    <button class="tab on" id="tabL" onclick="setTab('L')">سكن متاح</button>
     <button class="tab" id="tabR" onclick="setTab('R')">باحثون عن سكن</button>
   </nav>
 
@@ -210,11 +264,12 @@ footer a,footer .linkish{color:#CFE0DA}
 
 <footer>
   <div class="wrap">
-    <b style="color:#fff">موضع</b> — <span id="footTagline">منصة تأجير غرف وسكن مشترك موثّق.</span><br>
-    <span id="footPrivacy">الخصوصية أولاً: ما بننشر أرقام هواتف ولا عناوين دقيقة ولا جهات عمل على الموقع أبداً.</span><br>
+    <b style="color:#fff">موضع</b> — <span id="footTagline">منصة سكن موثّق.</span><br>
+    <span id="footPrivacy">الخصوصية أولاً: لا نُنشر أرقام الهواتف ولا العناوين الدقيقة ولا جهات العمل على الموقع مطلقاً.</span><br>
     <button class="linkish" id="footContact" onclick="openReport(null,null)">تواصل معنا أو قدّم شكوى</button>
-    &nbsp;·&nbsp; <a href="/page.html?p=how-it-works" id="footHow">كيف بشتغل موضع</a>
+    &nbsp;·&nbsp; <a href="/page.html?p=how-it-works" id="footHow">كيف يعمل موضع</a>
     &nbsp;·&nbsp; <a href="/institutions.html" id="footInst">لمؤسستك أو شركتك</a>
+    &nbsp;·&nbsp; <a href="/account.html" id="footAccount">حسابي</a>
     &nbsp;·&nbsp; <a href="/page.html?p=privacy" id="footPriv">سياسة الخصوصية</a>
     &nbsp;·&nbsp; <a href="/page.html?p=terms" id="footTerms">شروط الاستخدام</a>
   </div>
@@ -236,36 +291,40 @@ function paintChrome(){
   document.getElementById("langBtn").textContent = LANG === "ar" ? "EN" : "عربي";
 
   $("pageTitle").textContent = tt(
-    "موضع — غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت",
-    "Mawdi — Verified rooms & shared housing in Ramallah, Al-Bireh & Birzeit");
+    "موضع — سكن موثّق في رام الله والبيرة وبيرزيت",
+    "Mawdi — Verified housing in Ramallah, Al-Bireh & Birzeit");
   $("metaDesc").content = tt(
-    "غرف وسكن مشترك موثّق في رام الله والبيرة وبيرزيت. كل إعلان موثّق هاتفياً، وقسم كبير منها زارها مندوبنا شخصياً. أرقام الهواتف محمية.",
-    "Verified rooms and shared housing in Ramallah, Al-Bireh and Birzeit. Every listing is phone-verified, many visited in person. Phone numbers stay private.");
-  $("ogTitle").content = tt("موضع — غرف وسكن مشترك موثّق", "Mawdi — Verified shared housing");
-  $("ogDesc").content = tt("غرف موثّقة في رام الله والبيرة وبيرزيت.", "Verified rooms in Ramallah, Al-Bireh and Birzeit.");
+    "سكن موثّق في رام الله والبيرة وبيرزيت. كل إعلان موثّق هاتفياً، وقسم كبير منه تمت زيارته ميدانياً من مندوبنا. أرقام الهواتف تبقى محمية دائماً.",
+    "Verified housing in Ramallah, Al-Bireh and Birzeit. Every listing is phone-verified, and many are visited in person by our agent. Phone numbers always stay private.");
+  $("ogTitle").content = tt("موضع — سكن موثّق", "Mawdi — Verified housing");
+  $("ogDesc").content = tt("سكن موثّق في رام الله والبيرة وبيرزيت.", "Verified housing in Ramallah, Al-Bireh and Birzeit.");
   $("ogSiteName").content = tt("موضع", "Mawdi");
   $("ogLocale").content = LANG === "en" ? "en_US" : "ar_PS";
 
-  $("tagline").textContent = tt("غرف وسكن مشترك موثّق", "Verified rooms & shared housing");
-  $("btnAddRoom").textContent = tt("أضف غرفة", "List a room");
-  $("btnFindHome").textContent = tt("أبحث عن سكن", "Looking for a room");
+  $("btnAddRoom").textContent = tt("أضف عقارك", "Add your property");
+  $("btnFindHome").textContent = tt("ابحث عن سكن", "Search for housing");
 
-  $("heroH1").textContent = tt("دور على موضعك.", "Find your place.");
-  $("heroP").textContent = tt("مكانك الموثوق.", "Your trusted place.");
+  $("heroH1").textContent = tt("ابحث عن موضعك.", "Find your place.");
+  $("heroH1").classList.toggle("lat", LANG==="en");
+  $("heroP").textContent = tt("سكن موثّق في رام الله والبيرة وبيرزيت.", "Verified housing in Ramallah, Al-Bireh and Birzeit.");
   $("trust1").innerHTML = tt("✓ <b>توثيق هاتفي</b> لكل إعلان", "✓ <b>Phone-verified</b> listings");
-  $("trust2").innerHTML = tt("✓ <b>رقمك محمي</b> — ما بينعرض لحدا", "✓ <b>Your number stays private</b>");
-  $("trust3").innerHTML = tt("✓ <b>بدون إعلانات ميتة</b>", "✓ <b>No dead listings</b>");
+  $("trust2").innerHTML = tt("✓ <b>رقم هاتفك لا يظهر</b> لأي مستخدم", "✓ <b>Your number never shown</b> to any user");
+  $("trust3").innerHTML = tt("✓ <b>بدون إعلانات منتهية الصلاحية</b>", "✓ <b>No expired listings</b>");
 
-  $("tabL").textContent = tt("غرف متاحة", "Available rooms");
-  $("tabR").textContent = tt("باحثون عن سكن", "Room seekers");
+  $("modeSearch").textContent = tt("ابحث عن سكن", "Search for housing");
+  $("modeAdd").textContent = tt("أضف عقارك", "Add your property");
 
-  $("footTagline").textContent = tt("منصة تأجير غرف وسكن مشترك موثّق.", "A platform for verified room rentals & shared housing.");
+  $("tabL").textContent = tt("سكن متاح", "Available housing");
+  $("tabR").textContent = tt("باحثون عن سكن", "Housing seekers");
+
+  $("footTagline").textContent = tt("منصة سكن موثّق.", "A platform for verified housing.");
   $("footPrivacy").textContent = tt(
-    "الخصوصية أولاً: ما بننشر أرقام هواتف ولا عناوين دقيقة ولا جهات عمل على الموقع أبداً.",
+    "الخصوصية أولاً: لا نُنشر أرقام الهواتف ولا العناوين الدقيقة ولا جهات العمل على الموقع مطلقاً.",
     "Privacy first: we never publish phone numbers, exact addresses, or workplaces on the site.");
   $("footContact").textContent = tt("تواصل معنا أو قدّم شكوى", "Contact us / report an issue");
-  $("footHow").textContent = tt("كيف بشتغل موضع", "How Mawdi works");
+  $("footHow").textContent = tt("كيف يعمل موضع", "How Mawdi works");
   $("footInst").textContent = tt("لمؤسستك أو شركتك", "For institutions & companies");
+  $("footAccount").textContent = tt("حسابي", "My account");
   $("footPriv").textContent = tt("سياسة الخصوصية", "Privacy policy");
   $("footTerms").textContent = tt("شروط الاستخدام", "Terms of use");
 
@@ -334,8 +393,8 @@ const FEATURES = [
   {slug:"balcony",          ar:"بلكونة",                en:"Balcony"},
   {slug:"parking",          ar:"موقف سيارة",            en:"Parking"},
   {slug:"elevator",         ar:"مصعد",                 en:"Elevator"},
-  {slug:"near_transport",   ar:"قريب مواصلات",          en:"Near public transport"},
-  {slug:"cooking_allowed",  ar:"مسموح الطبخ",           en:"Cooking allowed"},
+  {slug:"near_transport",   ar:"قرب وسائل المواصلات",    en:"Near public transport"},
+  {slug:"cooking_allowed",  ar:"يُسمح بالطبخ",          en:"Cooking allowed"},
   {slug:"private_entrance", ar:"مدخل مستقل",            en:"Private entrance"},
   {slug:"room_lock",        ar:"قفل على باب الغرفة",     en:"Lock on room door"}
 ];
@@ -348,12 +407,12 @@ const FEATURE_LABEL = slug => {
 const TAGS = [
   {slug:"quiet",             ar:"هادئ/ة",           en:"Quiet"},
   {slug:"non_smoker",        ar:"غير مدخّن/ة",        en:"Non-smoker"},
-  {slug:"wfh",               ar:"بشتغل من البيت",     en:"Works from home"},
+  {slug:"wfh",               ar:"يعمل/تعمل من المنزل", en:"Works from home"},
   {slug:"university_hours",  ar:"دوام جامعي",        en:"University schedule"},
-  {slug:"tidy",              ar:"بحب النظام",         en:"Tidy / organized"},
+  {slug:"tidy",              ar:"منظّم/ة",            en:"Tidy / organized"},
   {slug:"religious",         ar:"ملتزم/ة دينياً",      en:"Religiously observant"},
-  {slug:"no_guests",         ar:"ما بستقبل ضيوف",     en:"Doesn't host guests"},
-  {slug:"early_riser",       ar:"صاحي/ة بكير",       en:"Early riser"}
+  {slug:"no_guests",         ar:"بدون استقبال ضيوف",   en:"Doesn't host guests"},
+  {slug:"early_riser",       ar:"يستيقظ/تستيقظ باكراً", en:"Early riser"}
 ];
 const TAG_LABEL = slug => {
   const t = TAGS.find(x=>x.slug===slug);
@@ -362,18 +421,18 @@ const TAG_LABEL = slug => {
 
 const REPORT_CATS = LANG === "en" ? {
   fake_listing:"Fake listing or false information",
-  already_rented:"Room already rented",
+  already_rented:"Housing already rented",
   harassment:"Harassment or inappropriate behavior",
-  entered_room:"Entered the room without permission",
+  entered_room:"Entered the housing without permission",
   deposit:"Deposit dispute",
   camera:"Camera inside the housing",
   other:"General inquiry or other complaint"
 } : {
   fake_listing:"إعلان وهمي أو معلومات غير صحيحة",
-  already_rented:"الغرفة مؤجّرة أصلاً",
+  already_rented:"السكن مؤجَّر مسبقاً",
   harassment:"تحرش أو سلوك غير لائق",
-  entered_room:"دخول الغرفة بدون إذن",
-  deposit:"مشكلة بالتأمين",
+  entered_room:"دخول السكن بدون إذن",
+  deposit:"خلاف على مبلغ التأمين",
   camera:"كاميرا داخل السكن",
   other:"استفسار عام أو شكوى أخرى"
 };
@@ -422,6 +481,13 @@ const areaName = id => localeName(AREAS.find(a=>a.id===Number(id)));
 const areaCity = id => (AREAS.find(a=>a.id===Number(id))||{}).city_id || null;
 const cityName = id => localeName(CITIES.find(c=>c.id===Number(id)));
 
+/* ═══════════════ وضع البحث/الإضافة ═══════════════ */
+function setMode(m){
+  if(m==="add"){ openForm("listing"); return; }
+  $("modeSearch").classList.add("on");
+  $("modeAdd").classList.remove("on");
+}
+
 /* ═══════════════ الهاتف ═══════════════ */
 function telHTML(idSel, idNum){
   const opts = DIAL.map(d=>`<option value="${d.c}"${d.c==="PS"?" selected":""}>${d.n} +${d.d}</option>`).join("");
@@ -447,8 +513,8 @@ function telValue(idSel, idNum){
 function telError(idSel){
   const d = DIAL.find(x=>x.c===$(idSel).value) || DIAL[0];
   return d.min===d.max
-    ? tt(`رقم ${d.n} لازم يكون ${d.min} خانات. مثال: ${d.ex}`, `${d.n} number must be ${d.min} digits. Example: ${d.ex}`)
-    : tt(`رقم ${d.n} لازم يكون بين ${d.min} و${d.max} خانة. مثال: ${d.ex}`, `${d.n} number must be between ${d.min} and ${d.max} digits. Example: ${d.ex}`);
+    ? tt(`يجب أن يتكوّن رقم ${d.n} من ${d.min} خانات. مثال: ${d.ex}`, `${d.n} number must be ${d.min} digits. Example: ${d.ex}`)
+    : tt(`يجب أن يتكوّن رقم ${d.n} من ${d.min} إلى ${d.max} خانة. مثال: ${d.ex}`, `${d.n} number must be between ${d.min} and ${d.max} digits. Example: ${d.ex}`);
 }
 
 /* ═══════════════ شرائح الاختيار ═══════════════ */
@@ -463,6 +529,34 @@ function chipsHTML(name, items, opt={}){
 }
 const chipsValue = name =>
   [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(i=>i.value);
+
+/* شرائح فئة السكن — مبنية من قيم listing_kind الفعلية، تستخدم لفلتر النوع */
+function kindChipsHTML(){
+  return `<div class="chips" id="fKindChips">
+    <button type="button" class="chip-btn${!F.kind?" on":""}" onclick="setKindFilter('')">${tt("الكل","All")}</button>
+    ${Object.entries(KIND).map(([k,v])=>
+      `<button type="button" class="chip-btn${F.kind===k?" on":""}" onclick="setKindFilter('${k}')">${esc(v)}</button>`).join("")}
+  </div>`;
+}
+function setKindFilter(k){ F.kind = k; renderFilters(); render(); }
+
+/* شرائح رقمية 1 2 3 4 +5 — بدل حقل رقمي لعدد الغرف بالسكن */
+function roomChipsHTML(id){
+  const opts = [1,2,3,4,5];
+  return `<div class="chips" id="${id}_chips">` +
+    opts.map(n=>`<button type="button" class="chip-btn" data-n="${n}" onclick="pickRoomChip('${id}',${n})">${n<5?n:"+5"}</button>`).join("") +
+    `</div><input type="hidden" id="${id}">`;
+}
+function pickRoomChip(id, n){
+  $(id).value = n;
+  syncRoomChip(id);
+  saveDraft();
+}
+function syncRoomChip(id){
+  const box = $(id+"_chips"); if(!box) return;
+  const v = Number($(id).value);
+  box.querySelectorAll(".chip-btn").forEach(b=>b.classList.toggle("on", Number(b.dataset.n)===v));
+}
 
 /* ═══════════════ التبويبات والفلاتر ═══════════════ */
 function setTab(t){
@@ -496,12 +590,9 @@ function renderFilters(){
 
   $("filters").innerHTML = TAB==="L" ? `
     <div style="grid-column:1/-1"><label>${tt("ابحث بالعنوان أو الوصف","Search by title or description")}</label>
-      <input id="fQ" placeholder="${tt("مثلاً: مفروشة، قرب بيرزيت…","e.g. furnished, near Birzeit…")}" value="${esc(F.q||"")}"
+      <input id="fQ" placeholder="${tt("مثلاً: مفروش، قرب بيرزيت…","e.g. furnished, near Birzeit…")}" value="${esc(F.q||"")}"
         oninput="F.q=this.value;render()"></div>` + common + `
-    <div><label>${tt("النوع","Type")}</label><select onchange="F.kind=this.value;render()">
-      <option value="">${tt("الكل","All")}</option>
-      ${Object.entries(KIND).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}
-    </select></div>
+    <div style="grid-column:1/-1"><label>${tt("نوع السكن","Housing type")}</label>${kindChipsHTML()}</div>
     <div><label>${tt("السكن لـ","Housing for")}</label><select onchange="F.pol=this.value;render()">
       <option value="">${tt("الكل","All")}</option><option value="female">${POL.female}</option>
       <option value="male">${POL.male}</option><option value="mixed">${POL.mixed}</option></select></div>
@@ -529,10 +620,10 @@ function render(){
       (!F.pol  || x.gender_pol===F.pol) &&
       (!F.max  || Number(x.price) <= Number(toEN(F.max))) &&
       (!q || (x.title||"").toLowerCase().includes(q) || (x.description||"").toLowerCase().includes(q)));
-    count.textContent = d.length ? tt(`${d.length} غرفة متاحة`, `${d.length} rooms available`) : "";
+    count.textContent = d.length ? tt(`${d.length} سكن متاح`, `${d.length} homes available`) : "";
     grid.innerHTML = d.length ? d.map(cardL).join("") :
-      `<div class="empty">${tt("ما في غرف بتطابق البحث حالياً.","No rooms match your search right now.")}<br><br>
-       <button class="btn" onclick="openForm('request')">${tt("سجّل طلبك وبنخبرك أول ما تنزل","Register your request and we'll notify you")}</button></div>`;
+      `<div class="empty">${tt("لا يتوفر سكن يطابق البحث حالياً.","No housing matches your search right now.")}<br><br>
+       <button class="btn" onclick="openForm('request')">${tt("سجّل طلبك وسنخبرك فور توفّر ما يناسبك","Register your request and we'll notify you when something matches")}</button></div>`;
   }else{
     const d = R.filter(x =>
       (!F.city || String(x.city_id)===String(F.city)) &&
@@ -541,7 +632,7 @@ function render(){
       (!F.occ  || x.occupation===F.occ));
     count.textContent = d.length ? tt(`${d.length} باحث عن سكن`, `${d.length} people looking for housing`) : "";
     grid.innerHTML = d.length ? d.map(cardR).join("") :
-      `<div class="empty">${tt("ما في طلبات بتطابق البحث حالياً.","No requests match your search right now.")}</div>`;
+      `<div class="empty">${tt("لا توجد طلبات تطابق البحث حالياً.","No requests match your search right now.")}</div>`;
   }
 }
 function cardL(x){
@@ -593,24 +684,27 @@ function countView(id){
   rpc("bump_listing_view", {p_id:id}).catch(()=>{});
 }
 
-/* ═══════════════ تفاصيل الغرفة ═══════════════ */
-/* ثلاث حالات: نعم / لا / ما انفحص — لأن القيمة بتيجي null إذا المندوب
+/* ═══════════════ تفاصيل السكن ═══════════════ */
+/* ثلاث حالات: نعم / لا / لم يُفحص — لأن القيمة بتيجي null إذا المندوب
    ما فحص البند، وعرضها ✕ حمرا كان بيوصل معلومة غلط للباحث */
 function chk3(v, txt){
   if(v === true)  return `<div class="chk"><i class="yes">✓</i>${txt}</div>`;
   if(v === false) return `<div class="chk"><i class="no">✕</i>${txt}</div>`;
-  return `<div class="chk"><i class="unk">–</i><span style="color:var(--mut)">${txt} — ${tt("ما انفحص","not checked")}</span></div>`;
+  return `<div class="chk"><i class="unk">–</i><span style="color:var(--mut)">${txt} — ${tt("لم يُفحص","not checked")}</span></div>`;
 }
 function openL(id){
   const x = L.find(a=>a.id===id); if(!x) return;
   countView(id);
+  const camHighlight = x.no_indoor_cameras === true
+    ? `<div class="safe-cam">✓ ${tt("تأكّد مندوبنا: لا توجد كاميرات داخل السكن","Confirmed by our agent: no indoor cameras")}</div>` : "";
   const visit = x.visit_date ? `<div class="sec">
       <h4>${tt("فحص المندوب الميداني — زيارة","Field agent visit —")} ${dt(x.visit_date)}</h4>
-      ${chk3(x.room_exists,tt("الغرفة موجودة فعلياً كما بالوصف","The room exists as described"))}
+      ${camHighlight}
+      ${chk3(x.room_exists,tt("السكن موجود فعلياً كما بالوصف","The housing exists as described"))}
       ${chk3(x.photos_match,tt("الصور مطابقة للواقع","Photos match reality"))}
       ${chk3(x.door_lock,tt("باب الغرفة عليه قفل","Room door has a lock"))}
       ${chk3(x.occupants_verified,tt("تم التحقق من الساكنين الحاليين","Current occupants verified"))}
-      ${chk3(x.no_indoor_cameras,tt("ما شفنا كاميرات داخل السكن وقت الزيارة","No indoor cameras seen during the visit"))}
+      ${x.no_indoor_cameras===true?"":chk3(x.no_indoor_cameras,tt("لم نشاهد كاميرات داخل السكن وقت الزيارة","No indoor cameras seen during the visit"))}
       ${chk3(x.private_bathroom,tt("حمام خاص","Private bathroom"))}
       ${chk3(x.kitchen_access,tt("وصول للمطبخ","Kitchen access"))}
       ${chk3(x.hot_water,tt("ماء ساخن","Hot water"))}
@@ -620,17 +714,19 @@ function openL(id){
       ${chk3(x.emergency_exit,tt("مخرج طوارئ","Emergency exit"))}
       ${chk3(x.street_access,tt("وصول الشارع للمبنى","Street access to the building"))}
       ${chk3(x.gas_detector,tt("كاشف غاز","Gas detector"))}
-      <div class="note">${tt("هاي ملاحظات مندوبنا وقت الزيارة، مش ضمانة دائمة. إذا لاحظت إشي مخالف بلّغنا فوراً.",
+      <div class="note">${tt("هذه ملاحظات مندوبنا وقت الزيارة، وليست ضماناً دائماً. إذا لاحظت أي أمر مخالف أبلغنا فوراً.",
         "These are our agent's notes from the visit, not a permanent guarantee. If something's different, report it right away.")}</div>
     </div>` : "";
 
-  const feats = (x.features||[]).length ? `<div class="sec"><h4>${tt("مواصفات الغرفة","Room features")}</h4>
+  const feats = (x.features||[]).length ? `<div class="sec"><h4>${tt("مواصفات السكن","Housing features")}</h4>
       <div class="tags">${x.features.map(f=>`<span class="t">${esc(FEATURE_LABEL(f))}</span>`).join("")}</div></div>` : "";
 
   const imgs = Array.isArray(x.images) ? x.images : [];
   CUR_IMGS = imgs;
   const gallery = imgs.length
     ? `<div class="gal">${imgs.map((u,i)=>`<img src="${esc(u)}" alt="${esc(x.title)}" onclick="openLightbox(${i})">`).join("")}</div>` : "";
+  const thumbs = imgs.length > 1
+    ? `<div class="thumbstrip">${imgs.slice(0,4).map((u,i)=>`<img src="${esc(u)}" class="${i===0?"cur":""}" onclick="openLightbox(${i})">`).join("")}${imgs.length>4?`<div class="more" onclick="openLightbox(4)">+${imgs.length-4}</div>`:""}</div>` : "";
 
   $("modal").innerHTML = `
     <div class="mh"><h2>${esc(x.title)}</h2>
@@ -640,6 +736,7 @@ function openL(id){
         <button class="x" onclick="closeAll()">×</button>
       </div></div>
     ${gallery}
+    ${thumbs}
     <div class="mb">
       <div class="sec">
         <div class="price" style="font-size:26px">${nis(x.price)}<small> ${tt("/ شهر","/ month")}</small></div>
@@ -656,16 +753,16 @@ function openL(id){
         <div class="row"><span>${tt("أقل مدة","Min. stay")}</span><span>${x.min_stay_months?x.min_stay_months+" "+tt("شهر","months"):"—"}</span></div>
         <div class="row"><span>${tt("عدد الغرف بالسكن","Rooms in the unit")}</span><span>${x.rooms_total||"—"}</span></div>
         <div class="row"><span>${tt("الساكنون حالياً","Current occupants")}</span><span>${x.occupants_now??"—"}</span></div>
-        <div class="row"><span>${tt("الفواتير","Bills")}</span><span>${x.bills_included?tt("مشمولة بالسعر","Included in price"):tt("مش محسوبة بالسعر","Not included")}</span></div>
+        <div class="row"><span>${tt("الفواتير","Bills")}</span><span>${x.bills_included?tt("مشمولة بالسعر","Included in price"):tt("غير محسوبة بالسعر","Not included")}</span></div>
         ${x.deposit?`<div class="row"><span>${tt("التأمين (مسترد)","Deposit (refundable)")}</span><span>${nis(x.deposit)}</span></div>`:""}
         ${x.occupants_note?`<div class="note">${esc(x.occupants_note)}</div>`:""}
       </div>
       ${feats}
       ${visit}
-      <div class="sec">
+      <div class="sec" id="contactSec">
         <h4>${tt("تواصل مع المالك","Contact the owner")}</h4>
         <p style="font-size:14px;color:var(--mut);margin:0 0 12px">
-          ${tt("ما بنعرض أرقام هواتف على الموقع. اترك اسمك ورقمك وبنوصله للمالك، وبنتابع معك خلال ٢٤ ساعة.",
+          ${tt("لا نعرض أرقام الهواتف على الموقع. اترك اسمك ورقمك وسنوصله إلى المالك، ونتابع معك خلال ٢٤ ساعة.",
             "We don't publish phone numbers on the site. Leave your name and number and we'll pass it to the owner, then follow up with you within 24 hours.")}</p>
         <div id="cWrap">
           <div class="fg"><label>${tt("الاسم","Name")}</label><input id="cName" placeholder="${tt("اسمك","Your name")}"></div>
@@ -675,8 +772,12 @@ function openL(id){
             onclick="sendContact('${x.id}','${esc(x.ref)}')">${tt("أرسل طلب تواصل","Send contact request")}</button>
         </div>
       </div>
-      <div class="note">${tt("إعلان غير صحيح أو في مشكلة؟","Listing incorrect or a problem?")}
+      <div class="note">${tt("إعلان غير صحيح أو فيه مشكلة؟","Listing incorrect or a problem?")}
         <button class="linkish" onclick="openReport('${x.id}','${esc(x.ref)}')">${tt("قدّم بلاغ","Report it")}</button></div>
+    </div>
+    <div class="stickyBar">
+      <b>${nis(x.price)}</b>
+      <button class="btn acc" onclick="document.getElementById('cName').scrollIntoView({behavior:'smooth',block:'center'});document.getElementById('cName').focus()">${tt("اطلب تواصل","Request contact")}</button>
     </div>`;
   wireDigits($("modal"));
   $("ov").classList.add("on");
@@ -693,7 +794,7 @@ function shareListing(ref, title){
     const b = $("shareBtn");
     if(!b) return;
     const old = b.textContent;
-    b.textContent = tt("انتسخ الرابط ✓","Link copied ✓");
+    b.textContent = tt("تم نسخ الرابط ✓","Link copied ✓");
     setTimeout(()=>{ b.textContent = old; }, 1800);
   }).catch(()=>{});
 }
@@ -707,12 +808,12 @@ async function sendContact(id, ref){
   try{
     await api("contact_requests", {method:"POST", headers:{Prefer:"return=minimal"},
       body: JSON.stringify({listing_id:id, seeker_name:n, seeker_phone:p})});
-    $("cWrap").innerHTML = `<div class="done">${tt("وصلنا طلبك ✓","Your request is in ✓")}<br>
-      ${tt(`بنتواصل معك خلال ٢٤ ساعة بخصوص الإعلان ${esc(ref)}.`, `We'll contact you within 24 hours about listing ${esc(ref)}.`)}</div>`;
+    $("cWrap").innerHTML = `<div class="done">${tt("تم استلام طلبك ✓","Your request is in ✓")}<br>
+      ${tt(`سنتواصل معك خلال ٢٤ ساعة بخصوص الإعلان ${esc(ref)}.`, `We'll contact you within 24 hours about listing ${esc(ref)}.`)}</div>`;
   }catch(e){
     $("cWrap").innerHTML = e.status===409
-      ? `<div class="done">${tt("سبق وأرسلت طلب لهذا الإعلان. بنتواصل معك قريباً.","You've already requested this listing. We'll be in touch soon.")}</div>`
-      : `<div class="err">${tt("صار خطأ. جرّب مرة ثانية بعد شوي.","Something went wrong. Try again in a bit.")}</div>`;
+      ? `<div class="done">${tt("سبق أن أرسلت طلباً لهذا الإعلان. سنتواصل معك قريباً.","You've already requested this listing. We'll be in touch soon.")}</div>`
+      : `<div class="err">${tt("حدث خطأ أثناء الإرسال. حاول مرة أخرى بعد قليل.","Something went wrong. Try again in a bit.")}</div>`;
   }
 }
 
@@ -728,7 +829,7 @@ function openR(id){
       <div class="row"><span>${tt("المدينة","City")}</span><span>${esc(x.city||"—")}</span></div>
       <div class="row"><span>${tt("المناطق المفضّلة","Preferred areas")}</span><span>${areas.join(" · ")||tt("مرن — أي منطقة","Flexible — any area")}</span></div>
       <div class="row"><span>${tt("نوع السكن","Housing type")}</span><span>${KIND[x.kind_pref]||tt("مرن","Flexible")}</span></div>
-      <div class="row"><span>${tt("مفروش؟","Furnished?")}</span><span>${x.furnished_pref===null||x.furnished_pref===undefined?tt("مرن","Flexible"):(x.furnished_pref?tt("يفضّل مفروش","Prefers furnished"):tt("مش ضروري","Not required"))}</span></div>
+      <div class="row"><span>${tt("مفروش؟","Furnished?")}</span><span>${x.furnished_pref===null||x.furnished_pref===undefined?tt("مرن","Flexible"):(x.furnished_pref?tt("يفضّل مفروش","Prefers furnished"):tt("غير ضروري","Not required"))}</span></div>
       <div class="row"><span>${tt("تاريخ الانتقال","Move-in date")}</span><span>${dt(x.move_in_date)}</span></div>
       <div class="row"><span>${tt("أقل مدة","Min. stay")}</span><span>${x.min_stay_months?x.min_stay_months+" "+tt("شهر","months"):"—"}</span></div>
       <div class="row"><span>${tt("التدخين","Smoking")}</span><span>${x.smoker===null||x.smoker===undefined?"—":(x.smoker?tt("مدخّن/ة","Smoker"):tt("غير مدخّن/ة","Non-smoker"))}</span></div>
@@ -736,13 +837,13 @@ function openR(id){
         ${x.lifestyle_tags.map(t=>`<span class="t">${esc(TAG_LABEL(t))}</span>`).join("")}</div>`:""}
       ${x.note?`<div class="note">${esc(x.note)}</div>`:""}
       <p style="font-size:14px;color:var(--mut);margin-top:14px">
-        ${tt("عندك غرفة بتناسبه/ا؟ اترك بياناتك وبنوصلك فيه/ا مباشرة.","Have a room that fits? Leave your info and we'll connect you directly.")}</p>
+        ${tt("هل لديك سكن يناسبه/ا؟ اترك بياناتك وسنوصلك به/ا مباشرة.","Have housing that fits? Leave your info and we'll connect you directly.")}</p>
       <div id="cWrap">
         <div class="fg"><label>${tt("اسمك","Your name")}</label><input id="cName" placeholder="${tt("اسمك","Your name")}"></div>
         <div class="fg"><label>${tt("رقم الواتساب","WhatsApp number")}</label>${telHTML("cDial","cPhone")}</div>
         <div id="cErr"></div>
         <button class="btn acc" style="width:100%" onclick="sendMatch('${x.id}','${esc(x.ref)}')">
-          ${tt("عندي غرفة مناسبة","I have a matching room")}</button>
+          ${tt("لديّ سكن مناسب","I have matching housing")}</button>
       </div>
     </div></div>`;
   wireDigits($("modal"));
@@ -757,10 +858,10 @@ async function sendMatch(reqId, ref){
   try{
     await api("contact_requests", {method:"POST", headers:{Prefer:"return=minimal"},
       body: JSON.stringify({request_id:reqId, seeker_name:n, seeker_phone:p})});
-    $("cWrap").innerHTML = `<div class="done">${tt("وصلنا ✓","Received ✓")}<br>
-      ${tt(`بنتواصل معك خلال ٢٤ ساعة بخصوص الطلب ${esc(ref)}.`, `We'll contact you within 24 hours about request ${esc(ref)}.`)}</div>`;
+    $("cWrap").innerHTML = `<div class="done">${tt("تم الاستلام ✓","Received ✓")}<br>
+      ${tt(`سنتواصل معك خلال ٢٤ ساعة بخصوص الطلب ${esc(ref)}.`, `We'll contact you within 24 hours about request ${esc(ref)}.`)}</div>`;
   }catch(e){
-    $("cWrap").innerHTML = `<div class="err">${tt("صار خطأ. جرّب مرة ثانية بعد شوي.","Something went wrong. Try again in a bit.")}</div>`;
+    $("cWrap").innerHTML = `<div class="err">${tt("حدث خطأ أثناء الإرسال. حاول مرة أخرى بعد قليل.","Something went wrong. Try again in a bit.")}</div>`;
   }
 }
 
@@ -772,13 +873,13 @@ function openReport(listingId, ref){
     <div class="mh"><h2>${listingId ? tt("بلاغ عن إعلان ","Report on listing ")+esc(ref) : tt("تواصل معنا","Contact us")}</h2>
       <button class="x" onclick="closeAll()">×</button></div>
     <div class="mb"><div class="sec" id="rpWrap">
-      <div class="note">${tt("كل بلاغ بيوصلنا مباشرة وبينفحص. ما بنعطي المالك أي معلومة عنك.","Every report reaches us directly and gets reviewed. We never share your info with the owner.")}</div>
+      <div class="note">${tt("كل بلاغ يصلنا مباشرة ويُراجَع. لا نُطلع المالك على أي معلومة عنك.","Every report reaches us directly and gets reviewed. We never share your info with the owner.")}</div>
       <div class="fg" style="margin-top:12px"><label>${tt("نوع البلاغ","Report type")}</label>
         <select id="rpCat">${listingId?cats:`<option value="other">${tt("استفسار عام أو شكوى","General inquiry or complaint")}</option>`+cats}</select></div>
       <div class="fg"><label>${tt("التفاصيل","Details")}</label>
-        <textarea id="rpDet" placeholder="${tt("احكيلنا شو صار بالتفصيل — إيمتى، ووين، ومين كان موجود.","Tell us what happened in detail — when, where, and who was involved.")}"></textarea></div>
+        <textarea id="rpDet" placeholder="${tt("اشرح لنا ما حدث بالتفصيل — متى، وأين، ومن كان موجوداً.","Tell us what happened in detail — when, where, and who was involved.")}"></textarea></div>
       <div class="fg"><label>${tt("رقمك للتواصل (اختياري)","Your contact number (optional)")}</label>${telHTML("rpDial","rpPhone")}
-        <div class="hint">${tt("إذا ما تركت رقم بنستلم البلاغ بس ما بنقدر نرجعلك بالنتيجة.","Without a number we'll still receive the report, but can't follow up with you.")}</div></div>
+        <div class="hint">${tt("دون رقم هاتف سيصلنا البلاغ، لكن لن نتمكن من إبلاغك بالنتيجة.","Without a number we'll still receive the report, but can't follow up with you.")}</div></div>
       <div id="rpErr"></div>
       <button class="btn acc" style="width:100%"
         onclick="sendReport(${listingId?`'${listingId}'`:"null"})">${tt("أرسل البلاغ","Send report")}</button>
@@ -801,10 +902,10 @@ async function sendReport(listingId){
     await api("reports", {method:"POST", headers:{Prefer:"return=minimal"},
       body: JSON.stringify({listing_id:listingId, category:$("rpCat").value,
                             details:det, reporter_phone:phone, status:"open"})});
-    $("rpWrap").innerHTML = `<div class="done">${tt("وصلنا بلاغك ✓","Your report is in ✓")}<br>
-      ${tt("بنراجعه خلال ٢٤ ساعة. شكراً إنك حميت غيرك.","We'll review it within 24 hours. Thanks for looking out for others.")}</div>`;
+    $("rpWrap").innerHTML = `<div class="done">${tt("تم استلام بلاغك ✓","Your report is in ✓")}<br>
+      ${tt("سنراجعه خلال ٢٤ ساعة. شكراً لحرصك على سلامة الآخرين.","We'll review it within 24 hours. Thanks for looking out for others.")}</div>`;
   }catch(e){
-    $("rpErr").innerHTML = `<div class="err">${tt("صار خطأ بالإرسال. جرّب مرة ثانية بعد شوي.","Something went wrong sending this. Try again in a bit.")}</div>`;
+    $("rpErr").innerHTML = `<div class="err">${tt("حدث خطأ أثناء الإرسال. حاول مرة أخرى بعد قليل.","Something went wrong sending this. Try again in a bit.")}</div>`;
   }
 }
 
@@ -830,8 +931,8 @@ function onReqCity(){
   $("rAreasBox").innerHTML = cid
     ? (list.length
         ? chipsHTML("rAreas", list, {val:a=>a.id, lbl:localeName})
-        : `<div class="hint">${tt("ما في مناطق مسجّلة لهاي المدينة بعد.","No areas registered for this city yet.")}</div>`)
-    : `<div class="hint">${tt("قم باختيار المدينة أولاً.","Choose a city first.")}</div>`;
+        : `<div class="hint">${tt("لا توجد مناطق مسجّلة لهذه المدينة بعد.","No areas registered for this city yet.")}</div>`)
+    : `<div class="hint">${tt("اختر المدينة أولاً.","Choose a city first.")}</div>`;
 }
 
 /* ═══════════════ صور الإعلان ═══════════════ */
@@ -876,21 +977,21 @@ async function uploadImages(){
 function openForm(kind){
   selectedImages = [];
   $("modal").innerHTML = kind==="listing" ? `
-    <div class="mh"><h2>${tt("أضف غرفة للإيجار","List a room for rent")}</h2><button class="x" onclick="closeAll()">×</button></div>
+    <div class="mh"><h2>${tt("أضف سكنك للإيجار","List your housing for rent")}</h2><button class="x" onclick="closeAll()">×</button></div>
     <div class="mb"><div class="sec">
       <div id="draftBanner"></div>
-      <div class="note">${tt("رقمك ما بينعرض على الموقع أبداً. بنستخدمه للتواصل معك وترتيب التوثيق فقط.",
+      <div class="note">${tt("رقم هاتفك لا يظهر على الموقع مطلقاً. نستخدمه للتواصل معك وترتيب التوثيق فقط.",
         "Your number is never shown on the site. We use it only to reach you and arrange verification.")}</div>
 
       <div class="fg" style="margin-top:12px"><label>${tt("اسمك","Your name")}</label><input id="lName"></div>
       <div class="fg"><label>${tt("رقم الواتساب","WhatsApp number")}</label>${telHTML("lDial","lPhone")}</div>
       <div class="fg"><label>${tt("عنوان الإعلان","Listing title")}</label>
-        <input id="lTitle" placeholder="${tt("مثلاً: غرفة في شقة طالبات — الطيرة","e.g. Room in a student apartment — Al-Tira")}"></div>
+        <input id="lTitle" placeholder="${tt("مثلاً: سكن مشترك للطالبات — الطيرة","e.g. Shared student housing — Al-Tira")}"></div>
 
-      <div class="fg"><label>${tt("صور الغرفة (اختياري، حتى ٦ صور)","Room photos (optional, up to 6)")}</label>
+      <div class="fg"><label>${tt("صور السكن (اختياري، حتى ٦ صور)","Housing photos (optional, up to 6)")}</label>
         <input type="file" id="lImgsInput" accept="image/jpeg,image/png,image/webp" multiple onchange="onImgsPick(event)">
         <div class="imgs-prev" id="lImgsPrev"></div>
-        <div class="hint">${tt("صورة وحدة ولو بسيطة بتزيد الثقة بالإعلان أضعاف.","Even one simple photo greatly increases trust in the listing.")}</div></div>
+        <div class="hint">${tt("صورة واحدة، ولو بسيطة، تزيد الثقة بإعلانك كثيراً.","Even one simple photo greatly increases trust in the listing.")}</div></div>
 
       <div class="f2">
         <div class="fg"><label>${tt("المدينة","City")}</label>${citySelect("lCity","onFormCity()")}</div>
@@ -909,36 +1010,36 @@ function openForm(kind){
         <div class="fg"><label>${tt("مفروش؟","Furnished?")}</label><select id="lFurn">
           <option value="true">${tt("مفروش","Furnished")}</option><option value="false">${tt("غير مفروش","Unfurnished")}</option></select></div>
         <div class="fg"><label>${tt("الفواتير","Bills")}</label><select id="lBills">
-          <option value="false">${tt("مش محسوبة بالسعر","Not included")}</option>
+          <option value="false">${tt("غير محسوبة بالسعر","Not included")}</option>
           <option value="true">${tt("مشمولة بالسعر","Included in price")}</option></select></div>
         <div class="fg"><label>${tt("عدد الغرف بالسكن (اختياري)","Rooms in the unit (optional)")}</label>
-          <input id="lRooms" data-num inputmode="numeric" placeholder="${tt("مثلاً ٣","e.g. 3")}"></div>
+          ${roomChipsHTML("lRooms")}</div>
         <div class="fg"><label>${tt("أقل مدة إيجار بالشهور (اختياري)","Min. rental period, months (optional)")}</label>
           <input id="lMin" data-num inputmode="numeric" placeholder="${tt("مثلاً ٦","e.g. 6")}"></div>
         <div class="fg"><label>${tt("متاح من","Available from")}</label><input id="lFrom" type="date"></div>
       </div>
 
-      <div class="fg"><label>${tt("مواصفات الغرفة والسكن","Room & housing features")}</label>
+      <div class="fg"><label>${tt("مواصفات السكن","Housing features")}</label>
         ${chipsHTML("lFeat", FEATURES, {val:f=>f.slug, lbl:f=>tt(f.ar,f.en)})}
-        <div class="hint">${tt("أشّر على كل اللي متوفر. هاد أكتر إشي بيسأل عنه الباحثون.","Check everything that's available — this is what seekers ask about most.")}</div></div>
+        <div class="hint">${tt("أشّر على كل ما هو متوفر — هذا أكثر ما يسأل عنه الباحثون.","Check everything that's available — this is what seekers ask about most.")}</div></div>
 
       <div class="fg"><label>${tt("علامة مميزة قريبة (اختياري)","Nearby landmark (optional)")}</label>
         <input id="lLand" placeholder="${tt("قرب دوار الماصيون","Near Al-Masyoun roundabout")}"></div>
       <div class="fg"><label>${tt("الساكنون حالياً (اختياري)","Current occupants (optional)")}</label>
         <input id="lOcc" placeholder="${tt("طالبتان في جامعة بيرزيت","Two students at Birzeit University")}"></div>
-      <div class="fg"><label>${tt("وصف الغرفة","Room description")}</label>
+      <div class="fg"><label>${tt("وصف السكن","Housing description")}</label>
         <textarea id="lDesc" placeholder="${tt("المساحة، القفل، المطبخ، المواصلات…","Size, lock, kitchen, transport…")}"></textarea></div>
 
       <div id="lErr"></div>
       <div id="lWrap"><button class="btn acc" style="width:100%" onclick="subListing()">
         ${tt("أرسل الإعلان للمراجعة","Submit listing for review")}</button></div>
       <p style="font-size:13px;color:var(--mut);margin:10px 0 0">
-        ${tt("بنراجع الإعلان وبنتواصل معك للتوثيق قبل النشر. الإعلان بينتهي تلقائياً بعد ٢١ يوم إلا إذا أكّدت إنه لسا متاح.",
+        ${tt("نراجع الإعلان ونتواصل معك للتوثيق قبل النشر. ينتهي الإعلان تلقائياً بعد ٢١ يوماً ما لم تؤكد أنه ما زال متاحاً.",
           "We review the listing and contact you for verification before publishing. It expires automatically after 21 days unless you confirm it's still available.")}</p>
     </div></div>` : `
     <div class="mh"><h2>${tt("سجّل طلبك للسكن","Register your housing request")}</h2><button class="x" onclick="closeAll()">×</button></div>
     <div class="mb"><div class="sec">
-      <div class="note">${tt("بينعرض اسمك الأول فقط. رقمك وجهة عملك أو دراستك ما بينعرضوا لحدا.",
+      <div class="note">${tt("يظهر اسمك الأول فقط. رقمك وجهة عملك أو دراستك لا تظهر لأي مستخدم.",
         "Only your first name is shown. Your number, workplace, or studies are never shown to anyone.")}</div>
 
       <div class="fg" style="margin-top:12px"><label>${tt("اسمك","Your name")}</label><input id="rName"></div>
@@ -959,26 +1060,26 @@ function openForm(kind){
         </select></div>
         <div class="fg"><label>${tt("مفروش؟","Furnished?")}</label><select id="rFurn">
           <option value="">${tt("مرن","Flexible")}</option><option value="true">${tt("يفضّل مفروش","Prefers furnished")}</option>
-          <option value="false">${tt("مش ضروري","Not required")}</option></select></div>
+          <option value="false">${tt("غير ضروري","Not required")}</option></select></div>
         <div class="fg"><label>${tt("أقل مدة بالشهور (اختياري)","Min. months (optional)")}</label>
           <input id="rMin" data-num inputmode="numeric" placeholder="${tt("مثلاً ٦","e.g. 6")}"></div>
-        <div class="fg"><label>${tt("بتدخّن؟","Do you smoke?")}</label><select id="rSmoke">
-          <option value="">${tt("ما بحب أحدد","Prefer not to say")}</option><option value="false">${tt("لا","No")}</option>
+        <div class="fg"><label>${tt("هل تدخّن؟","Do you smoke?")}</label><select id="rSmoke">
+          <option value="">${tt("أفضّل عدم التحديد","Prefer not to say")}</option><option value="false">${tt("لا","No")}</option>
           <option value="true">${tt("نعم","Yes")}</option></select></div>
       </div>
 
       <div class="fg"><label>${tt("المدينة","City")}</label>${citySelect("rCity","onReqCity()")}</div>
       <div class="fg"><label>${tt("المناطق المفضّلة","Preferred areas")}</label>
         <div class="chips-box" id="rAreasBox">
-          <div class="hint">${tt("قم باختيار المدينة أولاً.","Choose a city first.")}</div></div>
-        <div class="hint">${tt("اختر منطقة أو أكتر، أو اتركها فاضية إذا أي منطقة بالمدينة بتناسبك.","Pick one or more areas, or leave empty if any area in the city works.")}</div></div>
+          <div class="hint">${tt("اختر المدينة أولاً.","Choose a city first.")}</div></div>
+        <div class="hint">${tt("اختر منطقة أو أكثر، أو اترك الحقل فارغاً إذا كانت أي منطقة في المدينة تناسبك.","Pick one or more areas, or leave empty if any area in the city works.")}</div></div>
 
       <div class="fg"><label>${tt("صفاتك كساكن","Your traits as a housemate")}</label>
         ${chipsHTML("rTags", TAGS, {val:t=>t.slug, lbl:t=>tt(t.ar,t.en)})}
-        <div class="hint">${tt("بتساعد المالك يعرف إذا بتناسب السكن.","Helps the owner know if you'll fit the household.")}</div></div>
+        <div class="hint">${tt("تساعد المالك على معرفة مدى ملاءمتك للسكن.","Helps the owner know if you'll fit the household.")}</div></div>
 
       <div class="fg"><label>${tt("ملاحظات","Notes")}</label>
-        <textarea id="rNote" placeholder="${tt("أي إشي تاني بدك المالك يعرفه…","Anything else you want the owner to know…")}"></textarea></div>
+        <textarea id="rNote" placeholder="${tt("أي معلومة إضافية تريد أن يعرفها المالك…","Anything else you want the owner to know…")}"></textarea></div>
 
       <div id="rErr"></div>
       <div id="rWrap"><button class="btn acc" style="width:100%" onclick="subRequest()">
@@ -1013,11 +1114,12 @@ function restoreDraftIfAny(){
   telSync("lDial","lPhone");
   onFormCity();
   if(d.lArea) $("lArea").value = d.lArea;
+  syncRoomChip("lRooms");
   (d.lFeat||[]).forEach(v => {
     const el = document.querySelector(`input[name="lFeat"][value="${CSS.escape(v)}"]`);
     if(el) el.checked = true;
   });
-  $("draftBanner").innerHTML = `<div class="note">${tt("رجّعنا مسودة كنت عم تعبّيها قبل هيك.","We restored a draft you were filling in before.")}
+  $("draftBanner").innerHTML = `<div class="note">${tt("استرجعنا مسودة كنت تعبّئها سابقاً.","We restored a draft you were filling in before.")}
     <button class="linkish" onclick="discardDraft()">${tt("امسحها وابدأ من جديد","Clear it and start over")}</button></div>`;
 }
 function discardDraft(){
@@ -1052,22 +1154,22 @@ async function subListing(){
   const bad = m => { $("lErr").innerHTML = `<div class="err">${m}</div>`; return null; };
   if(v.p_name.length < 2)  return bad(tt("اكتب اسمك.","Enter your name."));
   if(!phone)               return bad(telError("lDial"));
-  if(v.p_title.length < 5) return bad(tt("عنوان الإعلان قصير — اكتب وصف واضح.","The title is too short — write something clearer."));
+  if(v.p_title.length < 5) return bad(tt("عنوان الإعلان قصير جداً — اكتب عنواناً أوضح.","The title is too short — write something clearer."));
   if(!$("lCity").value)    return bad(tt("اختر المدينة.","Choose a city."));
   if(!v.p_area)            return bad(tt("اختر المنطقة.","Choose an area."));
   if(!v.p_price)           return bad(tt("اكتب السعر الشهري.","Enter the monthly price."));
   const btn = $("lWrap").querySelector("button");
-  if(btn){ btn.disabled = true; btn.textContent = selectedImages.length ? tt("عم يرفع الصور…","Uploading photos…") : tt("عم يرسل…","Sending…"); }
+  if(btn){ btn.disabled = true; btn.textContent = selectedImages.length ? tt("جارِ رفع الصور…","Uploading photos…") : tt("جارِ الإرسال…","Sending…"); }
   try{
     v.p_images = await uploadImages();
     const ref = await rpc("submit_listing", v);
-    $("lWrap").innerHTML = `<div class="done">${tt("وصلنا إعلانك ✓ رقمه","Your listing is in ✓ its ID is")} <b>${esc(ref)}</b>.<br>
-      ${tt("بنتواصل معك خلال ٢٤ ساعة للتوثيق.","We'll contact you within 24 hours for verification.")}</div>`;
+    $("lWrap").innerHTML = `<div class="done">${tt("تم استلام إعلانك ✓ رقمه","Your listing is in ✓ its ID is")} <b>${esc(ref)}</b>.<br>
+      ${tt("سنتواصل معك خلال ٢٤ ساعة للتوثيق.","We'll contact you within 24 hours for verification.")}</div>`;
     $("lErr").innerHTML = "";
     selectedImages = [];
     clearDraft();
   }catch(e){
-    $("lErr").innerHTML = `<div class="err">${tt("صار خطأ بالإرسال. جرّب مرة ثانية بعد شوي.","Something went wrong sending this. Try again in a bit.")}</div>`;
+    $("lErr").innerHTML = `<div class="err">${tt("حدث خطأ أثناء الإرسال. حاول مرة أخرى بعد قليل.","Something went wrong sending this. Try again in a bit.")}</div>`;
     if(btn){ btn.disabled = false; btn.textContent = tt("أرسل الإعلان للمراجعة","Submit listing for review"); }
   }
 }
@@ -1100,10 +1202,10 @@ async function subRequest(){
   try{
     const ref = await rpc("submit_request", v);
     $("rWrap").innerHTML = `<div class="done">${tt("تم تسجيل طلبك ✓ رقمه","Your request is registered ✓ its ID is")} <b>${esc(ref)}</b>.<br>
-      ${tt("بنراجعه وبنخبرك أول ما تنزل غرفة بتناسبك.","We'll review it and notify you as soon as a matching room is listed.")}</div>`;
+      ${tt("سنراجعه ونخبرك فور توفّر سكن يناسبك.","We'll review it and notify you as soon as a matching room is listed.")}</div>`;
     $("rErr").innerHTML = "";
   }catch(e){
-    $("rErr").innerHTML = `<div class="err">${tt("صار خطأ بالإرسال. جرّب مرة ثانية بعد شوي.","Something went wrong sending this. Try again in a bit.")}</div>`;
+    $("rErr").innerHTML = `<div class="err">${tt("حدث خطأ أثناء الإرسال. حاول مرة أخرى بعد قليل.","Something went wrong sending this. Try again in a bit.")}</div>`;
   }
 }
 
@@ -1150,7 +1252,7 @@ async function checkConfirmLink(){
   $("modal").innerHTML = `
     <div class="mh"><h2>${tt("تأكيد الإعلان","Confirm listing")}</h2><button class="x" onclick="closeAll()">×</button></div>
     <div class="mb">${ok
-      ? `<div class="done">${tt("تم تمديد إعلانك ٢١ يوم ✓","Your listing was extended by 21 days ✓")}</div>`
+      ? `<div class="done">${tt("تم تمديد إعلانك ٢١ يوماً ✓","Your listing was extended by 21 days ✓")}</div>`
       : `<div class="err">${tt("الرابط غير صالح أو منتهي.","This link is invalid or expired.")}</div>`}</div>`;
   $("ov").classList.add("on");
 }
@@ -1184,13 +1286,13 @@ async function checkReviewLink(){
   $("modal").innerHTML = `
     <div class="mh"><h2>${tt("قيّم سكنك","Rate your stay")}</h2><button class="x" onclick="closeAll()">×</button></div>
     <div class="mb"><div class="sec">
-      <div class="note">${tt("تقييمك بيساعد باحثين تانيين، وما بيظهر لحدا إلا بعد ما يوصل ٣ تقييمات على نفس الإعلان.",
+      <div class="note">${tt("تقييمك يساعد باحثين آخرين، ولا يظهر لأي أحد إلا بعد وصول الإعلان إلى ٣ تقييمات.",
         "Your review helps other seekers, and only appears once a listing gets 3 reviews.")}</div>
       <div class="fg" style="margin-top:12px"><b>${esc(info.title)}</b> — ${esc(info.area)}, ${esc(info.city)}</div>
 
-      <div class="fg"><label>${tt("وضعك هلأ","Your situation now")}</label><select id="vStage">
-        <option value="day30">${tt("سكنت من شهر تقريباً","Been living here about a month")}</option>
-        <option value="move_out">${tt("طلعت من السكن","Moved out")}</option></select></div>
+      <div class="fg"><label>${tt("وضعك الآن","Your situation now")}</label><select id="vStage">
+        <option value="day30">${tt("أسكن منذ نحو شهر","Been living here about a month")}</option>
+        <option value="move_out">${tt("غادرت السكن","Moved out")}</option></select></div>
 
       <div class="f2">
         <div class="fg"><label>${tt("الصيانة والاستجابة للأعطال","Maintenance & responsiveness")}</label>${ratingSelect("vMaint")}</div>
@@ -1199,11 +1301,11 @@ async function checkReviewLink(){
         <div class="fg"><label>${tt("الأمان بالليل","Safety at night")}</label>${ratingSelect("vSafe")}</div>
       </div>
 
-      <div class="fg"><label>${tt("دخل المالك الغرفة بدون إذنك؟","Did the owner enter without your permission?")}</label><select id="vEnter">
-        <option value="">${tt("ما بحب أحدد","Prefer not to say")}</option><option value="false">${tt("لا","No")}</option>
+      <div class="fg"><label>${tt("هل دخل المالك السكن بدون إذنك؟","Did the owner enter without your permission?")}</label><select id="vEnter">
+        <option value="">${tt("أفضّل عدم التحديد","Prefer not to say")}</option><option value="false">${tt("لا","No")}</option>
         <option value="true">${tt("نعم","Yes")}</option></select></div>
-      <div class="fg"><label>${tt("رجّع المالك التأمين كامل؟","Did the owner return the full deposit?")}</label><select id="vDep">
-        <option value="">${tt("مش منطبق / لسا","N/A / not yet")}</option><option value="true">${tt("نعم","Yes")}</option>
+      <div class="fg"><label>${tt("هل أعاد المالك مبلغ التأمين كاملاً؟","Did the owner return the full deposit?")}</label><select id="vDep">
+        <option value="">${tt("غير منطبق / بعد","N/A / not yet")}</option><option value="true">${tt("نعم","Yes")}</option>
         <option value="false">${tt("لا","No")}</option></select></div>
 
       <div id="vErr"></div>
@@ -1226,12 +1328,12 @@ async function subReview(){
     p_deposit_returned: tri("vDep")
   };
   const btn = $("vWrap").querySelector("button");
-  if(btn){ btn.disabled = true; btn.textContent = tt("عم يرسل…","Sending…"); }
+  if(btn){ btn.disabled = true; btn.textContent = tt("جارِ الإرسال…","Sending…"); }
   try{
     await rpc("submit_review", v);
-    $("vWrap").innerHTML = `<div class="done">${tt("وصلنا تقييمك ✓ شكراً إلك.","Your review is in ✓ thank you.")}</div>`;
+    $("vWrap").innerHTML = `<div class="done">${tt("تم استلام تقييمك ✓ شكراً لك.","Your review is in ✓ thank you.")}</div>`;
   }catch(e){
-    $("vErr").innerHTML = `<div class="err">${tt("صار خطأ بالإرسال. جرّب مرة ثانية بعد شوي.","Something went wrong sending this. Try again in a bit.")}</div>`;
+    $("vErr").innerHTML = `<div class="err">${tt("حدث خطأ أثناء الإرسال. حاول مرة أخرى بعد قليل.","Something went wrong sending this. Try again in a bit.")}</div>`;
     if(btn){ btn.disabled = false; btn.textContent = tt("أرسل تقييمي","Submit my review"); }
   }
 }
@@ -1245,8 +1347,8 @@ function openSharedListing(){
   const x = L.find(a=>a.ref===ref);
   if(x){ openL(x.id); return; }
   $("modal").innerHTML = `
-    <div class="mh"><h2>${tt("الإعلان مو متاح","Listing unavailable")}</h2><button class="x" onclick="closeAll()">×</button></div>
-    <div class="mb"><div class="err">${tt("هاد الإعلان ما عاد منشور — ممكن انأجّر أو انتهت صلاحيته.","This listing is no longer published — it may have been rented or expired.")}</div></div>`;
+    <div class="mh"><h2>${tt("الإعلان غير متاح","Listing unavailable")}</h2><button class="x" onclick="closeAll()">×</button></div>
+    <div class="mb"><div class="err">${tt("هذا الإعلان لم يعد منشوراً — ربما تم تأجيره أو انتهت صلاحيته.","This listing is no longer published — it may have been rented or expired.")}</div></div>`;
   $("ov").classList.add("on");
 }
 
@@ -1282,7 +1384,7 @@ function openSharedListing(){
     console.error("Supabase error:", e);
     $("count").textContent = "";
     $("grid").innerHTML =
-      `<div class="empty">${tt("ما قدرنا نحمّل الإعلانات. تأكد من الاتصال وجرّب تحديث الصفحة.","We couldn't load listings. Check your connection and try refreshing.")}</div>`;
+      `<div class="empty">${tt("تعذّر تحميل الإعلانات. تأكد من الاتصال وحاول تحديث الصفحة.","We couldn't load listings. Check your connection and try refreshing.")}</div>`;
   }
 })();
 </script>

@@ -9,52 +9,65 @@ document.documentElement.dir  = MAWDI_LANG === "en" ? "ltr" : "rtl";
 </script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <title id="pageTitle">موضع للمؤسسات — إسكان موظفين وطلاب ومستفيدين</title>
-<meta id="metaDesc" name="description" content="مؤسستك أو شركتك محتاجة تؤمّن سكن لموظفين أو طلاب أو مستفيدين؟ موضع بتأمّن غرف موثّقة بالجملة برام الله والبيرة وبيرزيت.">
+<meta id="metaDesc" name="description" content="هل تحتاج مؤسستك أو شركتك لتأمين سكن لموظفين أو طلاب أو مستفيدين؟ موضع تؤمّن وحدات سكنية موثّقة بالجملة في رام الله والبيرة وبيرزيت.">
 <meta id="ogTitle" property="og:title" content="موضع للمؤسسات — إسكان موظفين وطلاب ومستفيدين">
-<meta id="ogDesc" property="og:description" content="مؤسستك أو شركتك محتاجة تؤمّن سكن لموظفين أو طلاب أو مستفيدين؟ موضع بتأمّن غرف موثّقة بالجملة برام الله والبيرة وبيرزيت.">
+<meta id="ogDesc" property="og:description" content="هل تحتاج مؤسستك أو شركتك لتأمين سكن لموظفين أو طلاب أو مستفيدين؟ موضع تؤمّن وحدات سكنية موثّقة بالجملة في رام الله والبيرة وبيرزيت.">
 <meta id="ogSiteName" property="og:site_name" content="موضع">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Archivo:wght@600;700&display=swap" rel="stylesheet">
 <style>
-:root{--brand:#12634E;--brand-d:#0C4839;--accent:#C4682B;--bg:#FAF7F2;--card:#FFFFFF;
-  --ink:#15201C;--mut:#6B7B75;--line:#E4DED4;--r:14px;
-  --sh:0 1px 2px rgba(20,32,28,.05),0 8px 24px rgba(20,32,28,.06)}
+:root{
+  --blue-700:#12309B; --blue-600:#1E45D6; --blue-500:#3A63F0;
+  --blue-100:#E4EAFF; --blue-050:#F2F5FF;
+  --amber:#F5A524; --amber-ink:#9A5B00;
+  --navy:#080F2E; --ink:#080F2E; --mut:#6B748F;
+  --bg:#F2F5FF; --card:#FFFFFF; --line:#E1E6F5;
+  --ok:#12A150; --warn:#C2410C; --danger:#DC2626;
+  --ok-bg:#E1F5EA; --danger-bg:#FCE9E8; --danger-ink:#9F1D18; --amber-hover:#E2941C;
+  --footer-link:#D7DDF3; --footer-text:#AEB8D6;
+  --r-sm:8px; --r:14px; --r-pill:999px;
+  --sh:0 10px 30px rgba(8,15,46,.10);
+}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);
   font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,sans-serif;line-height:1.75}
-a{color:var(--brand)}
+a{color:var(--blue-600)}
 .wrap{max-width:760px;margin:0 auto;padding:0 18px}
-header{background:var(--brand);color:#fff}
+header{background:var(--blue-700);color:#fff}
 .hd{display:flex;align-items:center;justify-content:space-between;padding:16px 0;gap:12px;flex-wrap:wrap}
-.logo{font-size:26px;font-weight:700;letter-spacing:-1px;color:#fff;text-decoration:none}
-.logo span{display:block;font-size:12px;font-weight:400;opacity:.85;letter-spacing:0}
-.back{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:10px;
+.logo{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none}
+.logo svg{width:30px;height:30px;flex:none}
+.logo .wordwrap{display:flex;flex-direction:column;line-height:1.1}
+.logo .word{font-size:24px;font-weight:700}
+.logo .sub{font-size:10.5px;font-weight:600;letter-spacing:.18em;color:rgba(255,255,255,.75);font-family:'Archivo',sans-serif}
+.back{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:var(--r-sm);
   padding:9px 15px;font:inherit;font-weight:600;text-decoration:none}
 .back:hover{background:rgba(255,255,255,.24)}
 .hero{padding:26px 0 24px}
 .hero h1{font-size:24px;margin:0 0 10px;line-height:1.4}
 .hero p{margin:0;color:var(--mut);font-size:15px}
 .pts{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;font-size:13.5px}
-.pts div{background:var(--card);border-radius:10px;padding:10px 14px;box-shadow:var(--sh)}
-.pts b{color:var(--brand-d)}
+.pts div{background:var(--card);border-radius:var(--r-sm);padding:10px 14px;box-shadow:var(--sh)}
+.pts b{color:var(--blue-700)}
 .card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:24px;margin:10px 0 30px}
 .fg{margin-bottom:14px}
 .f2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 label{display:block;font-size:13px;color:var(--mut);margin-bottom:4px;font-weight:500}
-input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-sm);
   font:inherit;background:#fff;color:var(--ink)}
 textarea{min-height:80px;resize:vertical}
-.btn{border:0;border-radius:10px;padding:12px 18px;font:inherit;font-weight:600;cursor:pointer;
-  background:var(--accent);color:#fff;width:100%}
-.btn:hover{background:#A9551F}
+.btn{border:0;border-radius:var(--r-sm);padding:12px 18px;font:inherit;font-weight:600;cursor:pointer;
+  background:var(--amber);color:var(--navy);width:100%}
+.btn:hover{background:var(--amber-hover)}
 .btn[disabled]{opacity:.55;cursor:not-allowed}
-.note{background:#F3F0EA;border-radius:10px;padding:10px 12px;font-size:13px;color:var(--mut);margin-bottom:14px}
-.err{background:#FBE7E4;color:#A5301F;border-radius:10px;padding:10px 12px;font-size:13.5px;margin-top:10px}
-.done{background:#E3F1E9;color:var(--brand-d);border-radius:10px;padding:16px;font-size:14.5px;text-align:center}
-footer{background:#101B18;color:#9FB2AC;padding:24px 0;font-size:13px}
-footer a{color:#CFE0DA}
+.note{background:var(--blue-050);border-radius:var(--r-sm);padding:10px 12px;font-size:13px;color:var(--mut);margin-bottom:14px}
+.err{background:var(--danger-bg);color:var(--danger-ink);border-radius:var(--r-sm);padding:10px 12px;font-size:13.5px;margin-top:10px}
+.done{background:var(--ok-bg);color:var(--ok);border-radius:var(--r-sm);padding:16px;font-size:14.5px;text-align:center}
+footer{background:var(--navy);color:var(--footer-text);padding:24px 0;font-size:13px}
+footer a{color:var(--footer-link)}
 @media(max-width:600px){.f2{grid-template-columns:1fr}.hero h1{font-size:21px}}
 </style>
 </head>
@@ -62,7 +75,13 @@ footer a{color:#CFE0DA}
 
 <header>
   <div class="wrap hd">
-    <a class="logo" href="/" id="logoLink">موضع<span id="tagline">غرف وسكن مشترك موثّق</span></a>
+    <a class="logo" href="/" id="logoLink">
+      <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g fill="#FFFFFF"><path d="M6 28h8v14H6z"/><path d="M17 18l11-6v30H17z"/><path d="M31 24l10-3v21H31z"/></g>
+        <rect x="20" y="24" width="6" height="6" fill="var(--amber)"/>
+      </svg>
+      <span class="wordwrap"><span class="word">موضع</span><span class="sub" id="tagline">MAWDI</span></span>
+    </a>
     <div style="display:flex;gap:8px;align-items:center">
       <button class="back" id="langBtn" onclick="toggleLang()" style="cursor:pointer;border:0">EN</button>
       <a class="back" href="/" id="backLink">الصفحة الرئيسية</a>
@@ -72,18 +91,18 @@ footer a{color:#CFE0DA}
 
 <div class="wrap">
   <section class="hero">
-    <h1 id="heroH1">بتوظّف أو بتستضيف ناس محتاجين سكن؟</h1>
-    <p id="heroP">مؤسستك، جامعتك، أو شركتك بتدفع رسم ثابت لكل غرفة — والمالك ما بيدفع إشي.
-       بنؤمّنلكم غرف موثّقة بالجملة برام الله والبيرة وبيرزيت، وبنتابع معكم مباشرة.</p>
+    <h1 id="heroH1">هل توظّف أو تستضيف أشخاصاً بحاجة إلى سكن؟</h1>
+    <p id="heroP">تدفع مؤسستك أو جامعتك أو شركتك رسماً ثابتاً لكل وحدة سكنية، ولا يدفع المالك شيئاً.
+       نؤمّن لكم وحدات سكنية موثّقة بالجملة في رام الله والبيرة وبيرزيت، ونتابع معكم مباشرة.</p>
     <div class="pts">
-      <div id="pt1"><b>٣٠٠–٥٠٠ ₪</b> لكل غرفة — تسعير حسب العدد والمدة</div>
-      <div id="pt2"><b>يدوي بالكامل</b> — مندوب بيتواصل معكم خلال يوم عمل</div>
-      <div id="pt3"><b>بدون التزام</b> — الطلب استفسار أولي بس</div>
+      <div id="pt1"><b>٣٠٠–٥٠٠ ₪</b> لكل وحدة — تسعير حسب العدد والمدة</div>
+      <div id="pt2"><b>يدوي بالكامل</b> — يتواصل معكم مندوبنا خلال يوم عمل</div>
+      <div id="pt3"><b>بدون التزام</b> — الطلب استفسار أولي فقط</div>
     </div>
   </section>
 
   <div class="card" id="formCard">
-    <div class="note" id="noteTxt">اتركوا بياناتكم وبنتواصل معكم لنفهم احتياجكم بالتفصيل ونرتّب التسعير.</div>
+    <div class="note" id="noteTxt">اتركوا بياناتكم، وسنتواصل معكم لفهم احتياجكم بالتفصيل وترتيب التسعير.</div>
     <div class="fg"><label id="lOrg">اسم المؤسسة</label><input id="iOrg" placeholder="مثلاً: جمعية كذا، جامعة كذا"></div>
     <div class="f2">
       <div class="fg"><label id="lType">نوع الجهة</label><select id="iType">
@@ -99,9 +118,9 @@ footer a{color:#CFE0DA}
       <div class="fg"><label id="lPhone">رقم الهاتف</label><input id="iPhone" inputmode="tel" placeholder="05XXXXXXXX"></div>
     </div>
     <div class="fg"><label id="lEmail">الإيميل (اختياري)</label><input id="iEmail" type="email" placeholder="name@org.org"></div>
-    <div class="fg"><label id="lRooms">عدد الغرف تقريباً</label><input id="iRooms" inputmode="numeric" placeholder="مثلاً ١٠"></div>
+    <div class="fg"><label id="lRooms">عدد الوحدات تقريباً</label><input id="iRooms" inputmode="numeric" placeholder="مثلاً ١٠"></div>
     <div class="fg"><label id="lMsg">تفاصيل إضافية (اختياري)</label>
-      <textarea id="iMsg" placeholder="مين المستفيدين، لأي مدة، أي متطلبات خاصة…"></textarea></div>
+      <textarea id="iMsg" placeholder="من هم المستفيدون، ولأي مدة، وأي متطلبات خاصة…"></textarea></div>
     <div id="iErr"></div>
     <div id="iWrap"><button class="btn" id="iSend">أرسل الطلب</button></div>
   </div>
@@ -152,27 +171,26 @@ function paintChrome(){
     "موضع للمؤسسات — إسكان موظفين وطلاب ومستفيدين",
     "Mawdi for institutions — housing for staff, students & beneficiaries");
   $("metaDesc").content = tt(
-    "مؤسستك أو شركتك محتاجة تؤمّن سكن لموظفين أو طلاب أو مستفيدين؟ موضع بتأمّن غرف موثّقة بالجملة برام الله والبيرة وبيرزيت.",
-    "Does your institution or company need housing for staff, students, or beneficiaries? Mawdi sources verified rooms in bulk in Ramallah, Al-Bireh and Birzeit.");
+    "هل تحتاج مؤسستك أو شركتك لتأمين سكن لموظفين أو طلاب أو مستفيدين؟ موضع تؤمّن وحدات سكنية موثّقة بالجملة في رام الله والبيرة وبيرزيت.",
+    "Does your institution or company need housing for staff, students, or beneficiaries? Mawdi sources verified housing in bulk in Ramallah, Al-Bireh and Birzeit.");
   $("ogTitle").content = tt(
     "موضع للمؤسسات — إسكان موظفين وطلاب ومستفيدين",
     "Mawdi for institutions — housing for staff, students & beneficiaries");
   $("ogDesc").content = tt(
-    "مؤسستك أو شركتك محتاجة تؤمّن سكن لموظفين أو طلاب أو مستفيدين؟ موضع بتأمّن غرف موثّقة بالجملة برام الله والبيرة وبيرزيت.",
-    "Does your institution or company need housing for staff, students, or beneficiaries? Mawdi sources verified rooms in bulk in Ramallah, Al-Bireh and Birzeit.");
+    "هل تحتاج مؤسستك أو شركتك لتأمين سكن لموظفين أو طلاب أو مستفيدين؟ موضع تؤمّن وحدات سكنية موثّقة بالجملة في رام الله والبيرة وبيرزيت.",
+    "Does your institution or company need housing for staff, students, or beneficiaries? Mawdi sources verified housing in bulk in Ramallah, Al-Bireh and Birzeit.");
   $("ogSiteName").content = tt("موضع", "Mawdi");
-  $("tagline").textContent = tt("غرف وسكن مشترك موثّق", "Verified rooms & shared housing");
   $("backLink").textContent = tt("الصفحة الرئيسية", "Home");
   $("footHome").textContent = tt("الصفحة الرئيسية", "Home");
-  $("heroH1").textContent = tt("بتوظّف أو بتستضيف ناس محتاجين سكن؟", "Housing staff, students, or beneficiaries?");
+  $("heroH1").textContent = tt("هل توظّف أو تستضيف أشخاصاً بحاجة إلى سكن؟", "Housing staff, students, or beneficiaries?");
   $("heroP").textContent = tt(
-    "مؤسستك، جامعتك، أو شركتك بتدفع رسم ثابت لكل غرفة — والمالك ما بيدفع إشي. بنؤمّنلكم غرف موثّقة بالجملة برام الله والبيرة وبيرزيت، وبنتابع معكم مباشرة.",
-    "Your institution, university, or company pays a flat fee per room — the owner pays nothing. We source verified rooms in bulk in Ramallah, Al-Bireh and Birzeit, and follow up with you directly.");
-  $("pt1").innerHTML = tt("<b>٣٠٠–٥٠٠ ₪</b> لكل غرفة — تسعير حسب العدد والمدة", "<b>300–500 ₪</b> per room — priced by count and duration");
-  $("pt2").innerHTML = tt("<b>يدوي بالكامل</b> — مندوب بيتواصل معكم خلال يوم عمل", "<b>Fully manual</b> — an agent contacts you within one business day");
-  $("pt3").innerHTML = tt("<b>بدون التزام</b> — الطلب استفسار أولي بس", "<b>No commitment</b> — the request is just an initial inquiry");
+    "تدفع مؤسستك أو جامعتك أو شركتك رسماً ثابتاً لكل وحدة سكنية، ولا يدفع المالك شيئاً. نؤمّن لكم وحدات سكنية موثّقة بالجملة في رام الله والبيرة وبيرزيت، ونتابع معكم مباشرة.",
+    "Your institution, university, or company pays a flat fee per unit — the owner pays nothing. We source verified housing in bulk in Ramallah, Al-Bireh and Birzeit, and follow up with you directly.");
+  $("pt1").innerHTML = tt("<b>٣٠٠–٥٠٠ ₪</b> لكل وحدة — تسعير حسب العدد والمدة", "<b>300–500 ₪</b> per unit — priced by count and duration");
+  $("pt2").innerHTML = tt("<b>يدوي بالكامل</b> — يتواصل معكم مندوبنا خلال يوم عمل", "<b>Fully manual</b> — an agent contacts you within one business day");
+  $("pt3").innerHTML = tt("<b>بدون التزام</b> — الطلب استفسار أولي فقط", "<b>No commitment</b> — the request is just an initial inquiry");
   $("noteTxt").textContent = tt(
-    "اتركوا بياناتكم وبنتواصل معكم لنفهم احتياجكم بالتفصيل ونرتّب التسعير.",
+    "اتركوا بياناتكم، وسنتواصل معكم لفهم احتياجكم بالتفصيل وترتيب التسعير.",
     "Leave your details and we'll reach out to understand your needs and arrange pricing.");
   $("lOrg").textContent = tt("اسم المؤسسة", "Organization name");
   $("iOrg").placeholder = tt("مثلاً: جمعية كذا، جامعة كذا", "e.g. XYZ association, XYZ university");
@@ -183,10 +201,10 @@ function paintChrome(){
   $("iName").placeholder = tt("اسمك", "Your name");
   $("lPhone").textContent = tt("رقم الهاتف", "Phone number");
   $("lEmail").textContent = tt("الإيميل (اختياري)", "Email (optional)");
-  $("lRooms").textContent = tt("عدد الغرف تقريباً", "Approximate number of rooms");
+  $("lRooms").textContent = tt("عدد الوحدات تقريباً", "Approximate number of units");
   $("iRooms").placeholder = tt("مثلاً ١٠", "e.g. 10");
   $("lMsg").textContent = tt("تفاصيل إضافية (اختياري)", "Additional details (optional)");
-  $("iMsg").placeholder = tt("مين المستفيدين، لأي مدة، أي متطلبات خاصة…", "Who the beneficiaries are, for how long, any special requirements…");
+  $("iMsg").placeholder = tt("من هم المستفيدون، ولأي مدة، وأي متطلبات خاصة…", "Who the beneficiaries are, for how long, any special requirements…");
   $("iSend").textContent = tt("أرسل الطلب", "Send request");
   renderCityOptions();
 }
@@ -222,14 +240,14 @@ $("iSend").onclick = async () => {
   if(contactName.length < 2) return bad(tt("اكتب اسم شخص التواصل.","Enter the contact person's name."));
   if(contactPhone.length < 9)return bad(tt("اكتب رقم هاتف صحيح.","Enter a valid phone number."));
   const btn = $("iSend");
-  btn.disabled = true; btn.textContent = tt("عم يرسل…","Sending…");
+  btn.disabled = true; btn.textContent = tt("جارِ الإرسال…","Sending…");
   try{
     await rpc("submit_institution_lead", v);
     $("iWrap").innerHTML = '';
     document.querySelectorAll("#formCard > *:not(.done)").forEach(el=>el.remove());
-    $("formCard").innerHTML = `<div class="done">${tt("وصلنا طلبكم ✓","Your request has been received ✓")}<br>${tt("بنتواصل معكم خلال يوم عمل لنرتّب التفاصيل.","We'll reach out within one business day to arrange the details.")}</div>`;
+    $("formCard").innerHTML = `<div class="done">${tt("تم استلام طلبكم ✓","Your request has been received ✓")}<br>${tt("سنتواصل معكم خلال يوم عمل لترتيب التفاصيل.","We'll reach out within one business day to arrange the details.")}</div>`;
   }catch(e){
-    $("iErr").innerHTML = `<div class="err">${tt("صار خطأ بالإرسال. جرّب مرة ثانية بعد شوي.","Something went wrong sending this. Try again in a bit.")}</div>`;
+    $("iErr").innerHTML = `<div class="err">${tt("حدث خطأ أثناء الإرسال. حاول مرة أخرى بعد قليل.","Something went wrong sending this. Try again in a bit.")}</div>`;
     btn.disabled = false; btn.textContent = tt("أرسل الطلب","Send request");
   }
 };

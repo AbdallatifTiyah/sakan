@@ -4,13 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <title>موضع — مركز التحكم</title>
 <style>
 /* ═══════════════ الرموز ═══════════════ */
 :root{
   --ink:#0e1520; --ink-2:#151f2e; --ink-3:#1d2a3d; --line:#26364c;
   --paper:#f4f7fb; --mute:#7d8fa8; --text:#dbe6f2; --text-2:#9fb2c9;
-  --ok:#2fbf71; --warn:#e8a33d; --bad:#e5544b; --info:#4aa3e0; --gold:#c9a227;
+  --ok:#2fbf71; --warn:#e8a33d; --bad:#e5544b; --info:#3A63F0; --gold:#F5A524;
   --r:6px; --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   --ar:"Segoe UI","Noto Sans Arabic","Tahoma",system-ui,sans-serif;
 }
@@ -188,7 +189,13 @@ tbody tr:hover{background:#182234;cursor:pointer}
 <!-- ═══════════════ التطبيق ═══════════════ -->
 <div id="app">
   <aside>
-    <div class="brand"><b>موضع</b><span>مركز التحكم</span></div>
+    <div class="brand" style="display:flex;align-items:center;gap:8px">
+      <svg viewBox="0 0 48 48" width="26" height="26" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g fill="#FFFFFF"><path d="M6 28h8v14H6z"/><path d="M17 18l11-6v30H17z"/><path d="M31 24l10-3v21H31z"/></g>
+        <rect x="20" y="24" width="6" height="6" fill="var(--gold)"/>
+      </svg>
+      <div><b>موضع</b><span>مركز التحكم</span></div>
+    </div>
     <nav id="nav"></nav>
     <div class="who" id="who"></div>
   </aside>
@@ -353,8 +360,10 @@ const VIEWS = [
   {id:"matches", t:"المطابقة العكسية", grp:"", both:true},
   {id:"owners",  t:"الملّاك",          grp:"الناس", both:true},
   {id:"seekers", t:"الباحثون",        grp:"", both:false},
+  {id:"accounts",t:"المستخدمون",      grp:"", both:false},
   {id:"fees",    t:"الرسوم",          grp:"المال", both:true, badge:"fees"},
   {id:"activity",t:"نشاط المنصة",     grp:"السجلات", both:false},
+  {id:"notifications",t:"الإشعارات", grp:"", both:false},
   {id:"audit",   t:"سجل الإجراءات",   grp:"", both:false},
   {id:"settings",t:"الإعدادات",       grp:"", both:false},
   {id:"pages",   t:"صفحات المحتوى",   grp:"", both:false}
@@ -505,7 +514,7 @@ function go(v){
     listings:vListings,reports:vReports,
     pipeline:vPipeline,verify:vVerify,owners:vOwners,seekers:vSeekers,fees:vFees,
     matches:vMatches,activity:vActivity,audit:vAudit,settings:vSettings,
-    pages:vPages}[v])();
+    pages:vPages,accounts:vAccounts,notifications:vNotifications}[v])();
 }
 function loading(t){ $("#main").innerHTML = '<div class="head"><h2>'+esc(t)+'</h2></div><div class="empty">بيحمّل…</div>'; }
 function fail(e){ $("#main").innerHTML += '<div class="warnbox">'+esc(e.message)+"</div>"; }
@@ -1306,7 +1315,7 @@ async function vOwners(){
         <th>مستحق</th><th>محصّل</th><th>بلاغات</th><th>آخر إدراج</th>
       </tr></thead><tbody>
       ${rows.map(r=>`<tr data-id="${r.id}">
-        <td>${esc(r.first_name)} ${lvl(r.verification_level)}${r.is_blocked?' <span class="tag t-rejected">موقوف</span>':""}</td>
+        <td>${esc(r.first_name)} ${lvl(r.verification_level)}${r.is_blocked?' <span class="tag t-rejected">موقوف</span>':""}${r.has_account?' <span class="tag t-owner_responded">صاحب حساب</span>':""}</td>
         <td class="phone">${esc(r.phone)}</td>
         <td>${esc(r.city)}</td>
         <td class="num">${num(r.listings_total)}</td>
@@ -1396,7 +1405,7 @@ async function vSeekers(){
         <th>طلبات</th><th>نشطة</th><th>تواصل</th><th>تأجيرات</th><th>مسجّل</th>
       </tr></thead><tbody>
       ${rows.map(r=>`<tr data-id="${r.id}">
-        <td>${esc(r.first_name)}${r.is_blocked?' <span class="tag t-rejected">موقوف</span>':""}</td>
+        <td>${esc(r.first_name)}${r.is_blocked?' <span class="tag t-rejected">موقوف</span>':""}${r.has_account?' <span class="tag t-owner_responded">صاحب حساب</span>':""}</td>
         <td class="phone">${esc(r.phone)}</td>
         <td>${r.gender==="female"?"أنثى":r.gender==="male"?"ذكر":"—"}</td>
         <td>${esc({student:"طالب",employee:"موظّف",other:"أخرى"}[r.occupation]||"—")}</td>
@@ -2101,6 +2110,89 @@ async function vPages(){
         toast("انحفظت الصفحة — صارت ظاهرة بالموقع.", "ok");
         S.page = d.key; vPages();
       } catch(e){ toast(e.message, "bad"); sv.disabled = false; }
+    };
+  } catch(e){ fail(e); }
+}
+
+/* ══════════════ المستخدمون (الحسابات المسجّلة) ══════════════ */
+async function vAccounts(){
+  loading("المستخدمون");
+  try{
+    const rows = await rpc("admin_list_accounts");
+    $("#main").innerHTML = `
+      <div class="head"><h2>المستخدمون</h2><span class="note">${rows.length} حساب مسجّل</span></div>
+      <div class="card" style="margin-bottom:12px">
+        <h3>ربط سجل قائم بحساب</h3>
+        <div class="note">لاستخدامه بعد ما يتأكد الطاقم هاتفياً إنه نفس الشخص — مش ربط تلقائي بالرقم.</div>
+        <div class="bars" style="margin-top:8px">
+          <input id="lkProfile" placeholder="معرّف السجل (profile id)">
+          <input id="lkAccount" placeholder="معرّف الحساب (auth uid)">
+          <button class="btn primary sm" id="lkGo">ربط</button>
+        </div>
+      </div>
+      ${rows.length?"":'<div class="empty"><b>ما في حسابات مسجّلة بعد</b>بتظهر هون بعد أول تسجيل من صفحة «حسابي».</div>'}
+      <div class="tw" ${rows.length?"":'style="display:none"'}><table><thead><tr>
+        <th>البريد</th><th>الصفات المفعّلة</th><th>مسجّل منذ</th>
+      </tr></thead><tbody>
+      ${rows.map(a=>`<tr>
+        <td>${esc(a.email)}</td>
+        <td>${(a.profiles||[]).map(p=>`
+          <span class="tag ${p.role==='owner'?'t-published':'t-owner_responded'}">
+            ${p.role==='owner'?'مالك':'باحث/ة'} — ${esc(p.first_name)} · ${esc(p.phone)}
+            ${p.is_blocked?' · موقوف':''}
+          </span>`).join(" ") || "—"}</td>
+        <td style="color:var(--mute)">${dt(a.created_at)}</td>
+      </tr>`).join("")}</tbody></table></div>`;
+    $("#lkGo").onclick = async () => {
+      const pid = $("#lkProfile").value.trim(), aid = $("#lkAccount").value.trim();
+      if(!pid || !aid) return toast("عبّي المعرّفين الاثنين.", "bad");
+      try{
+        await rpc("admin_link_profile", {p_profile_id:pid, p_account_uid:aid});
+        toast("انربط.", "ok"); vAccounts();
+      } catch(e){ toast(e.message, "bad"); }
+    };
+  } catch(e){ fail(e); }
+}
+
+/* ══════════════ الإشعارات ══════════════ */
+const N_EVENT = {contact_received:"طلب تواصل", listing_status_changed:"تغيّر حالة إعلان",
+  listing_verification_changed:"تغيّر توثيق", listing_expiring_soon:"قرب انتهاء إعلان",
+  request_published:"نشر طلب", new_matching_listing:"تطابق جديد", manual_staff:"يدوي من الطاقم"};
+async function vNotifications(){
+  loading("الإشعارات");
+  try{
+    const rows = await rpc("admin_list_notifications", {p_limit:200});
+    $("#main").innerHTML = `
+      <div class="head"><h2>الإشعارات</h2><span class="note">آخر ${rows.length} إشعار</span></div>
+      <div class="card" style="margin-bottom:12px">
+        <h3>إرسال إشعار يدوي</h3>
+        <div class="bars">
+          <input id="ntAccount" placeholder="معرّف الحساب (auth uid)">
+          <input id="ntTitle" placeholder="العنوان">
+        </div>
+        <div class="bars" style="margin-top:8px">
+          <input id="ntBody" placeholder="النص (اختياري)" style="min-width:320px">
+          <button class="btn primary sm" id="ntGo">إرسال</button>
+        </div>
+      </div>
+      ${rows.length?"":'<div class="empty"><b>ما في إشعارات بعد</b>بتنبعث تلقائياً مع أحداث المنصة.</div>'}
+      <div class="tw" ${rows.length?"":'style="display:none"'}><table><thead><tr>
+        <th>النوع</th><th>العنوان</th><th>الحساب</th><th>مقروء</th><th>الوقت</th>
+      </tr></thead><tbody>
+      ${rows.map(n=>`<tr>
+        <td>${esc(N_EVENT[n.event_type]||n.event_type)}</td>
+        <td>${esc(n.title)}</td>
+        <td class="ref">${esc(n.account_uid)}</td>
+        <td>${n.is_read?"نعم":"لا"}</td>
+        <td style="color:var(--mute)">${dt(n.created_at, true)}</td>
+      </tr>`).join("")}</tbody></table></div>`;
+    $("#ntGo").onclick = async () => {
+      const aid = $("#ntAccount").value.trim(), title = $("#ntTitle").value.trim(), body = $("#ntBody").value.trim();
+      if(!aid || !title) return toast("عبّي معرّف الحساب والعنوان.", "bad");
+      try{
+        await rpc("admin_send_notification", {p_account_uid:aid, p_title:title, p_body:body||null});
+        toast("انبعث الإشعار.", "ok"); vNotifications();
+      } catch(e){ toast(e.message, "bad"); }
     };
   } catch(e){ fail(e); }
 }

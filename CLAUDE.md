@@ -19,7 +19,8 @@
 | `public/page.html` | صفحات المحتوى (كيف بشتغل موضع · سياسة الخصوصية · شروط الاستخدام) — بتقرأ من جدول `pages`. ثنائي اللغة — `title_en`/`body_en` لو فاضيين بترجع للعربي. |
 | `public/owner.html` | رابط المالك الموقّع — `?id=..&t=..` بتوكن `profiles.owner_token`، بدون تسجيل دخول. بيوريه إعلاناته وطلبات التواصل عليها. عربي بس. |
 | `public/institutions.html` | نموذج التقاط طلبات المؤسسات/NGOs — عبر `submit_institution_lead`. ثنائي اللغة. |
-| `public/admin/index.html` | مركز التحكم — منشور على `/admin`، دخول عبر Supabase Auth. عربي بس دايماً (أداة داخلية للطاقم). |
+| `public/account.html` | حساب اختياري (مالك/باحث/الاثنين) عبر Supabase Auth بالبريد وكلمة السر. لوحة ذاتية عبر `my_owner_dashboard`/`my_seeker_dashboard`، ربط صفة جديدة عبر `link_account_role`، جرس إشعارات (قراءة/تحديث مباشر من جدول `notifications` بجلسة المستخدم). ثنائي اللغة. `access_token`/`refresh_token` بـ`sessionStorage` فقط. |
+| `public/admin/index.html` | مركز التحكم — منشور على `/admin`، دخول عبر Supabase Auth. عربي بس دايماً (أداة داخلية للطاقم). فيه قسمي «المستخدمون» و«الإشعارات» فوق نفس التوكنز الغامقة القديمة (لم تُستبدل بالكامل — قرار متحفّظ، شوف «الهوية البصرية»). |
 | `src/whatsapp.js` | `sendWhatsAppTemplate()` — مجهّز، غير مستدعى من أي مكان لحد ما يصير حساب Meta جاهز |
 | `src/worker.js` | بيمرّر لـ`ASSETS` ويضيف `X-Robots-Tag: noindex` على `/admin`، وعلى `/?l=REF` بيبدّل meta tags (عنوان/وصف/`og:image`) بجلب بيانات الإعلان من `v_listings_public` بمفتاح anon قبل ما يرجّع الصفحة، وبيولّد `/robots.txt` و`/sitemap.xml` ديناميكياً (الأخير فيه كل إعلان منشور) |
 | `wrangler.toml` | `main` + `binding = "ASSETS"` + `run_worker_first = true` |
@@ -39,10 +40,17 @@
 - Worker: `sakan` → `sakan.abdallatif-tiyah.workers.dev`. النشر يدوي: `npx wrangler deploy`. **ما في CI/CD.**
 - أسرار `ADMIN_USER`/`ADMIN_PASS` (Basic Auth القديم) ما عاد الـWorker يستخدمها — الحماية صارت بالقاعدة.
 
-**الجداول (١٨)**
+**الجداول (٢٠)**
 `admin_actions` · `areas` · `cities` · `contact_requests` · `events` · `institution_leads` ·
-`listing_safety` · `listings` · `owner_fees` · `pages` · `profiles` · `promo_codes` · `reports` ·
-`reviews` · `seeker_requests` · `settings` · `staff` (فيها `username` — اختياري، فريد بدون حساسية لحالة الأحرف) · `verification_log`
+`listing_safety` · `listings` · `notifications` · `owner_fees` · `pages` · `profiles` · `promo_codes` · `reports` ·
+`reviews` · `saved_listings` · `seeker_requests` · `settings` · `staff` (فيها `username` — اختياري، فريد بدون حساسية لحالة الأحرف) · `verification_log`
+
+**الحسابات (اختيارية، إضافية فوق النموذج بدون تسجيل):**
+- `profiles.account_uid` (uuid، غير فريد، مفهرس) — يربط صف `profiles` بحساب Supabase Auth (`auth.users.id`). فهرس فريد جزئي `(account_uid, role)` بيمنع أكثر من صف بنفس الصفة لنفس الحساب — شخص واحد ممكن يفعّل مالك **و**باحث بنفس الوقت (صفّان منفصلان بنفس `account_uid`).
+- **لا ربط تلقائي بالرقم.** `link_account_role()` بينشئ صف `profiles` جديد مربوط بالحساب دايماً — ما بيسطو على صف قديم غير مربوط بمطابقة الهاتف (لأن الهاتف مش مُتحقَّق منه بأي OTP، والمطابقة التلقائية كانت بتفتح ثغرة انتحال). ربط صف قديم بحساب موجود = يدوي حصراً عبر `admin_link_profile()` بعد ما الطاقم يتأكد هاتفياً إنه نفس الشخص (نفس منطق التوثيق الهاتفي الموجود أصلاً).
+- `notifications` — RLS: `self_read`/`self_update` (`account_uid = auth.uid()`) + `staff_read`. **بدون** سياسة `insert` لـ`authenticated` — الإدراج فقط من دوال/محفزات `SECURITY DEFINER` (مالكها بيتجاوز RLS). العميل بيقرأ/يعلّم كمقروء مباشرة عبر REST بجلسته.
+- `saved_listings` — سياسة `self_all` (`account_uid = auth.uid()`)، PK مركّب `(account_uid, listing_id)`.
+- محفزات إشعار تلقائي: `notify_contact_request` (AFTER INSERT على `contact_requests`) · `notify_listing_change` (AFTER UPDATE OF status,verification على `listings` — وفيها منطق تطابق للباحثين المنشورين عند أول نشر) · `notify_request_published` (AFTER UPDATE OF status على `seeker_requests`) · `notify_expiring_soon` (مجدولة عبر `pg_cron`، مش RPC عام — القيمة من `settings.expiring_soon_days` مش رقم ثابت).
 
 **الأنواع (enums) الإضافية:** `staff_role` (`admin` · `agent`) · `institution_org_type` · `institution_lead_status`
 
@@ -66,13 +74,19 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 | كتابة (insert فقط) | `contact_requests` · `reports` · `events` |
 | دوال | `submit_listing` · `submit_request` · `confirm_listing_available` · `bump_listing_view` · `staff_email_for_username` (تحويل يوزرنيم لإيميل قبل الدخول — ما بترجّع غير الإيميل) · `review_link_info` · `submit_review` · `owner_dashboard` · `submit_institution_lead` — كلهن بدون تسجيل دخول |
 
+**`authenticated` (حساب مسجّل، بدون شرط طاقم) — لوحة «حسابي» الذاتية فقط**
+
+`link_account_role` · `my_profile` · `my_owner_dashboard` · `my_seeker_dashboard` — الفاعل حصراً `auth.uid()`، بدون أي `p_actor`/`p_id` يحدّد شخص غيره. `my_owner_dashboard` بتطبّق نفس بوابة القاعدة ١٨ (رقم الباحث محجوب لحد ما تصير حالة طلب التواصل غير `new`) رغم إنها ذاتية.
+
 **`authenticated` (بشرط `is_staff()`/`is_admin()`) + `service_role` — مركز التحكم فقط**
 
 الواجهات الداخلية (فيها أرقام هواتف — **ممنوع منح `anon` عليها إطلاقاً**) صارت `security_invoker = on`، والحماية الفعلية سياسة `staff_read` على الجداول تحتها:
 `v_admin_listings` · `v_admin_owners` · `v_admin_seekers` · `v_admin_requests` · `v_admin_reports` · `v_admin_pipeline` · `v_admin_fees` · `v_admin_activity` · `v_kpi_daily` · `v_kpi_core` · `v_kpi_quality` · `v_reverse_matches`
 
-الدوال الإدارية (١٧) — كل وحدة فيها حارس `if not (is_staff() or auth.uid() is null) then raise exception` (أربعة بـ`is_admin()`: `admin_profile_block` · `admin_set_setting` · `admin_page_save` · `admin_report_status`)، ومنحصرة بـ`authenticated, service_role`:
-`admin_listing_status` · `admin_listing_verification` · `admin_listing_extend` · `admin_request_status` · `admin_profile_level` · `admin_profile_block` · `admin_report_status` · `admin_fee_status` · `admin_fee_promo` · `admin_contact_status` · `admin_save_safety` · `admin_city_save` · `admin_area_save` · `admin_page_save` · `admin_set_setting` · `admin_log` · `admin_listing_images`
+> `v_admin_owners`/`v_admin_seekers` فيهن عمود `has_account` (بذيل القائمة) — `true` لو الصف مربوط بحساب Supabase Auth.
+
+الدوال الإدارية (٢١) — كل وحدة فيها حارس `if not (is_staff() or auth.uid() is null) then raise exception` (أربعة بـ`is_admin()`: `admin_profile_block` · `admin_set_setting` · `admin_page_save` · `admin_report_status`)، ومنحصرة بـ`authenticated, service_role`:
+`admin_listing_status` · `admin_listing_verification` · `admin_listing_extend` · `admin_request_status` · `admin_profile_level` · `admin_profile_block` · `admin_report_status` · `admin_fee_status` · `admin_fee_promo` · `admin_contact_status` · `admin_save_safety` · `admin_city_save` · `admin_area_save` · `admin_page_save` · `admin_set_setting` · `admin_log` · `admin_listing_images` · `admin_list_accounts` · `admin_list_notifications` · `admin_send_notification` · `admin_link_profile`
 
 > `admin_listing_images` بدون `p_actor` إطلاقاً — الفاعل من `auth.uid()` حصراً. `auth.uid() is null` (استدعاء من `service_role`/SQL مباشر) بيعدّي الحارس، لطوارئ القاعدة فقط.
 
@@ -108,6 +122,18 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 19. **ممنوع موقع دقيق لأي غرفة مشغولة على خريطة.** لو انبنى عرض خرائطي: دائرة تقريبية ٣٠٠–٥٠٠م + نص عربي واضح إنه العنوان الدقيق بيعطيه المندوب وقت ترتيب الزيارة. دبوس دقيق + سياسة الجنس على إعلان عام = خطر على الساكن.
 20. **لا تنزّل رسم النجاح أبداً.** الخصم بكود خصم فقط، مش بتغيير `settings.fee_base`. رفع السعر من صفر أصعب بنيوياً من التخفيض.
 21. **نصوص الموقع ما بتوحي بمخزون كبير.** كل ادّعاء لازم يكون مسنود بالبيانات الفعلية بالقاعدة. طلبات الباحثين هي دليل الطلب لاستقطاب الملّاك، مش العكس.
+22. **المصطلح الجامع لكل نصوص الواجهة العامة: «سكن»** (وللجمع «وحدات»)، لأنه `listing_kind` فيه أكثر من نوع (`room_shared`/`bed_shared`/`studio`/`apartment`/`family`). كلمة «غرفة» تُستعمل فقط لما السياق فعلاً عن نوع محدّد (تسمية `listing_kind` نفسها، أو حقل عددي زي «عدد الغرف بالسكن»)، مش وصف عام للمنصة.
+23. **نبرة النصوص العامة: عربية فصحى معاصرة بسيطة**، مش محكية ومش لغة شركات متكلّفة. جملة قصيرة، فعل مباشر. بدون «نسعى»/«حلول متكاملة»/«فريقنا»، وبدون علامات تعجب أو إيموجي. (مركز التحكم استثناء — عربي داخلي عادي، مش موجّه لعامة الناس.)
+
+---
+
+## الهوية البصرية
+
+- **التوكنز** (بكل ملف `public/*.html` عدا `admin/index.html`): `--blue-700:#12309B` `--blue-600:#1E45D6` `--blue-500:#3A63F0` `--blue-100:#E4EAFF` `--blue-050:#F2F5FF` `--amber:#F5A524` `--amber-ink:#9A5B00` `--navy:#080F2E` `--ink:#080F2E` `--mut:#6B748F` `--bg:#F2F5FF` `--card:#FFFFFF` `--line:#E1E6F5` `--ok:#12A150` `--warn:#C2410C` `--danger:#DC2626`. أشكال: `--r-sm:8px` `--r:14px` `--r-lg:20px` `--r-pill:999px`. ظل واحد `--sh:0 10px 30px rgba(8,15,46,.10)` — بدون تدرّجات ولا تكديس ظلال.
+- **قاعدة الزر الكهرماني:** `--amber` تعبئات فقط، **زر أساسي واحد بالشاشة الواحدة** (`.btn.acc`، نص `var(--navy)` أو `var(--amber-ink)` — أبيض على كهرماني ضعيف التباين). أي زر إضافي يصير `--blue-600`.
+- **الشعار:** أيقونة SVG ثابتة (مبنى بثلاث كتل + نافذة كهرمانية) — نسخة عادية (`fill="var(--blue-600)"`، لخلفية بيضاء) ونسخة معكوسة (`fill="#FFFFFF"` + نافذة `var(--amber)`، لخلفية زرقاء غامقة). البلاطة/الفافيكون (`public/favicon.svg`, `public/favicon-16.svg`) بخلفية `#1E45D6` مربّعة الزوايا. **الرمز نفسه لا يُعكس أبداً بين عربي/إنجليزي** — بس ترتيب DOM (الأيقونة قبل النص بالعربي) بيخلّيها تظهر يمين النص تلقائياً بـRTL.
+- **الخطوط:** `IBM Plex Sans Arabic` للنص كله، `Archivo` للاتيني بالشعار (`MAWDI` تحت «موضع») وعناوين إنجليزية فقط. ارتفاع سطر عربي ≥ 1.60 دايماً. بدون `letter-spacing`/`italic` عربي.
+- **`public/admin/index.html` قرار متحفّظ:** ظل توكناته القديمة (`--ink`/`--ink-2`/`--info`/`--gold`...) بدون استبدال كامل — لوحة داخلية كثيفة (٢١٠٠+ سطر) بيعتمد عليها كل مكان تقريباً، واستبدال الأسماء كان بده يكسرها بدون فحص بصري ممكن. اللي انعمل: فافيكون + شعار مصغّر بالـ`.brand` + تقريب قيم `--info`/`--gold` الفعلية لدرجات الأزرق/الكهرماني الجديدة. أي إعادة تصميم كاملة للوحة تحتاج جلسة مخصّصة بفحص بصري فعلي.
 
 ---
 
@@ -130,7 +156,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 
 شات داخلي · بوابة دفع · حساب ضمان (escrow) · تطبيق أصلي · إيجار يومي/سياحي · أي ميزة بتأخّر الإطلاق.
 
-> **تسجيل دخول للمالك والباحث** خارج النطاق كحساب/كلمة سر. البديل المعتمد: **رابط موقّع بدون كلمة سر** (زي `confirm_token`/`owner_token`) — بيعطي ٩٠٪ من الفايدة بدون خسارة نموذج «بدون تسجيل» اللي هو ميزة تنافسية.
+> **الحساب اختياري وإضافي، مش شرط.** التصفّح وإضافة إعلان وتسجيل طلب بحث وطلب التواصل **تبقى شغّالة بالكامل بدون تسجيل دخول** — هذا يبقى المسار الافتراضي والمُعلن. الروابط الموقّعة (`confirm_token`/`owner_token`) تبقى شغّالة كما هي، بالتوازي. حساب `public/account.html` (Supabase Auth بريد/كلمة سر) طبقة إضافية تعطي متابعة وإشعارات فقط — لا يجبر أي مستخدم على التسجيل، وأي تعديل يجبر عليه = خطأ يُرفض.
 
 ---
 
@@ -150,6 +176,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 | اسم ملف migration محلي ما طابق `supabase_migrations` بعد `apply_migration` | أداة الـMCP بتسجّل نسختها الزمنية الخاصة، مش اسم الملف. **دايماً** شغّل `list_migrations` بعد التطبيق وسمّي الملف المحلي بنفس الرقم بالضبط |
 | حذف من `storage.objects` بـSQL بيرفض حتى بـ`service_role` | `protect_delete` trigger مقصود. احذف عبر Storage API (`DELETE /storage/v1/object/<bucket>/<path>`) |
 | `function is not unique` وقت استدعاء دالة إدارية بمعطيات مسمّاة | `create or replace function` بمعطيات إضافية (حتى لو كلها بـ`default`) بتغيّر التوقيع (argument type list) وبتخلق **overload جديد** بدل ما تستبدل القديمة. لازم `drop function if exists <old signature exact types>` صريح قبلها، وبعدين `revoke`/`grant` من جديد على التوقيع الجديد (المنح ما بينورث تلقائياً). صار مع `admin_page_save`/`admin_city_save`/`admin_area_save` وقت إضافة الحقول الإنجليزية. |
+| `v_admin_*` صارت مرئية لـ`authenticated` عادي بعد إضافة عمود لها | `create or replace view` **بيصفّر خيار `security_invoker=on`** إذا ما انكتب صراحة بنفس أمر الاستبدال (مش موروث زي الأعمدة). لازم `alter view <name> set (security_invoker = on);` فوراً بعد أي `create or replace view` على واجهة كانت تحمل هالخيار، والتحقّق بـ`select reloptions from pg_class where relname=...` (لازم يطلع `{security_invoker=on}`) **وبعدين** إعادة فحص `set local role authenticated` = صفر صفوف. صار وقت إضافة عمود `has_account` لـ`v_admin_owners`/`v_admin_seekers`. |
 
 ---
 
