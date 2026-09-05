@@ -81,7 +81,9 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 **`authenticated` (بشرط `is_staff()`/`is_admin()`) + `service_role` — مركز التحكم فقط**
 
 الواجهات الداخلية (فيها أرقام هواتف — **ممنوع منح `anon` عليها إطلاقاً**) صارت `security_invoker = on`، والحماية الفعلية سياسة `staff_read` على الجداول تحتها:
-`v_admin_listings` · `v_admin_owners` · `v_admin_seekers` · `v_admin_requests` · `v_admin_reports` · `v_admin_pipeline` · `v_admin_fees` · `v_admin_activity` · `v_kpi_daily` · `v_kpi_core` · `v_kpi_quality` · `v_reverse_matches`
+`v_admin_listings` · `v_admin_owners` · `v_admin_seekers` · `v_admin_requests` · `v_admin_reports` · `v_admin_pipeline` · `v_admin_fees` · `v_admin_activity` · `v_admin_reviews` · `v_kpi_daily` · `v_kpi_core` · `v_kpi_quality` · `v_reverse_matches`
+
+> **`v_admin_reviews` منحة صريحة، مش وراثة.** views الجداد بدون `grant select ... to authenticated, service_role` صريح ما بتنقرأ حتى من الطاقم — `security_invoker=on` وحدها مش كافية، لازم الاثنين معاً (تحقّق بـ`has_table_privilege('authenticated', '<view>', 'select')`).
 
 > `v_admin_owners`/`v_admin_seekers` فيهن عمود `has_account` (بذيل القائمة) — `true` لو الصف مربوط بحساب Supabase Auth.
 
