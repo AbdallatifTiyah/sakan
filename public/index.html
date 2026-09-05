@@ -638,6 +638,9 @@ function render(){
 function cardL(x){
   const v = x.verification==="field" ? `<span class="t v">✓ ${VER.field}</span>`
           : x.verification==="desk"  ? `<span class="t d">✓ ${VER.desk}</span>` : "";
+  /* التقييم بيظهر فقط إذا في تقييمات فعلية منشورة — بدون نجوم فارغة أو صفر وهمي */
+  const rating = x.review_count > 0
+    ? `<span class="t">★ ${x.review_avg} (${x.review_count})</span>` : "";
   const img0 = Array.isArray(x.images) && x.images[0] ? x.images[0] : null;
   const thumb = img0
     ? `<div class="thumb" style="background-image:url('${esc(img0)}')"></div>`
@@ -648,7 +651,7 @@ function cardL(x){
       <h3>${esc(x.title)}</h3>
       <div class="meta">${esc(x.city)} · ${esc(x.area)}${x.landmark?" · "+esc(x.landmark):""}</div>
       <div class="price">${nis(x.price)}<small> ${tt("/ شهر","/ month")}${x.bills_included?tt(" — شامل الفواتير"," — bills included"):""}</small></div>
-      <div class="tags">${v}<span class="t">${KIND[x.kind]||""}</span>
+      <div class="tags">${v}${rating}<span class="t">${KIND[x.kind]||""}</span>
         <span class="t">${POL[x.gender_pol]||""}</span>
         ${x.furnished?`<span class="t">${tt("مفروش","Furnished")}</span>`:""}
         <span class="t">${tt("متاح","Available")} ${dt(x.available_from)}</span></div>
@@ -721,6 +724,15 @@ function openL(id){
   const feats = (x.features||[]).length ? `<div class="sec"><h4>${tt("مواصفات السكن","Housing features")}</h4>
       <div class="tags">${x.features.map(f=>`<span class="t">${esc(FEATURE_LABEL(f))}</span>`).join("")}</div></div>` : "";
 
+  /* تقييمات ساكنين سابقين — تظهر فقط بعد وصول الإعلان لعتبة النشر (settings.review_publish_threshold) */
+  const reviews = x.review_count > 0 ? `<div class="sec">
+      <h4>${tt("تقييمات ساكنين سابقين","Reviews from past residents")}</h4>
+      <div class="row"><span>${tt("التقييم العام","Overall rating")}</span>
+        <span>★ ${x.review_avg} / 5 — ${tt(`${x.review_count} تقييم`, `${x.review_count} reviews`)}</span></div>
+      <div class="note">${tt("متوسط تقييمات ساكنين أقاموا فعلياً بهذا السكن، بعد ٣٠ يوماً على الأقل من الانتقال.",
+        "Average rating from residents who actually lived here, collected at least 30 days after move-in.")}</div>
+    </div>` : "";
+
   const imgs = Array.isArray(x.images) ? x.images : [];
   CUR_IMGS = imgs;
   const gallery = imgs.length
@@ -758,6 +770,7 @@ function openL(id){
         ${x.occupants_note?`<div class="note">${esc(x.occupants_note)}</div>`:""}
       </div>
       ${feats}
+      ${reviews}
       ${visit}
       <div class="sec" id="contactSec">
         <h4>${tt("تواصل مع المالك","Contact the owner")}</h4>
