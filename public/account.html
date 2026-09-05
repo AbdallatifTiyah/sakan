@@ -252,6 +252,9 @@ function renderAuthCard(){
     <div class="fg"><label>${tt("كلمة السر","Password")}</label><input id="loPass" type="password"></div>
     <div id="loErr"></div>
     <button class="btn acc" style="width:100%" onclick="submitLogin()">${tt("دخول","Log in")}</button>
+    <div class="meta" style="margin-top:12px;text-align:center">${tt(
+      "تعذّر الدخول؟ <a href=\"/\">تواصل معنا</a> من الصفحة الرئيسية.",
+      "Can't log in? <a href=\"/\">Contact us</a> from the homepage.")}</div>
   ` : `
     <div class="fg"><label>${tt("البريد الإلكتروني","Email")}</label><input id="suEmail" type="email"></div>
     <div class="fg"><label>${tt("كلمة السر (٦ أحرف على الأقل)","Password (at least 6 characters)")}</label><input id="suPass" type="password"></div>
@@ -281,7 +284,9 @@ async function submitSignup(){
       setSession(r);
       location.reload();
     }else{
-      $("authCard").innerHTML = `<div class="done">${tt("تم إنشاء الحساب ✓ تحقّق من بريدك لتأكيده، ثم سجّل الدخول.","Account created ✓ Check your email to confirm it, then log in.")}</div>`;
+      $("authCard").innerHTML = `<div class="done">${tt(
+        "تم إنشاء الحساب ✓ لكن الدخول التلقائي لم يعمل. جرّب تسجيل الدخول بنفس البريد وكلمة السر — إن طُلب تأكيد بريد ولم تصلك رسالة، تواصل معنا من الصفحة الرئيسية.",
+        "Account created ✓ but automatic login didn't work. Try logging in with the same email and password — if email confirmation is requested and you don't receive it, contact us from the homepage.")}</div>`;
     }
   }catch(e){
     $("suErr").innerHTML = `<div class="err">${tt("تعذّر إنشاء الحساب. ربما البريد مستخدم مسبقاً.","Couldn't create the account. The email may already be in use.")}</div>`;

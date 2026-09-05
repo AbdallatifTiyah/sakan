@@ -26,6 +26,8 @@
 | `wrangler.toml` | `main` + `binding = "ASSETS"` + `run_worker_first = true` |
 | `supabase/migrations/` | لازم تطابق `supabase_migrations` بالحرف — العدد والحالة: `npx supabase migration list` |
 
+> **التسجيل ببريد وكلمة سر بدون تأكيد.** خدمة البريد المدمجة في Supabase لا تسلّم إلا لأعضاء الفريق، لذا لا رسائل تأكيد ولا استرجاع كلمة سر. الاسترجاع إجراء يدوي: تعيين كلمة سر جديدة من لوحة Auth. **ممنوع حذف مستخدم من لوحة Auth قبل التحقق من قاعدة الحذف على `profiles.account_uid`** (لا يوجد قيد مفتاح خارجي على العمود أصلاً — تحقّق حيّ: `select confdeltype from pg_constraint where conname like '%account_uid%'` يرجع صفراً، فلا cascade مرتبط بالعمود، لكن تحقّق من جديد لو أُضيف قيد لاحقاً). يُعاد تفعيل التأكيد بعد ربط النطاق وتوثيق مزوّد إرسال.
+
 **Supabase**
 - ref: `yckteijitcqjtedoyoyv` (eu-central-1، Postgres 17.6) · URL: `https://yckteijitcqjtedoyoyv.supabase.co`
 - anon key عام ومسموح يظهر بالكود. `service_role` **ممنوع** يظهر بأي ملف — وما عاد يُلصق يدوياً بمركز التحكم أصلاً.
@@ -180,6 +182,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 | `function is not unique` وقت استدعاء دالة إدارية بمعطيات مسمّاة | `create or replace function` بمعطيات إضافية (حتى لو كلها بـ`default`) بتغيّر التوقيع (argument type list) وبتخلق **overload جديد** بدل ما تستبدل القديمة. لازم `drop function if exists <old signature exact types>` صريح قبلها، وبعدين `revoke`/`grant` من جديد على التوقيع الجديد (المنح ما بينورث تلقائياً). صار مع `admin_page_save`/`admin_city_save`/`admin_area_save` وقت إضافة الحقول الإنجليزية. |
 | `v_admin_*` صارت مرئية لـ`authenticated` عادي بعد إضافة عمود لها | `create or replace view` **بيصفّر خيار `security_invoker=on`** إذا ما انكتب صراحة بنفس أمر الاستبدال (مش موروث زي الأعمدة). لازم `alter view <name> set (security_invoker = on);` فوراً بعد أي `create or replace view` على واجهة كانت تحمل هالخيار، والتحقّق بـ`select reloptions from pg_class where relname=...` (لازم يطلع `{security_invoker=on}`) **وبعدين** إعادة فحص `set local role authenticated` = صفر صفوف. صار وقت إضافة عمود `has_account` لـ`v_admin_owners`/`v_admin_seekers`. |
 | مستخدم يقدر يعدّل عموداً ما كان المفروض يلمسه بجدول له RLS سليمة | `grant update on <table> to authenticated` بلا قيد أعمدة يسمح بتعديل **أي** عمود بالصف اللي يملكه، حتى لو `with check` بالسياسة سليم — لأن `with check` يحرس **الصفوف** (مين يملك الصف) لا **الأعمدة** (أي حقل يتغيّر). لازم `revoke update on <table> from authenticated` ثم `grant update (<الأعمدة المسموحة فقط>) on <table> to authenticated`. صار مع `notifications`/`is_read` بتدقيق ٢٠٢٦-٠٩-٠٥. |
+| تسجيل بـ`account.html` يرجع `200` ولا تصل رسالة تأكيد | الخدمة المدمجة ترفض التسليم لغير أعضاء فريق Supabase، **بصمت وبدون خطأ** — راجع `Confirm email`/`Enable custom SMTP` بلوحة `/auth/providers`/`/auth/smtp` قبل افتراض عطل بالكود. مع `Confirm email` مطفأ (الوضع الحالي)، لا رسالة أصلاً — الرد يحتوي `session` مباشرة. |
 
 ---
 
