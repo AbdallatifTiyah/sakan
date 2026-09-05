@@ -343,6 +343,8 @@ const R_CAT    = {fake_listing:"إعلان وهمي",already_rented:"مؤجّر 
 const F_STATUS = {due:"مستحق",collected:"محصّل",waived:"معفى",lost:"ضائع"};
 const I_TYPE   = {ngo:"منظمة غير حكومية",university:"جامعة",company:"شركة",government:"جهة حكومية",other:"غير ذلك"};
 const I_STATUS = {new:"جديد",contacted:"تم التواصل",negotiating:"قيد التفاوض",won:"اتفاق",lost:"مغلق"};
+const V_STAGE  = {day30:"بعد ٣٠ يوماً",move_out:"بعد الانتقال"};
+const yn = v => v===true?'<span style="color:var(--ok)">نعم</span>' : v===false?'<span style="color:var(--bad)">لا</span>' : '<span style="color:var(--mute)">—</span>';
 const REJECTS  = ["صور مش مطابقة للواقع","السعر غير واقعي","الرقم ما بيرد / رقم غلط",
                   "المالك انسحب","تكرار إعلان موجود","معلومات ناقصة","مخالف لشروط السلامة"];
 
@@ -358,6 +360,7 @@ const VIEWS = [
   {id:"listings",t:"كل الإعلانات",    grp:"المخزون", both:true},
   {id:"verify",  t:"التوثيق",         grp:"", both:true},
   {id:"matches", t:"المطابقة العكسية", grp:"", both:true},
+  {id:"reviews", t:"التقييمات",        grp:"", both:true},
   {id:"owners",  t:"الملّاك",          grp:"الناس", both:true},
   {id:"seekers", t:"الباحثون",        grp:"", both:false},
   {id:"accounts",t:"المستخدمون",      grp:"", both:false},
@@ -514,7 +517,7 @@ function go(v){
     listings:vListings,reports:vReports,
     pipeline:vPipeline,verify:vVerify,owners:vOwners,seekers:vSeekers,fees:vFees,
     matches:vMatches,activity:vActivity,audit:vAudit,settings:vSettings,
-    pages:vPages,accounts:vAccounts,notifications:vNotifications}[v])();
+    pages:vPages,accounts:vAccounts,notifications:vNotifications,reviews:vReviews}[v])();
 }
 function loading(t){ $("#main").innerHTML = '<div class="head"><h2>'+esc(t)+'</h2></div><div class="empty">بيحمّل…</div>'; }
 function fail(e){ $("#main").innerHTML += '<div class="warnbox">'+esc(e.message)+"</div>"; }
@@ -834,6 +837,7 @@ async function openDrawer(kind, id){
     if(kind==="contact")  return drawContact(id);
     if(kind==="fee")      return drawFee(id);
     if(kind==="inst")     return drawInstitutionLead(id);
+    if(kind==="review")   return drawReview(id);
   } catch(e){ $("#dpanel").innerHTML = '<div class="warnbox">'+esc(e.message)+"</div>"; }
 }
 
@@ -2195,6 +2199,81 @@ async function vNotifications(){
       } catch(e){ toast(e.message, "bad"); }
     };
   } catch(e){ fail(e); }
+}
+
+/* ══════════════ التقييمات ══════════════ */
+async function vReviews(){
+  const f = S.filters.reviews = S.filters.reviews || {search:"", stage:"", pub:""};
+  $("#main").innerHTML = `
+    <div class="head"><h2>التقييمات</h2><span class="note" id="rvcount"></span></div>
+    <div class="bars">
+      <input type="search" id="rvs" placeholder="بحث برمز الإعلان أو عنوانه…" value="${esc(f.search)}">
+      <select id="rvst"><option value="">كل المراحل</option>
+        ${Object.entries(V_STAGE).map(([k,v])=>`<option value="${k}" ${f.stage===k?"selected":""}>${v}</option>`).join("")}</select>
+      <span class="chip ${f.pub==="pub"?"on":""}" data-pub="pub">منشور فقط</span>
+      <span class="chip ${f.pub==="unpub"?"on":""}" data-pub="unpub">غير منشور فقط</span>
+    </div>
+    <div id="rvtable"><div class="empty">بيحمّل…</div></div>`;
+
+  const reload = () => loadReviews(f);
+  $("#rvs").oninput = debounce(()=>{ f.search=$("#rvs").value.trim(); reload(); }, 300);
+  $("#rvst").onchange = ()=>{ f.stage=$("#rvst").value; reload(); };
+  $("#main").querySelectorAll("[data-pub]").forEach(c => c.onclick = ()=>{
+    f.pub = f.pub===c.dataset.pub ? "" : c.dataset.pub;
+    $("#main").querySelectorAll("[data-pub]").forEach(x=>x.classList.toggle("on", x.dataset.pub===f.pub));
+    reload();
+  });
+  reload();
+}
+async function loadReviews(f){
+  let p = "/v_admin_reviews?select=*&order=created_at.desc&limit=300";
+  if(f.stage) p += "&stage=eq."+f.stage;
+  if(f.pub==="pub") p += "&is_published=eq.true";
+  if(f.pub==="unpub") p += "&is_published=eq.false";
+  if(f.search) p += "&or=(listing_ref.ilike.*"+encodeURIComponent(f.search)+"*,listing_title.ilike.*"+encodeURIComponent(f.search)+"*)";
+  try{
+    const rows = await get(p);
+    $("#rvcount").textContent = rows.length + " تقييم";
+    $("#rvtable").innerHTML = rows.length ? `
+      <div class="tw"><table><thead><tr>
+        <th>الإعلان</th><th>المدينة/المنطقة</th><th>المرحلة</th><th>التقييم العام</th>
+        <th>دخول بدون إذن؟</th><th>إرجاع التأمين؟</th><th>الحالة</th><th>التاريخ</th>
+      </tr></thead><tbody>
+      ${rows.map(r=>`<tr data-id="${r.id}">
+        <td><span class="ref">${esc(r.listing_ref)}</span> ${esc(r.listing_title)}</td>
+        <td>${esc(r.city)} · ${esc(r.area)}</td>
+        <td>${esc(V_STAGE[r.stage]||r.stage)}</td>
+        <td class="num">★ ${r.avg_rating}</td>
+        <td>${yn(r.entered_without_permission)}</td>
+        <td>${yn(r.deposit_returned)}</td>
+        <td>${r.is_published?'<span class="tag t-published">منشور</span>':'<span class="tag t-pending">غير منشور بعد</span>'}</td>
+        <td style="color:var(--mute)">${dt(r.created_at,true)}</td>
+      </tr>`).join("")}</tbody></table></div>`
+      : '<div class="empty"><b>ما في تقييمات</b>بتوصل عبر روابط التقييم الموقّعة اللي بترسل للساكنين، وبتنشر تلقائياً بعد ما يوصل الإعلان لعدد كافٍ منها.</div>';
+    wireRows("review");
+  } catch(e){ $("#rvtable").innerHTML = '<div class="warnbox">'+esc(e.message)+"</div>"; }
+}
+async function drawReview(id){
+  const r = (await get("/v_admin_reviews?select=*&id=eq."+id))[0];
+  if(!r) return ($("#dpanel").innerHTML = '<div class="empty">التقييم مش موجود.</div>');
+  $("#dpanel").innerHTML = `
+    <div class="dhead"><div><h3>${esc(r.listing_ref)} — ${esc(r.listing_title)}</h3>
+      <div class="ref">${esc(V_STAGE[r.stage]||r.stage)} · ${dt(r.created_at,true)}</div></div>
+      <button class="btn sm" id="dx">إغلاق</button></div>
+    <dl class="dl">
+      <dt>المدينة/المنطقة</dt><dd>${esc(r.city)} · ${esc(r.area)}</dd>
+      <dt>الصيانة والاستجابة</dt><dd class="num">${r.r_maintenance} / 5</dd>
+      <dt>الهدوء</dt><dd class="num">${r.r_quiet} / 5</dd>
+      <dt>دقة الوصف</dt><dd class="num">${r.r_accuracy} / 5</dd>
+      <dt>الأمان بالليل</dt><dd class="num">${r.r_safety_night} / 5</dd>
+      <dt>التقييم العام</dt><dd class="num">★ ${r.avg_rating} / 5</dd>
+      <dt>دخول المالك بدون إذن؟</dt><dd>${yn(r.entered_without_permission)}</dd>
+      <dt>إرجاع التأمين كاملاً؟</dt><dd>${yn(r.deposit_returned)}</dd>
+      <dt>الحالة</dt><dd>${r.is_published?'<span class="tag t-published">منشور للعامة</span>':'<span class="tag t-pending">غير منشور — بانتظار عتبة النشر</span>'}</dd>
+    </dl>
+    <div class="acts"><button class="btn sm" id="goListing">فتح الإعلان</button></div>`;
+  $("#dx").onclick = closeDrawer;
+  $("#goListing").onclick = () => openDrawer("listing", r.listing_id);
 }
 
 /* ── الإقلاع ─────────────────────────────────────────── */
