@@ -74,7 +74,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 |---|---|
 | قراءة | `v_listings_public` · `v_requests_public` · `cities` · `areas` · `pages` |
 | كتابة (insert فقط) | `contact_requests` · `reports` · `events` |
-| دوال | `submit_listing` · `submit_request` · `confirm_listing_available` · `bump_listing_view` · `staff_email_for_username` (تحويل يوزرنيم لإيميل قبل الدخول — ما بترجّع غير الإيميل) · `review_link_info` · `submit_review` · `owner_dashboard` · `submit_institution_lead` — كلهن بدون تسجيل دخول |
+| دوال | `submit_listing` · `submit_request` · `confirm_listing_available` · `bump_listing_view` · `staff_email_for_username` (تحويل يوزرنيم لإيميل قبل الدخول — ما بترجّع غير الإيميل) · `review_link_info` · `submit_review` · `owner_dashboard` · `owner_contact_status` (تغيير حالة طلب تواصل من طرف المالك بتوكنه الموقّع — بيسمح فقط بـ`owner_responded`/`viewing_set`/`dead`؛ `rented`/`forwarded`/`new` مرفوضة دايماً، `rented` تحديداً لأنها حدث فوترة بتخلق صف `owner_fees` عبر `on_contact_rented` وتضل بيد الطاقم حصراً) · `submit_institution_lead` — كلهن بدون تسجيل دخول |
 
 **`authenticated` (حساب مسجّل، بدون شرط طاقم) — لوحة «حسابي» الذاتية فقط**
 
@@ -146,7 +146,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 - **الموسمية:** ذروة آب–تشرين أول، ذروة أصغر شباط. السرعة أهم من الكمال — تفويت افتتاح الفصل الدراسي كلفة استراتيجية حقيقية.
 - **بوابة القرار:** غرف موثّقة + تأجيرات مؤكدة قبل تاريخ محدّد — الأرقام بجدول `settings` (`gate_rooms`/`gate_rentals`/`gate_date`). هاي بوابة استمرار/توقف للاستثمار، مش مؤشر أداء.
 - **مؤشر PMF الأساسي:** نسبة إعادة الإدراج من المالك خلال ٦٠ يوم (`v_kpi_quality.owner_repeat_pct`).
-- **الدخل:** رسم نجاح من المالك يُحصّل **نقداً عبر المندوب** (القيمة بـ`settings.fee_base`). الباحث مجاني دايماً. `MAWDI50` كود خصم (القيمة والحد والصلاحية بجدول `promo_codes`).
+- **الدخل:** رسم نجاح من المالك يُحصّل **نقداً عبر المندوب** (القيمة الافتراضية بـ`settings.fee_base`). الباحث مجاني دايماً. `MAWDI50` كود خصم (القيمة والحد والصلاحية بجدول `promo_codes`). **المبلغ الفعلي متغيّر حسب نوع السكن** (غرفة برسم ثابت منخفض، ووحدة كاملة بنصف أجرة شهر) — القيمة المعروضة لأي واجهة (`owner.html` مثلاً) هي `owner_fees.amount_due` المخزّن حرفياً بعد حساب `compute_fee_due()` (تريغر `trg_fee_due`)، **مش** `settings.fee_base` مباشرة ولا أي حساب بالواجهة.
 - **التسعير:** الرسم الحالي أرخص من قيمة الخدمة عمداً. المجال الواقعي لاحقاً أعلى، **بعد** إثبات `owner_repeat_pct` مش قبله.
 - **رسم شارة الباحث (`seeker_badge_fee`):** موجود بـ`settings` وغير مفعّل. لا تبني له تتبّع بالنظام لحد ما يصير في دليل إنه الباحثين بيدفعوا فعلاً.
 - **المؤسسات/NGOs:** تسعير معكوس — المؤسسة تدفع لكل غرفة والمالك ما بيدفع. `institutions.html` بس بتلتقط الطلب؛ التسعير والمتابعة **يدوية بالكامل**.

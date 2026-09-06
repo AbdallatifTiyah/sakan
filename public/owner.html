@@ -12,61 +12,106 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Archivo:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --blue-700:#12309B; --blue-600:#1E45D6; --blue-500:#3A63F0;
   --blue-100:#E4EAFF; --blue-050:#F2F5FF;
   --amber:#F5A524; --amber-ink:#9A5B00;
-  --navy:#080F2E; --ink:#080F2E; --mut:#6B748F;
+  --navy:#080F2E; --ink:#080F2E; --ink-2:#4A5470; --mut:#6B748F; --mask:#9AA3BE;
   --bg:#F2F5FF; --card:#FFFFFF; --line:#E1E6F5;
   --ok:#12A150; --warn:#C2410C; --danger:#DC2626;
-  --ok-bg:#E1F5EA; --warn-bg:#FBEBDD; --danger-bg:#FCE9E8; --footer-link:#D7DDF3; --footer-text:#AEB8D6;
+  --ok-bg:#E1F5EA; --warn-bg:#FBEBDD; --danger-bg:#FCE9E8;
   --r-sm:8px; --r:14px; --r-pill:999px;
   --sh:0 10px 30px rgba(8,15,46,.10);
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);
-  font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,sans-serif;line-height:1.7}
+body{margin:0;background:var(--bg);color:var(--ink-2);
+  font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,sans-serif;line-height:1.65;font-size:14px}
 a{color:var(--blue-600)}
-.wrap{max-width:820px;margin:0 auto;padding:0 18px}
+:focus-visible{outline:2px solid var(--blue-500);outline-offset:2px}
+.wrap{max-width:820px;margin:0 auto;padding:0 16px}
 header{background:var(--blue-700);color:#fff}
-.hd{display:flex;align-items:center;justify-content:space-between;padding:16px 0;gap:12px;flex-wrap:wrap}
-.logo{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none}
-.logo svg{width:30px;height:30px;flex:none}
-.logo .wordwrap{display:flex;flex-direction:column;line-height:1.1}
-.logo .word{font-size:24px;font-weight:700}
-.logo .sub{font-size:10.5px;font-weight:600;letter-spacing:.18em;color:rgba(255,255,255,.75);font-family:'Archivo',sans-serif}
-.back{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:var(--r-sm);
-  padding:9px 15px;font:inherit;font-weight:600;text-decoration:none}
-.back:hover{background:rgba(255,255,255,.24)}
-h1{font-size:22px;margin:22px 0 4px}
-.sub{color:var(--mut);font-size:13.5px;margin-bottom:20px}
-h2{font-size:16px;margin:26px 0 10px}
+.hd{display:flex;align-items:center;justify-content:space-between;padding:14px 0;gap:10px}
+.logo{display:flex;align-items:center;gap:8px;color:#fff;text-decoration:none}
+.logo svg{width:26px;height:26px;flex:none}
+.logo .word{font-size:18px;font-weight:700}
+h1{font-size:19px;font-weight:700;color:var(--ink);margin:18px 0 2px;line-height:1.6}
+.hello-sub{color:var(--mut);font-size:12.5px;margin-bottom:18px}
+h2{font-size:15px;font-weight:700;color:var(--ink);margin:24px 0 10px}
 .card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:16px;margin-bottom:12px}
-.row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
-.title{font-weight:600;font-size:15px}
-.ref{font-family:ui-monospace,monospace;font-size:12px;color:var(--mut)}
-.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
-.t{background:var(--blue-050);border-radius:var(--r-pill);padding:3px 10px;font-size:12px;font-weight:600;color:var(--ink)}
-.t.warn{background:var(--warn-bg);color:var(--warn)}
+
+/* الطابور */
+.queue{border-inline-start:3px solid var(--amber);}
+.queue .lbl{font-size:12px;font-weight:700;color:var(--amber-ink);background:var(--warn-bg);
+  border-radius:var(--r-pill);padding:2px 10px;display:inline-block;margin-bottom:6px}
+.queue .txt{font-size:14.5px;color:var(--ink);font-weight:600}
+.queue .ref{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--mut);margin-top:2px}
+
+/* كروت الإعلانات */
+.lrow{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.ltitle{font-weight:700;font-size:15.5px;color:var(--ink)}
+.lref{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--mut);margin-top:2px}
+.lloc{font-size:13px;color:var(--ink-2);margin-top:4px}
+.lprice{font-weight:700;color:var(--blue-700);font-size:15px;white-space:nowrap}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.t{background:var(--blue-050);border-radius:var(--r-pill);padding:3px 10px;font-size:12px;font-weight:600;color:var(--ink-2)}
 .t.ok{background:var(--ok-bg);color:var(--ok)}
+.t.warn{background:var(--warn-bg);color:var(--amber-ink)}
 .t.bad{background:var(--danger-bg);color:var(--danger)}
-.meta{color:var(--mut);font-size:12.5px;margin-top:6px}
-.btn{border:0;border-radius:var(--r-sm);padding:8px 14px;font:inherit;font-weight:600;cursor:pointer;
-  background:var(--blue-600);color:#fff;text-decoration:none;display:inline-block;font-size:13px}
+.lmeta{color:var(--mut);font-size:12px;margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.lmeta b{color:var(--warn);font-weight:700}
+
+.divider{border:0;border-top:1px solid var(--line);margin:12px 0}
+.reqs-head{font-size:12.5px;color:var(--mut);font-weight:600;margin-bottom:8px}
+
+/* طلبات التواصل (مضغوطة تحت الإعلان) */
+.req{padding:10px 0;border-top:1px solid var(--line)}
+.req:first-child{border-top:0}
+.req-row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.req-name{font-weight:600;font-size:13.5px;color:var(--ink)}
+.req-date{color:var(--mut);font-size:12px}
+.req-phone-mask{color:var(--mask);letter-spacing:.1em;font-family:ui-monospace,Consolas,monospace;
+  font-size:13.5px;display:inline-flex;align-items:center;gap:5px;margin-top:6px}
+.req-phone{font-family:ui-monospace,Consolas,monospace;font-size:14px;font-weight:600;color:var(--ink);
+  direction:ltr;unicode-bidi:isolate;display:inline-block;margin-top:6px}
+
+/* أزرار */
+.btn{border:0;border-radius:var(--r-sm);padding:0 14px;height:40px;font:inherit;font-weight:600;cursor:pointer;
+  background:var(--blue-600);color:#fff;text-decoration:none;display:inline-flex;align-items:center;
+  justify-content:center;gap:6px;font-size:13.5px;min-height:44px}
 .btn:hover{background:var(--blue-700)}
 .btn.line{background:#fff;color:var(--blue-600);border:1px solid var(--line)}
 .btn.line:hover{background:var(--blue-050)}
+.btn.ghost{background:transparent;color:var(--mut);border:1px solid var(--line);font-size:12.5px}
+.btn.ghost:hover{background:var(--blue-050);color:var(--ink-2)}
 .btn[disabled]{opacity:.55;cursor:not-allowed}
-.acts{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
-.empty{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:26px;
-  text-align:center;color:var(--mut)}
-.msg{padding:40px;text-align:center;color:var(--mut)}
-.phone{font-family:ui-monospace,monospace;direction:ltr;display:inline-block}
-footer{background:var(--navy);color:var(--footer-text);padding:24px 0;font-size:13px;margin-top:30px}
-footer a{color:var(--footer-link)}
-@media(max-width:600px){h1{font-size:20px}}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.btn-row .btn{flex:1;min-width:120px}
+
+.rented-note{background:var(--ok-bg);color:var(--ok);border-radius:var(--r-sm);padding:8px 12px;
+  font-size:12.5px;font-weight:600;margin-top:10px}
+
+/* الرسوم */
+.fee-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;
+  border-top:1px solid var(--line)}
+.fee-row:first-child{border-top:0}
+.fee-amount{font-weight:700;font-size:22px;color:var(--blue-700)}
+.fee-ref{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--mut);margin-top:2px}
+.fee-note{color:var(--mut);font-size:12.5px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+
+.empty{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:24px 18px;
+  text-align:center;color:var(--mut);font-size:13.5px}
+.msg{padding:50px 16px;text-align:center;color:var(--mut)}
+.lock-icon{flex:none}
+
+footer{background:var(--navy);color:#AEB8D6;padding:20px 0;font-size:12.5px;margin-top:26px;text-align:center}
+footer b{color:#fff}
+
+@media(min-width:600px){
+  body{font-size:14.5px}
+  h1{font-size:22px}
+}
 </style>
 </head>
 <body>
@@ -78,9 +123,8 @@ footer a{color:var(--footer-link)}
         <g fill="#FFFFFF"><path d="M6 28h8v14H6z"/><path d="M17 18l11-6v30H17z"/><path d="M31 24l10-3v21H31z"/></g>
         <rect x="20" y="24" width="6" height="6" fill="var(--amber)"/>
       </svg>
-      <span class="wordwrap"><span class="word">موضع</span><span class="sub">MAWDI</span></span>
+      <span class="word">موضع</span>
     </a>
-    <a class="back" href="/">الصفحة الرئيسية</a>
   </div>
 </header>
 
@@ -89,7 +133,7 @@ footer a{color:var(--footer-link)}
 </div>
 
 <footer><div class="wrap">
-  <b style="color:#fff">موضع</b> — هذه لوحة خاصة بك، الرابط لا يُشارك مع أي شخص آخر.
+  هذا الرابط خاص بك — <b>لا تشاركه مع أي شخص</b>
 </div></footer>
 
 <script>
@@ -107,7 +151,11 @@ const L_STATUS = {draft:"مسودّة",pending:"بانتظار المراجعة"
 const L_VERIF  = {none:"غير موثّق",desk:"توثيق مكتبي",field:"توثيق ميداني"};
 const C_STATUS = {new:"جديد",forwarded:"محوّل إلك",owner_responded:"رديت عليه",
                   viewing_set:"معاينة محدّدة",rented:"تم التأجير",dead:"مغلق"};
-const statusCls = s => ({published:"ok",rented:"ok",rejected:"bad",dead:"bad"}[s] || "");
+const F_STATUS = {due:"مستحق",collected:"محصّل"};
+const statusCls = s => ({published:"ok",rented:"ok",collected:"ok",rejected:"bad",dead:"bad",due:"warn"}[s] || "");
+
+const p = new URLSearchParams(location.search);
+const OWNER_ID = p.get("id"), TOKEN = p.get("t");
 
 async function rpc(fn, body){
   const r = await fetch(SUPABASE_URL+"/rest/v1/rpc/"+fn, {
@@ -118,50 +166,102 @@ async function rpc(fn, body){
   return data;
 }
 
-function listingCard(l){
-  const soon = l.status==="published" && l.days_left!=null && l.days_left<=3;
+function lockIcon(){
+  return `<svg class="lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4" y="11" width="16" height="10" rx="2"></rect>
+    <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
+  </svg>`;
+}
+
+function maskedPhone(){
+  return `<span class="req-phone-mask">${lockIcon()}059• ••• •••</span>`;
+}
+
+function fullPhone(phone){
+  const digits = String(phone).replace(/\D/g,"");
+  const chunks = [digits.slice(0,4), digits.slice(4,7), digits.slice(7,10)].filter(Boolean);
+  return `<span class="req-phone">${esc(chunks.join(" "))}</span>`;
+}
+
+function contactActions(phone){
+  const wa = "970"+String(phone).replace(/^0/,"");
+  return `<div class="btn-row">
+    <a class="btn line" href="tel:${esc(phone)}">اتصال</a>
+    <a class="btn" target="_blank" rel="noopener" href="https://wa.me/${esc(wa)}">واتساب</a>
+  </div>`;
+}
+
+function requestItem(r){
+  const revealed = r.status !== "new";
+  return `<div class="req" data-req="${esc(r.id)}">
+    <div class="req-row">
+      <span class="req-name">${esc(r.seeker_name||"باحث/ة")}</span>
+      <span class="req-date">${dt(r.created_at)}</span>
+    </div>
+    ${revealed
+      ? fullPhone(r.seeker_phone) + contactActions(r.seeker_phone) + statusRowFor(r)
+      : `<div>${maskedPhone()}</div>
+         <div class="btn-row">
+           <button class="btn" data-reveal="${esc(r.id)}">استلمت الطلب — أظهر الرقم</button>
+         </div>`}
+  </div>`;
+}
+
+function statusRowFor(r){
+  if(r.status === "rented"){
+    return `<div class="rented-note">وصلنا خبرك. بنتواصل معك لتأكيد التأجير.</div>`;
+  }
+  if(r.status === "dead"){
+    return `<div class="tags" style="margin-top:8px"><span class="t bad">مغلق</span></div>`;
+  }
+  return `<div class="btn-row">
+    <button class="btn line" data-viewing="${esc(r.id)}">معاينة محدّدة</button>
+    <button class="btn line" data-dead="${esc(r.id)}">إغلاق الطلب</button>
+    <button class="btn ghost" data-rented="${esc(r.id)}" data-listing="${esc(r.listing_ref)}">تم التأجير</button>
+  </div>`;
+}
+
+function listingCard(l, requests){
+  const soon = l.status==="published" && l.days_left!=null && l.days_left<=EXPIRING_SOON_DAYS;
   const confirmBtn = l.status==="published"
     ? `<button class="btn line" data-confirm="${esc(l.ref)}" data-token="${esc(l.confirm_token)}">
          تأكيد أنها ما زالت متاحة</button>`
     : "";
+  const own = requests.filter(r => r.listing_ref === l.ref && r.status !== "new");
   return `<div class="card">
-    <div class="row">
+    <div class="lrow">
       <div>
-        <div class="title">${esc(l.title)}</div>
-        <div class="ref">${esc(l.ref)} · ${esc(l.city)} — ${esc(l.area)} · ${money(l.price)}/شهر</div>
+        <div class="ltitle">${esc(l.title)}</div>
+        <div class="lref">${esc(l.ref)}</div>
+        <div class="lloc">${esc(l.city)} — ${esc(l.area)}</div>
       </div>
-      <div class="tags">
-        <span class="t ${statusCls(l.status)}">${esc(L_STATUS[l.status]||l.status)}</span>
-        ${l.verification!=="none"?'<span class="t">'+esc(L_VERIF[l.verification]||l.verification)+"</span>":""}
-      </div>
+      <div class="lprice">${money(l.price)}<span style="font-weight:400;color:var(--mut);font-size:12px"> / شهر</span></div>
     </div>
-    <div class="meta">
+    <div class="tags">
+      <span class="t ${statusCls(l.status)}">${esc(L_STATUS[l.status]||l.status)}</span>
+      ${l.verification!=="none"?'<span class="t">'+esc(L_VERIF[l.verification]||l.verification)+"</span>":""}
+    </div>
+    <div class="lmeta">
       ${l.status==="published" && l.days_left!=null
-        ? (soon ? '<b style="color:var(--warn)">بحاجة لتأكيد — تنتهي بعد '+l.days_left+' يوم</b>'
+        ? (soon ? '<b>بحاجة لتأكيد — تنتهي بعد '+l.days_left+' يوم</b>'
                 : "تنتهي بعد "+l.days_left+" يوم")
         : ""}
-      ${l.view_count!=null ? " · "+l.view_count+" مشاهدة" : ""}
-      ${l.status==="rejected" && l.reject_reason ? " · سبب الرفض: "+esc(l.reject_reason) : ""}
+      ${l.view_count!=null ? "· "+l.view_count+" مشاهدة" : ""}
+      ${l.status==="rejected" && l.reject_reason ? "· سبب الرفض: "+esc(l.reject_reason) : ""}
     </div>
-    ${confirmBtn?'<div class="acts">'+confirmBtn+"</div>":""}
+    ${confirmBtn?'<div class="btn-row">'+confirmBtn+"</div>":""}
+    ${own.length ? '<hr class="divider"><div class="reqs-head">طلبات التواصل ('+own.length+')</div>'+own.map(requestItem).join("") : ""}
   </div>`;
 }
 
-function requestCard(r){
-  const phone = r.seeker_phone;
-  return `<div class="card">
-    <div class="row">
-      <div>
-        <div class="title">${esc(r.seeker_name||"باحث/ة")}</div>
-        <div class="ref">على إعلانك: ${esc(r.listing_ref)} — ${esc(r.listing_title)} · ${dt(r.created_at)}</div>
-      </div>
-      <span class="t ${statusCls(r.status)}">${esc(C_STATUS[r.status]||r.status)}</span>
+function feeItem(f){
+  return `<div class="fee-row">
+    <div>
+      <div class="fee-amount">${money(f.amount_due)}</div>
+      <div class="fee-ref">${esc(f.listing_ref)}</div>
     </div>
-    ${phone ? `<div class="acts">
-      <a class="btn line" href="tel:${esc(phone)}">اتصال <span class="phone">${esc(phone)}</span></a>
-      <a class="btn line" target="_blank" rel="noopener"
-         href="https://wa.me/970${esc(String(phone).replace(/^0/,""))}">واتساب</a>
-    </div>` : '<div class="meta">الطلب قيد المراجعة — سيظهر رقمه هنا فور تحويله إليك.</div>'}
+    <span class="t ${statusCls(f.status)}">${esc(F_STATUS[f.status]||f.status)}</span>
   </div>`;
 }
 
@@ -175,35 +275,109 @@ async function confirmListing(ref, token, btn){
   }
 }
 
-(async () => {
-  const p = new URLSearchParams(location.search);
-  const id = p.get("id"), token = p.get("t");
-  const doc = document.getElementById("doc");
-  if(!id || !token){
-    doc.innerHTML = '<div class="empty">هذا الرابط ناقص جزءاً منه. تأكد أنك نسخته كاملاً.</div>';
-    return;
-  }
+async function changeContactStatus(id, status, btn){
+  const prevText = btn.textContent;
+  btn.disabled = true; btn.textContent = "جارِ الحفظ…";
   try{
-    const d = await rpc("owner_dashboard", {p_owner_id:id, p_token:token});
+    await rpc("owner_contact_status", {p_owner_id:OWNER_ID, p_token:TOKEN, p_contact_id:id, p_status:status});
+    await load();
+  }catch(e){
+    btn.disabled = false; btn.textContent = prevText;
+    alert(e.message || "حدث خطأ.");
+  }
+}
+
+async function reportRented(id, ref, btn){
+  btn.disabled = true; btn.textContent = "جارِ الإرسال…";
+  try{
+    await fetch(SUPABASE_URL+"/rest/v1/events", {
+      method:"POST", headers:H,
+      body: JSON.stringify([{event_type:"owner_reported_rented", source:"user", actor_role:"owner",
+        meta:{contact_id:id, listing_ref:ref, owner_id:OWNER_ID}}])
+    });
+    btn.closest(".btn-row").outerHTML = `<div class="rented-note">وصلنا خبرك. بنتواصل معك لتأكيد التأجير.</div>`;
+  }catch(e){
+    btn.disabled = false; btn.textContent = "تم التأجير";
+  }
+}
+
+function wireActions(doc, d){
+  doc.querySelectorAll("[data-confirm]").forEach(b => b.onclick = () =>
+    confirmListing(b.dataset.confirm, b.dataset.token, b));
+  doc.querySelectorAll("[data-reveal]").forEach(b => b.onclick = () =>
+    changeContactStatus(b.dataset.reveal, "owner_responded", b));
+  doc.querySelectorAll("[data-viewing]").forEach(b => b.onclick = () =>
+    changeContactStatus(b.dataset.viewing, "viewing_set", b));
+  doc.querySelectorAll("[data-dead]").forEach(b => b.onclick = () =>
+    changeContactStatus(b.dataset.dead, "dead", b));
+  doc.querySelectorAll("[data-rented]").forEach(b => b.onclick = () =>
+    reportRented(b.dataset.rented, b.dataset.listing, b));
+}
+
+let EXPIRING_SOON_DAYS = 3;
+
+async function loadSettings(){
+  try{
+    const r = await fetch(SUPABASE_URL+"/rest/v1/settings?key=eq.expiring_soon_days&select=value", {headers:H});
+    const rows = await r.json();
+    if(rows && rows[0]) EXPIRING_SOON_DAYS = Number(rows[0].value);
+  }catch(e){}
+}
+
+async function load(){
+  const doc = document.getElementById("doc");
+  try{
+    const d = await rpc("owner_dashboard", {p_owner_id:OWNER_ID, p_token:TOKEN});
     document.title = "مرحباً " + d.owner_name + " — موضع";
-    const listings = d.listings || [], requests = d.requests || [];
+    const listings = d.listings || [], requests = d.requests || [], fees = d.fees || [];
+
+    const queueItems = [];
+    requests.filter(r => r.status === "new").forEach(r =>
+      queueItems.push(`<div class="card queue" data-req="${esc(r.id)}">
+        <span class="lbl">طلب تواصل جديد</span>
+        <div class="txt">${esc(r.seeker_name||"باحث/ة")} — ${esc(r.listing_title)}</div>
+        <div class="ref">${esc(r.listing_ref)} · ${dt(r.created_at)}</div>
+        <div style="margin-top:8px">${maskedPhone()}</div>
+        <div class="btn-row"><button class="btn" data-reveal="${esc(r.id)}">استلمت الطلب — أظهر الرقم</button></div>
+      </div>`));
+    listings.filter(l => l.status==="published" && l.days_left!=null && l.days_left<=EXPIRING_SOON_DAYS).forEach(l =>
+      queueItems.push(`<div class="card queue">
+        <span class="lbl">قرب انتهاء الصلاحية</span>
+        <div class="txt">${esc(l.title)} — بحاجة لتأكيد خلال ${l.days_left} يوم</div>
+        <div class="ref">${esc(l.ref)}</div>
+      </div>`));
+
     doc.innerHTML = `
       <h1>مرحباً ${esc(d.owner_name)}</h1>
-      <div class="sub">هذه لوحتك — إعلاناتك وطلبات التواصل عليها.</div>
+      <div class="hello-sub">هذه لوحتك الخاصة — إعلاناتك وطلبات التواصل عليها.</div>
+
+      ${queueItems.length ? queueItems.join("") : ""}
 
       <h2>إعلاناتك (${listings.length})</h2>
-      ${listings.length ? listings.map(listingCard).join("")
+      ${listings.length ? listings.map(l => listingCard(l, requests)).join("")
         : '<div class="empty">لا توجد إعلانات مسجّلة بعد.</div>'}
 
-      <h2>طلبات التواصل (${requests.length})</h2>
-      ${requests.length ? requests.map(requestCard).join("")
-        : '<div class="empty">لم يصل أي طلب تواصل بعد.</div>'}
+      <h2>الرسوم</h2>
+      ${fees.length
+        ? `<div class="card">${fees.map(feeItem).join("")}
+             <div class="fee-note">رسم النجاح بينتفق عليه مع المندوب قبل النشر، وبيتحصّله نقداً لما يزورك. ما في دفع من هون.</div>
+           </div>`
+        : '<div class="empty">الرسم بينخلق بس عند التأجير عن طريق موضع.</div>'}
     `;
-    doc.querySelectorAll("[data-confirm]").forEach(b => b.onclick = () =>
-      confirmListing(b.dataset.confirm, b.dataset.token, b));
+    wireActions(doc, d);
   }catch(e){
     doc.innerHTML = '<div class="empty">'+esc(e.message||"الرابط غير صالح.")+'</div>';
   }
+}
+
+(async () => {
+  if(!OWNER_ID || !TOKEN){
+    document.getElementById("doc").innerHTML =
+      '<div class="empty">هذا الرابط ناقص جزءاً منه. تأكد أنك نسخته كاملاً.</div>';
+    return;
+  }
+  await loadSettings();
+  await load();
 })();
 </script>
 </body>
