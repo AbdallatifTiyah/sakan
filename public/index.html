@@ -368,9 +368,11 @@ const DIAL = LANG === "en" ? [
   {c:"US", d:"1",   n:"أمريكا",   min:10, max:10, ex:"2025550123"}
 ];
 
-const KIND = LANG === "en" ? {room_shared:"Shared room", bed_shared:"Bed in shared room",
+/* bed_shared وfamily موجودتان بـlisting_kind ومسعّرتان (fee_bed_shared/fee_family
+   بجدول settings)، لكن مش معروضتان هون عمداً — نفس منطق إخفاء family السابق. */
+const KIND = LANG === "en" ? {room_shared:"Shared room",
               studio:"Studio", apartment:"Apartment"} : {
-              room_shared:"غرفة بسكن مشترك", bed_shared:"سرير بغرفة مشتركة",
+              room_shared:"غرفة بسكن مشترك",
               studio:"استوديو", apartment:"شقة"};
 const ICON = {room_shared:"🛏", bed_shared:"🛌", studio:"🏠", apartment:"🏢"};
 const POL  = LANG === "en" ? {female:"Women only", male:"Men only", mixed:"Mixed"}
@@ -1014,7 +1016,7 @@ function openForm(kind){
           <input id="lPrice" data-num inputmode="numeric" placeholder="${tt("مثلاً ٨٠٠","e.g. 800")}"></div>
         <div class="fg"><label>${tt("التأمين (₪ — اختياري)","Deposit (₪ — optional)")}</label>
           <input id="lDep" data-num inputmode="numeric" placeholder="${tt("مبلغ مسترد","Refundable amount")}"></div>
-        <div class="fg"><label>${tt("النوع","Type")}</label><select id="lKind">
+        <div class="fg"><label>${tt("النوع","Type")}</label><select id="lKind" onchange="renderFeeInfo()">
           ${Object.entries(KIND).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}
         </select></div>
         <div class="fg"><label>${tt("السكن لـ","Housing for")}</label><select id="lPol">
@@ -1031,6 +1033,8 @@ function openForm(kind){
           <input id="lMin" data-num inputmode="numeric" placeholder="${tt("مثلاً ٦","e.g. 6")}"></div>
         <div class="fg"><label>${tt("متاح من","Available from")}</label><input id="lFrom" type="date"></div>
       </div>
+
+      <div class="note" id="lFeeInfo" style="margin-top:6px"></div>
 
       <div class="fg"><label>${tt("مواصفات السكن","Housing features")}</label>
         ${chipsHTML("lFeat", FEATURES, {val:f=>f.slug, lbl:f=>tt(f.ar,f.en)})}
@@ -1099,7 +1103,7 @@ function openForm(kind){
         ${tt("سجّل طلبي","Register my request")}</button></div>
     </div></div>`;
   wireDigits($("modal"));
-  if(kind==="listing") restoreDraftIfAny();
+  if(kind==="listing"){ restoreDraftIfAny(); renderFeeInfo(); }
   $("ov").classList.add("on");
 }
 
@@ -1141,6 +1145,43 @@ function discardDraft(){
 }
 
 const num = id => { const v = toEN($(id).value).replace(/[^\d.]/g,""); return v ? Number(v) : null; };
+
+/* رسم النجاح — يُجلب من quote_listing_fee دايماً، بدون أي حساب هون.
+   كود الخصم النشط (إن وجد) يُعرض للعلم فقط عبر active_promo، بدون حقل إدخال (قاعدة ١٧). */
+let ACTIVE_PROMO_CACHE;
+async function getActivePromo(){
+  if(ACTIVE_PROMO_CACHE === undefined){
+    try{
+      const rows = await rpc("active_promo", {});
+      ACTIVE_PROMO_CACHE = (rows && rows[0]) || null;
+    }catch(e){ ACTIVE_PROMO_CACHE = null; }
+  }
+  return ACTIVE_PROMO_CACHE;
+}
+async function renderFeeInfo(){
+  const box = $("lFeeInfo"); if(!box) return;
+  const kind = $("lKind").value;
+  let fee = null;
+  try{ fee = await rpc("quote_listing_fee", {p_kind: kind}); }catch(e){}
+  let html = "";
+  if(fee !== null && fee !== undefined){
+    html += `<div>${tt(
+      `رسم النجاح: ${fee} شيكل — يُدفع مرة واحدة بعد تأكيد التأجير، وأقل من نصف أجرة الشهر الأول. الباحث لا يدفع شيئاً.`,
+      `Success fee: ${fee} shekels — paid once after the rental is confirmed, less than half the first month's rent. Seekers pay nothing.`
+    )}</div>`;
+  }
+  const promo = await getActivePromo();
+  if(promo){
+    const validStr = promo.valid_until
+      ? new Date(promo.valid_until).toLocaleDateString(LANG==="en"?"en-US":"ar-EG", {day:"numeric", month:"long", year:"numeric"})
+      : tt("بدون تاريخ انتهاء","No expiry date");
+    html += `<div>${tt(
+      `كود خصم فعّال: <b>${esc(promo.code)}</b> — خصم ${promo.discount_pct}٪، صالح حتى ${validStr}`,
+      `Active promo code: <b>${esc(promo.code)}</b> — ${promo.discount_pct}% off, valid until ${validStr}`
+    )}</div>`;
+  }
+  box.innerHTML = html;
+}
 
 async function subListing(){
   $("lErr").innerHTML = "";
