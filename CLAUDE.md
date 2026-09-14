@@ -75,7 +75,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 |---|---|
 | قراءة | `v_listings_public` · `v_requests_public` · `cities` · `areas` · `pages` |
 | كتابة (insert فقط) | `contact_requests` · `reports` · `events` |
-| دوال | `submit_listing` · `submit_request` · `confirm_listing_available` · `bump_listing_view` · `staff_email_for_username` (تحويل يوزرنيم لإيميل قبل الدخول — ما بترجّع غير الإيميل) · `review_link_info` · `submit_review` · `owner_dashboard` · `owner_contact_status` (تغيير حالة طلب تواصل من طرف المالك بتوكنه الموقّع — بيسمح فقط بـ`owner_responded`/`viewing_set`/`dead`؛ `rented`/`forwarded`/`new` مرفوضة دايماً، `rented` تحديداً لأنها حدث فوترة بتخلق صف `owner_fees` عبر `on_contact_rented` وتضل بيد الطاقم حصراً) · `submit_institution_lead` — كلهن بدون تسجيل دخول |
+| دوال | `submit_listing` · `submit_request` · `confirm_listing_available` · `bump_listing_view` · `staff_email_for_username` (تحويل يوزرنيم لإيميل قبل الدخول — ما بترجّع غير الإيميل) · `review_link_info` · `submit_review` · `owner_dashboard` · `owner_contact_status` (تغيير حالة طلب تواصل من طرف المالك بتوكنه الموقّع — بيسمح فقط بـ`owner_responded`/`viewing_set`/`dead`؛ `rented`/`forwarded`/`new` مرفوضة دايماً، `rented` تحديداً لأنها حدث فوترة بتخلق صف `owner_fees` عبر `on_contact_rented` وتضل بيد الطاقم حصراً) · `submit_institution_lead` · `quote_listing_fee(p_kind listing_kind)` (رسم النوع — عرض فقط بنموذج «أضف غرفة»، المصدر الوحيد لأي سعر) · `active_promo()` (كود الخصم النشط الوحيد إن وُجد — عرض فقط، بدون حقل إدخال، قاعدة ١٧) — كلهن بدون تسجيل دخول |
 
 **`authenticated` (حساب مسجّل، بدون شرط طاقم) — لوحة «حسابي» الذاتية فقط**
 
@@ -90,8 +90,10 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 
 > `v_admin_owners`/`v_admin_seekers` فيهن عمود `has_account` (بذيل القائمة) — `true` لو الصف مربوط بحساب Supabase Auth.
 
-الدوال الإدارية (٢١) — كل وحدة فيها حارس `if not (is_staff() or auth.uid() is null) then raise exception` (أربعة بـ`is_admin()`: `admin_profile_block` · `admin_set_setting` · `admin_page_save` · `admin_report_status`)، ومنحصرة بـ`authenticated, service_role`:
-`admin_listing_status` · `admin_listing_verification` · `admin_listing_extend` · `admin_request_status` · `admin_profile_level` · `admin_profile_block` · `admin_report_status` · `admin_fee_status` · `admin_fee_promo` · `admin_contact_status` · `admin_save_safety` · `admin_city_save` · `admin_area_save` · `admin_page_save` · `admin_set_setting` · `admin_log` · `admin_listing_images` · `admin_list_accounts` · `admin_list_notifications` · `admin_send_notification` · `admin_link_profile`
+الدوال الإدارية (٢٢) — كل وحدة فيها حارس `if not (is_staff() or auth.uid() is null) then raise exception` (أربعة بـ`is_admin()`: `admin_profile_block` · `admin_set_setting` · `admin_page_save` · `admin_report_status`)، ومنحصرة بـ`authenticated, service_role`:
+`admin_listing_status` · `admin_listing_verification` · `admin_listing_extend` · `admin_request_status` · `admin_profile_level` · `admin_profile_block` · `admin_report_status` · `admin_fee_status` · `admin_fee_promo` · `admin_fee_amount` · `admin_contact_status` · `admin_save_safety` · `admin_city_save` · `admin_area_save` · `admin_page_save` · `admin_set_setting` · `admin_log` · `admin_listing_images` · `admin_list_accounts` · `admin_list_notifications` · `admin_send_notification` · `admin_link_profile`
+
+> `admin_fee_amount(p_fee_id uuid, p_amount numeric, p_reason text)` — تعديل يدوي استثنائي لـ`amount_due` على صف `owner_fees` واحد، بدون `p_actor` (الفاعل من `auth.uid()` عبر `actor_name()` حصراً، قاعدة ١٦). يسجّل بـ`admin_actions` (`from_state`/`to_state` = القيمة القديمة/الجديدة كنص).
 
 > `admin_listing_images` بدون `p_actor` إطلاقاً — الفاعل من `auth.uid()` حصراً. `auth.uid() is null` (استدعاء من `service_role`/SQL مباشر) بيعدّي الحارس، لطوارئ القاعدة فقط.
 
@@ -127,7 +129,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 19. **ممنوع موقع دقيق لأي غرفة مشغولة على خريطة.** لو انبنى عرض خرائطي: دائرة تقريبية ٣٠٠–٥٠٠م + نص عربي واضح إنه العنوان الدقيق بيعطيه المندوب وقت ترتيب الزيارة. دبوس دقيق + سياسة الجنس على إعلان عام = خطر على الساكن.
 20. **لا تنزّل رسم النجاح أبداً.** الخصم بكود خصم فقط، مش بتغيير `settings.fee_base`. رفع السعر من صفر أصعب بنيوياً من التخفيض.
 21. **نصوص الموقع ما بتوحي بمخزون كبير.** كل ادّعاء لازم يكون مسنود بالبيانات الفعلية بالقاعدة. طلبات الباحثين هي دليل الطلب لاستقطاب الملّاك، مش العكس.
-22. **المصطلح الجامع لكل نصوص الواجهة العامة: «سكن»** (وللجمع «وحدات»)، لأنه `listing_kind` فيه أكثر من نوع (`room_shared`/`bed_shared`/`studio`/`apartment`/`family`). كلمة «غرفة» تُستعمل فقط لما السياق فعلاً عن نوع محدّد (تسمية `listing_kind` نفسها، أو حقل عددي زي «عدد الغرف بالسكن»)، مش وصف عام للمنصة.
+22. **المصطلح الجامع لكل نصوص الواجهة العامة: «سكن»** (وللجمع «وحدات»)، لأنه `listing_kind` فيه أكثر من نوع (`room_shared`/`bed_shared`/`studio`/`apartment`/`family`). كلمة «غرفة» تُستعمل فقط لما السياق فعلاً عن نوع محدّد (تسمية `listing_kind` نفسها، أو حقل عددي زي «عدد الغرف بالسكن»)، مش وصف عام للمنصة. **`bed_shared` و`family` موجودتان بالـenum ومسعّرتان (`fee_bed_shared`/`fee_family` بـ`settings`) لكن مش معروضتين بمنتقي النوع بأي نموذج عام** (`index.html` — لا بنموذج «أضف غرفة» ولا بتفضيل نوع الباحث) — القيمتان تبقيان صالحتين لإعلانات قديمة أو حالات يدوية استثنائية، بس مش خيار عند إضافة إعلان جديد.
 23. **نبرة النصوص العامة: عربية فصحى معاصرة بسيطة**، مش محكية ومش لغة شركات متكلّفة. جملة قصيرة، فعل مباشر. بدون «نسعى»/«حلول متكاملة»/«فريقنا»، وبدون علامات تعجب أو إيموجي. (مركز التحكم استثناء — عربي داخلي عادي، مش موجّه لعامة الناس.)
 
 ---
@@ -147,7 +149,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 - **الموسمية:** ذروة آب–تشرين أول، ذروة أصغر شباط. السرعة أهم من الكمال — تفويت افتتاح الفصل الدراسي كلفة استراتيجية حقيقية.
 - **بوابة القرار:** غرف موثّقة + تأجيرات مؤكدة قبل تاريخ محدّد — الأرقام بجدول `settings` (`gate_rooms`/`gate_rentals`/`gate_date`). هاي بوابة استمرار/توقف للاستثمار، مش مؤشر أداء.
 - **مؤشر PMF الأساسي:** نسبة إعادة الإدراج من المالك خلال ٦٠ يوم (`v_kpi_quality.owner_repeat_pct`).
-- **الدخل:** رسم نجاح من المالك يُحصّل **نقداً عبر المندوب** (القيمة الافتراضية بـ`settings.fee_base`). الباحث مجاني دايماً. `SAKANNA50` كود خصم (القيمة والحد والصلاحية بجدول `promo_codes`). **المبلغ الفعلي متغيّر حسب نوع السكن** (غرفة برسم ثابت منخفض، ووحدة كاملة بنصف أجرة شهر) — القيمة المعروضة لأي واجهة (`owner.html` مثلاً) هي `owner_fees.amount_due` المخزّن حرفياً بعد حساب `compute_fee_due()` (تريغر `trg_fee_due`)، **مش** `settings.fee_base` مباشرة ولا أي حساب بالواجهة.
+- **الدخل:** رسم نجاح من المالك يُحصّل **نقداً عبر المندوب**. الباحث مجاني دايماً. `SAKANNA50` كود خصم (القيمة والحد والصلاحية بجدول `promo_codes`، عرض فقط بالواجهة العامة — قاعدة ١٧). **الرسم مبلغ ثابت لكل نوع سكن، مش نسبة من الإيجار:** `fee_apartment`/`fee_studio`/`fee_room_shared`/`fee_bed_shared`/`fee_family` بجدول `settings`، و`fee_base` احتياطي فقط لو مفتاح النوع غايب. **`quote_listing_fee(p_kind listing_kind)` هي المصدر الوحيد لأي سعر** — تستدعيها `compute_fee_due()` (تريغر `trg_fee_due` على `owner_fees`) وواجهة `index.html` (عرض فقط عبر RPC، صفر حساب بالجافاسكربت). القيمة النهائية بعد الخصم مخزّنة حرفياً بـ`owner_fees.amount_due`، وتعديلها اليدوي الاستثنائي عبر `admin_fee_amount()` فقط.
 - **التسعير:** الرسم الحالي أرخص من قيمة الخدمة عمداً. المجال الواقعي لاحقاً أعلى، **بعد** إثبات `owner_repeat_pct` مش قبله.
 - **رسم شارة الباحث (`seeker_badge_fee`):** موجود بـ`settings` وغير مفعّل. لا تبني له تتبّع بالنظام لحد ما يصير في دليل إنه الباحثين بيدفعوا فعلاً.
 - **المؤسسات/NGOs:** تسعير معكوس — المؤسسة تدفع لكل غرفة والمالك ما بيدفع. `institutions.html` بس بتلتقط الطلب؛ التسعير والمتابعة **يدوية بالكامل**.
