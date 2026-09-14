@@ -331,7 +331,7 @@ function exportCSV(filename, cols, rows){
 /* ── القواميس ─────────────────────────────────────────── */
 const L_STATUS = {draft:"مسودّة",pending:"بانتظار المراجعة",published:"منشور",rejected:"مرفوض",
                   reserved:"محجوز",rented:"مؤجّر",expired:"منتهي"};
-const L_VERIF  = {none:"غير موثّق",desk:"توثيق مكتبي",field:"توثيق ميداني"};
+const L_VERIF  = {none:"غير موثّق",desk:"توثيق مكتبي",video:"توثيق بمكالمة فيديو",field:"توثيق ميداني"};
 const L_KIND   = {room_shared:"غرفة بسكن مشترك",bed_shared:"سرير بغرفة مشتركة",
                   studio:"ستوديو",apartment:"شقة"};
 const L_POL    = {female:"إناث فقط",male:"ذكور فقط",mixed:"مختلط"};
@@ -939,6 +939,7 @@ async function drawListing(id){
     ${isAdmin()?`<div class="acts" style="margin-top:8px">
       <button class="btn sm" data-vf="none">إلغاء التوثيق</button>
       <button class="btn sm" data-vf="desk">توثيق مكتبي</button>
+      <button class="btn sm" data-vf="video">توثيق بمكالمة فيديو</button>
       <button class="btn sm" data-vf="field">توثيق ميداني</button>
     </div>`:""}
   </div>
