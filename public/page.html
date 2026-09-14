@@ -2,19 +2,19 @@
 <html lang="ar" dir="rtl">
 <head>
 <script>
-try{ var MAWDI_LANG = localStorage.getItem("mawdi_lang") === "en" ? "en" : "ar"; }
-catch(e){ var MAWDI_LANG = "ar"; }
-document.documentElement.lang = MAWDI_LANG;
-document.documentElement.dir  = MAWDI_LANG === "en" ? "ltr" : "rtl";
+try{ var SAKANNA_LANG = localStorage.getItem("sakanna_lang") === "en" ? "en" : "ar"; }
+catch(e){ var SAKANNA_LANG = "ar"; }
+document.documentElement.lang = SAKANNA_LANG;
+document.documentElement.dir  = SAKANNA_LANG === "en" ? "ltr" : "rtl";
 </script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<title id="pageTitle">موضع</title>
-<meta id="metaDesc" name="description" content="سياسة الخصوصية وشروط الاستخدام — منصة موضع.">
-<meta id="ogTitle" property="og:title" content="موضع">
-<meta id="ogDesc" property="og:description" content="سياسة الخصوصية وشروط الاستخدام — منصة موضع.">
-<meta id="ogSiteName" property="og:site_name" content="موضع">
+<title id="pageTitle">سكنّا</title>
+<meta id="metaDesc" name="description" content="سياسة الخصوصية وشروط الاستخدام — منصة سكنّا.">
+<meta id="ogTitle" property="og:title" content="سكنّا">
+<meta id="ogDesc" property="og:description" content="سياسة الخصوصية وشروط الاستخدام — منصة سكنّا.">
+<meta id="ogSiteName" property="og:site_name" content="سكنّا">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Archivo:wght@600;700&display=swap" rel="stylesheet">
@@ -79,7 +79,7 @@ footer a{color:var(--footer-link)}
         <g fill="#FFFFFF"><path d="M6 28h8v14H6z"/><path d="M17 18l11-6v30H17z"/><path d="M31 24l10-3v21H31z"/></g>
         <rect x="20" y="24" width="6" height="6" fill="var(--amber)"/>
       </svg>
-      <span class="wordwrap"><span class="word">موضع</span><span class="sub" id="tagline">MAWDI</span></span>
+      <span class="wordwrap"><span class="word">سكنّا</span><span class="sub" id="tagline">SAKANNA</span></span>
     </a>
     <div style="display:flex;gap:8px;align-items:center">
       <button class="back" id="langBtn" onclick="toggleLang()" style="cursor:pointer">EN</button>
@@ -90,7 +90,7 @@ footer a{color:var(--footer-link)}
 
 <div class="wrap">
   <div class="tabs" style="margin-top:18px">
-    <a href="?p=how-it-works" id="tHow">كيف بشتغل موضع</a>
+    <a href="?p=how-it-works" id="tHow">كيف بشتغل سكنّا</a>
     <a href="?p=privacy" id="tPrivacy">سياسة الخصوصية</a>
     <a href="?p=terms" id="tTerms">شروط الاستخدام</a>
   </div>
@@ -98,7 +98,7 @@ footer a{color:var(--footer-link)}
 </div>
 
 <footer><div class="wrap">
-  <b style="color:#fff">موضع</b> — <a href="/" id="footHome">الصفحة الرئيسية</a>
+  <b style="color:#fff">سكنّا</b> — <a href="/" id="footHome">الصفحة الرئيسية</a>
 </div></footer>
 
 <script>
@@ -157,22 +157,22 @@ function md(src){
   return out;
 }
 
-let LANG = MAWDI_LANG;
+let LANG = SAKANNA_LANG;
 const tt = (ar, en) => LANG === "en" ? en : ar;
 function toggleLang(){
   const next = LANG === "ar" ? "en" : "ar";
-  try{ localStorage.setItem("mawdi_lang", next); }catch(e){}
+  try{ localStorage.setItem("sakanna_lang", next); }catch(e){}
   location.reload();
 }
 function paintChrome(){
   document.getElementById("langBtn").textContent = LANG === "ar" ? "EN" : "عربي";
   document.getElementById("backLink").textContent = tt("رجوع للموقع", "Back to site");
   document.getElementById("footHome").textContent = tt("الصفحة الرئيسية", "Home");
-  document.getElementById("tHow").textContent = tt("كيف يعمل موضع", "How it works");
+  document.getElementById("tHow").textContent = tt("كيف يعمل سكنّا", "How it works");
   document.getElementById("tPrivacy").textContent = tt("سياسة الخصوصية", "Privacy policy");
   document.getElementById("tTerms").textContent = tt("شروط الاستخدام", "Terms of use");
   document.getElementById("loadingMsg").textContent = tt("جارِ التحميل…", "Loading…");
-  document.getElementById("ogSiteName").content = tt("موضع", "Mawdi");
+  document.getElementById("ogSiteName").content = tt("سكنّا", "Sakanna");
 }
 paintChrome();
 
@@ -194,17 +194,17 @@ const KEYS = {"how-it-works":"tHow", privacy:"tPrivacy", terms:"tTerms"};
     const d = rows[0];
     const title = LANG === "en" && d.title_en ? d.title_en : d.title_ar;
     const body  = LANG === "en" && d.body_en  ? d.body_en  : d.body_md;
-    document.title = title + " — " + tt("موضع","Mawdi");
-    document.getElementById("metaDesc").content = title + " — " + tt("موضع","Mawdi");
-    document.getElementById("ogTitle").content = title + " — " + tt("موضع","Mawdi");
-    document.getElementById("ogDesc").content = title + " — " + tt("موضع","Mawdi");
+    document.title = title + " — " + tt("سكنّا","Sakanna");
+    document.getElementById("metaDesc").content = title + " — " + tt("سكنّا","Sakanna");
+    document.getElementById("ogTitle").content = title + " — " + tt("سكنّا","Sakanna");
+    document.getElementById("ogDesc").content = title + " — " + tt("سكنّا","Sakanna");
     document.getElementById("doc").innerHTML =
       `<h1>${esc(title)}</h1>
        <div class="upd">${tt("آخر تحديث","Last updated")}: ${new Date(d.updated_at)
          .toLocaleDateString(LANG === "en" ? "en-GB" : "ar-EG",{day:"numeric",month:"long",year:"numeric"})}</div>`
       + md(body);
   }catch(e){
-    console.error("Mawdi page load:", e);
+    console.error("Sakanna page load:", e);
     document.getElementById("doc").innerHTML =
       `<div class="msg">${tt("تعذّر تحميل الصفحة. حاول تحديث الصفحة، أو ارجع للموقع.",
         "We couldn't load this page. Try refreshing, or go back to the site.")}</div>`;

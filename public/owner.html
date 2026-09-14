@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>لوحة المالك — موضع</title>
-<meta name="description" content="إعلاناتك وطلبات التواصل عليها — موضع.">
-<meta property="og:title" content="لوحة المالك — موضع">
-<meta property="og:description" content="إعلاناتك وطلبات التواصل عليها — موضع.">
-<meta property="og:site_name" content="موضع">
+<title>لوحة المالك — سكنّا</title>
+<meta name="description" content="إعلاناتك وطلبات التواصل عليها — سكنّا.">
+<meta property="og:title" content="لوحة المالك — سكنّا">
+<meta property="og:description" content="إعلاناتك وطلبات التواصل عليها — سكنّا.">
+<meta property="og:site_name" content="سكنّا">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -123,7 +123,7 @@ footer b{color:#fff}
         <g fill="#FFFFFF"><path d="M6 28h8v14H6z"/><path d="M17 18l11-6v30H17z"/><path d="M31 24l10-3v21H31z"/></g>
         <rect x="20" y="24" width="6" height="6" fill="var(--amber)"/>
       </svg>
-      <span class="word">موضع</span>
+      <span class="word">سكنّا</span>
     </a>
   </div>
 </header>
@@ -328,7 +328,7 @@ async function load(){
   const doc = document.getElementById("doc");
   try{
     const d = await rpc("owner_dashboard", {p_owner_id:OWNER_ID, p_token:TOKEN});
-    document.title = "مرحباً " + d.owner_name + " — موضع";
+    document.title = "مرحباً " + d.owner_name + " — سكنّا";
     const listings = d.listings || [], requests = d.requests || [], fees = d.fees || [];
 
     const queueItems = [];
@@ -362,7 +362,7 @@ async function load(){
         ? `<div class="card">${fees.map(feeItem).join("")}
              <div class="fee-note">رسم النجاح بينتفق عليه مع المندوب قبل النشر، وبيتحصّله نقداً لما يزورك. ما في دفع من هون.</div>
            </div>`
-        : '<div class="empty">الرسم بينخلق بس عند التأجير عن طريق موضع.</div>'}
+        : '<div class="empty">الرسم بينخلق بس عند التأجير عن طريق سكنّا.</div>'}
     `;
     wireActions(doc, d);
   }catch(e){

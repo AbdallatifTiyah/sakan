@@ -2,15 +2,15 @@
 <html lang="ar" dir="rtl">
 <head>
 <script>
-try{ var MAWDI_LANG = localStorage.getItem("mawdi_lang") === "en" ? "en" : "ar"; }
-catch(e){ var MAWDI_LANG = "ar"; }
-document.documentElement.lang = MAWDI_LANG;
-document.documentElement.dir  = MAWDI_LANG === "en" ? "ltr" : "rtl";
+try{ var SAKANNA_LANG = localStorage.getItem("sakanna_lang") === "en" ? "en" : "ar"; }
+catch(e){ var SAKANNA_LANG = "ar"; }
+document.documentElement.lang = SAKANNA_LANG;
+document.documentElement.dir  = SAKANNA_LANG === "en" ? "ltr" : "rtl";
 </script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<title id="pageTitle">حسابي — موضع</title>
+<title id="pageTitle">حسابي — سكنّا</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -113,7 +113,7 @@ footer a{color:var(--footer-link)}
         <g fill="#FFFFFF"><path d="M6 28h8v14H6z"/><path d="M17 18l11-6v30H17z"/><path d="M31 24l10-3v21H31z"/></g>
         <rect x="20" y="24" width="6" height="6" fill="var(--amber)"/>
       </svg>
-      <span class="wordwrap"><span class="word">موضع</span><span class="sub">MAWDI</span></span>
+      <span class="wordwrap"><span class="word">سكنّا</span><span class="sub">SAKANNA</span></span>
     </a>
     <div class="cta">
       <button class="bell" id="bellBtn" onclick="toggleNotifPanel()" style="display:none">🔔<span class="dot" id="bellCount" style="display:none">0</span></button>
@@ -133,18 +133,18 @@ footer a{color:var(--footer-link)}
 </div>
 
 <footer><div class="wrap">
-  <b style="color:#fff">موضع</b> — <span id="footNote">حسابك اختياري: التصفّح وإضافة الإعلانات وطلبات البحث تعمل دائماً بدون تسجيل دخول.</span>
+  <b style="color:#fff">سكنّا</b> — <span id="footNote">حسابك اختياري: التصفّح وإضافة الإعلانات وطلبات البحث تعمل دائماً بدون تسجيل دخول.</span>
 </div></footer>
 
 <script>
 const SUPABASE_URL = "https://yckteijitcqjtedoyoyv.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlja3RlaWppdGNxanRlZG95b3l2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MjA3MTksImV4cCI6MjEwMzQ5NjcxOX0.mAY5A6ROvtxN4kkD8g1s_tsDlSjGfy4TCNkgbYHeRvo";
 
-let LANG = MAWDI_LANG;
+let LANG = SAKANNA_LANG;
 const tt = (ar, en) => LANG === "en" ? en : ar;
 function toggleLang(){
   const next = LANG === "ar" ? "en" : "ar";
-  try{ localStorage.setItem("mawdi_lang", next); }catch(e){}
+  try{ localStorage.setItem("sakanna_lang", next); }catch(e){}
   location.reload();
 }
 const esc = s => String(s??"").replace(/[&<>"']/g,
@@ -154,7 +154,7 @@ const money = n => n==null ? "—" : Number(n).toLocaleString(LANG==="en"?"en-US
 const dt = d => d ? new Date(d).toLocaleDateString(LANG==="en"?"en-US":"ar-EG",{day:"numeric",month:"long"}) : "—";
 
 /* ═══════════════ الجلسة — access_token/refresh_token بـsessionStorage فقط ═══════════════ */
-const SESSION_KEY = "mawdi_session";
+const SESSION_KEY = "sakanna_session";
 function getSession(){
   try{ return JSON.parse(sessionStorage.getItem(SESSION_KEY) || "null"); }catch(e){ return null; }
 }
@@ -437,7 +437,7 @@ async function renderDashboard(){
 
 /* ═══════════════ الإقلاع ═══════════════ */
 (function(){
-  $("pageTitle").textContent = tt("حسابي — موضع","My account — Mawdi");
+  $("pageTitle").textContent = tt("حسابي — سكنّا","My account — Sakanna");
   $("langBtn").textContent = LANG === "ar" ? "EN" : "عربي";
   $("logoutBtn").textContent = tt("تسجيل خروج","Log out");
   $("footNote").textContent = tt(

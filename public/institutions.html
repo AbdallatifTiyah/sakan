@@ -2,19 +2,19 @@
 <html lang="ar" dir="rtl">
 <head>
 <script>
-try{ var MAWDI_LANG = localStorage.getItem("mawdi_lang") === "en" ? "en" : "ar"; }
-catch(e){ var MAWDI_LANG = "ar"; }
-document.documentElement.lang = MAWDI_LANG;
-document.documentElement.dir  = MAWDI_LANG === "en" ? "ltr" : "rtl";
+try{ var SAKANNA_LANG = localStorage.getItem("sakanna_lang") === "en" ? "en" : "ar"; }
+catch(e){ var SAKANNA_LANG = "ar"; }
+document.documentElement.lang = SAKANNA_LANG;
+document.documentElement.dir  = SAKANNA_LANG === "en" ? "ltr" : "rtl";
 </script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<title id="pageTitle">موضع للمؤسسات — إسكان موظفين وطلاب ومستفيدين</title>
-<meta id="metaDesc" name="description" content="هل تحتاج مؤسستك أو شركتك لتأمين سكن لموظفين أو طلاب أو مستفيدين؟ موضع تؤمّن وحدات سكنية موثّقة بالجملة في رام الله والبيرة وبيرزيت.">
-<meta id="ogTitle" property="og:title" content="موضع للمؤسسات — إسكان موظفين وطلاب ومستفيدين">
-<meta id="ogDesc" property="og:description" content="هل تحتاج مؤسستك أو شركتك لتأمين سكن لموظفين أو طلاب أو مستفيدين؟ موضع تؤمّن وحدات سكنية موثّقة بالجملة في رام الله والبيرة وبيرزيت.">
-<meta id="ogSiteName" property="og:site_name" content="موضع">
+<title id="pageTitle">سكنّا للمؤسسات — إسكان موظفين وطلاب ومستفيدين</title>
+<meta id="metaDesc" name="description" content="هل تحتاج مؤسستك أو شركتك لتأمين سكن لموظفين أو طلاب أو مستفيدين؟ سكنّا تؤمّن وحدات سكنية موثّقة بالجملة في رام الله والبيرة وبيرزيت.">
+<meta id="ogTitle" property="og:title" content="سكنّا للمؤسسات — إسكان موظفين وطلاب ومستفيدين">
+<meta id="ogDesc" property="og:description" content="هل تحتاج مؤسستك أو شركتك لتأمين سكن لموظفين أو طلاب أو مستفيدين؟ سكنّا تؤمّن وحدات سكنية موثّقة بالجملة في رام الله والبيرة وبيرزيت.">
+<meta id="ogSiteName" property="og:site_name" content="سكنّا">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Archivo:wght@600;700&display=swap" rel="stylesheet">
@@ -80,7 +80,7 @@ footer a{color:var(--footer-link)}
         <g fill="#FFFFFF"><path d="M6 28h8v14H6z"/><path d="M17 18l11-6v30H17z"/><path d="M31 24l10-3v21H31z"/></g>
         <rect x="20" y="24" width="6" height="6" fill="var(--amber)"/>
       </svg>
-      <span class="wordwrap"><span class="word">موضع</span><span class="sub" id="tagline">MAWDI</span></span>
+      <span class="wordwrap"><span class="word">سكنّا</span><span class="sub" id="tagline">SAKANNA</span></span>
     </a>
     <div style="display:flex;gap:8px;align-items:center">
       <button class="back" id="langBtn" onclick="toggleLang()" style="cursor:pointer;border:0">EN</button>
@@ -127,7 +127,7 @@ footer a{color:var(--footer-link)}
 </div>
 
 <footer><div class="wrap">
-  <b style="color:#fff">موضع</b> — <a href="/" id="footHome">الصفحة الرئيسية</a>
+  <b style="color:#fff">سكنّا</b> — <a href="/" id="footHome">الصفحة الرئيسية</a>
 </div></footer>
 
 <script>
@@ -148,11 +148,11 @@ async function api(path, opt={}){
 const rpc = (fn, body) => api("rpc/"+fn, {method:"POST", body:JSON.stringify(body)});
 
 /* ═══════════════ اللغة ═══════════════ */
-let LANG = MAWDI_LANG;
+let LANG = SAKANNA_LANG;
 const tt = (ar, en) => LANG === "en" ? en : ar;
 function toggleLang(){
   const next = LANG === "ar" ? "en" : "ar";
-  try{ localStorage.setItem("mawdi_lang", next); }catch(e){}
+  try{ localStorage.setItem("sakanna_lang", next); }catch(e){}
   location.reload();
 }
 const ORG_TYPES = LANG === "en" ? {
@@ -168,18 +168,18 @@ const localeName = c => c ? tt(c.name_ar, c.name_en || c.name_ar) : "—";
 function paintChrome(){
   $("langBtn").textContent = LANG === "ar" ? "EN" : "عربي";
   $("pageTitle").textContent = tt(
-    "موضع للمؤسسات — إسكان موظفين وطلاب ومستفيدين",
-    "Mawdi for institutions — housing for staff, students & beneficiaries");
+    "سكنّا للمؤسسات — إسكان موظفين وطلاب ومستفيدين",
+    "Sakanna for institutions — housing for staff, students & beneficiaries");
   $("metaDesc").content = tt(
-    "هل تحتاج مؤسستك أو شركتك لتأمين سكن لموظفين أو طلاب أو مستفيدين؟ موضع تؤمّن وحدات سكنية موثّقة بالجملة في رام الله والبيرة وبيرزيت.",
-    "Does your institution or company need housing for staff, students, or beneficiaries? Mawdi sources verified housing in bulk in Ramallah, Al-Bireh and Birzeit.");
+    "هل تحتاج مؤسستك أو شركتك لتأمين سكن لموظفين أو طلاب أو مستفيدين؟ سكنّا تؤمّن وحدات سكنية موثّقة بالجملة في رام الله والبيرة وبيرزيت.",
+    "Does your institution or company need housing for staff, students, or beneficiaries? Sakanna sources verified housing in bulk in Ramallah, Al-Bireh and Birzeit.");
   $("ogTitle").content = tt(
-    "موضع للمؤسسات — إسكان موظفين وطلاب ومستفيدين",
-    "Mawdi for institutions — housing for staff, students & beneficiaries");
+    "سكنّا للمؤسسات — إسكان موظفين وطلاب ومستفيدين",
+    "Sakanna for institutions — housing for staff, students & beneficiaries");
   $("ogDesc").content = tt(
-    "هل تحتاج مؤسستك أو شركتك لتأمين سكن لموظفين أو طلاب أو مستفيدين؟ موضع تؤمّن وحدات سكنية موثّقة بالجملة في رام الله والبيرة وبيرزيت.",
-    "Does your institution or company need housing for staff, students, or beneficiaries? Mawdi sources verified housing in bulk in Ramallah, Al-Bireh and Birzeit.");
-  $("ogSiteName").content = tt("موضع", "Mawdi");
+    "هل تحتاج مؤسستك أو شركتك لتأمين سكن لموظفين أو طلاب أو مستفيدين؟ سكنّا تؤمّن وحدات سكنية موثّقة بالجملة في رام الله والبيرة وبيرزيت.",
+    "Does your institution or company need housing for staff, students, or beneficiaries? Sakanna sources verified housing in bulk in Ramallah, Al-Bireh and Birzeit.");
+  $("ogSiteName").content = tt("سكنّا", "Sakanna");
   $("backLink").textContent = tt("الصفحة الرئيسية", "Home");
   $("footHome").textContent = tt("الصفحة الرئيسية", "Home");
   $("heroH1").textContent = tt("هل توظّف أو تستضيف أشخاصاً بحاجة إلى سكن؟", "Housing staff, students, or beneficiaries?");
