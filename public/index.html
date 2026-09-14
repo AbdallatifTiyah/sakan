@@ -381,6 +381,16 @@ const OCC  = LANG === "en" ? {student:"Student", employee:"Employee", other:"Oth
                             : {student:"طالب/ة", employee:"موظف/ة", other:"غير ذلك"};
 const VER  = LANG === "en" ? {field:"Field-verified", desk:"Phone-verified", none:"Not verified"}
                             : {field:"موثّق ميدانياً", desk:"موثّق هاتفياً", none:"غير موثّق"};
+/* توثيق ميداني/فيديو لازم يذكر الطريقة والتاريخ حرفياً — ممنوع عرض "موثّق" وحدها. */
+function verifBadge(x){
+  if(x.verification==="field")
+    return `<span class="t v">${tt("موثّق بزيارة ميدانية","Verified by site visit")} — ${dt(x.visit_date)}</span>`;
+  if(x.verification==="video")
+    return `<span class="t d">${tt("موثّق بمكالمة فيديو","Verified by video call")} — ${dt(x.video_verified_at)}</span>`;
+  if(x.verification==="desk")
+    return `<span class="t d">✓ ${VER.desk}</span>`;
+  return "";
+}
 
 /* مواصفات الغرفة — بتنحفظ بعمود listings.features كـslug ثابت (مش نص عرض)،
    فالتسمية بتنعرض عربي/إنجليزي حسب اللغة. الـslug نفسه هو القيمة المخزّنة. */
@@ -638,8 +648,7 @@ function render(){
   }
 }
 function cardL(x){
-  const v = x.verification==="field" ? `<span class="t v">✓ ${VER.field}</span>`
-          : x.verification==="desk"  ? `<span class="t d">✓ ${VER.desk}</span>` : "";
+  const v = verifBadge(x);
   /* التقييم بيظهر فقط إذا في تقييمات فعلية منشورة — بدون نجوم فارغة أو صفر وهمي */
   const rating = x.review_count > 0
     ? `<span class="t">★ ${x.review_avg} (${x.review_count})</span>` : "";
@@ -755,8 +764,7 @@ function openL(id){
       <div class="sec">
         <div class="price" style="font-size:26px">${nis(x.price)}<small> ${tt("/ شهر","/ month")}</small></div>
         <div class="tags" style="margin:10px 0 14px">
-          ${x.verification==="field"?`<span class="t v">✓ ${VER.field}</span>`:""}
-          ${x.verification==="desk"?`<span class="t d">✓ ${VER.desk}</span>`:""}
+          ${verifBadge(x)}
           <span class="t">${KIND[x.kind]||""}</span><span class="t">${POL[x.gender_pol]||""}</span>
           ${x.furnished?`<span class="t">${tt("مفروش","Furnished")}</span>`:""}</div>
         <p style="margin:0 0 12px">${esc(x.description||"")}</p>
