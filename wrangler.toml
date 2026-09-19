@@ -1,6 +1,11 @@
 name = "sakan"
 main = "src/worker.js"
 compatibility_date = "2026-08-28"
+workers_dev = true
+
+[[routes]]
+pattern = "sakanna.ps"
+custom_domain = true
 
 [assets]
 directory = "./public"
