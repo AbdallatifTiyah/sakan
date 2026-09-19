@@ -1369,6 +1369,7 @@ async function drawOwner(id){
          href="https://wa.me/970${esc(String(r.phone||"").replace(/^0/,""))}">واتساب</a>
       ${isAdmin()?'<button class="btn sm '+(r.is_blocked?"ok":"bad")+'" id="tg">'+
         (r.is_blocked?"إلغاء الإيقاف":"إيقاف الحساب")+"</button>":""}
+      ${isAdmin()?'<button class="btn sm bad" id="delOwner">حذف الملف نهائياً</button>':""}
     </div>
     <div class="sec">
       <h4>رابط لوحة المالك</h4>
@@ -1402,7 +1403,15 @@ async function drawOwner(id){
     if(on && !why) return;
     try{
       await rpc("admin_profile_block", {p_id:r.id, p_blocked:on, p_reason:why});
-      toast(on?"انوقف الحساب.":"انرفع الإيقاف.", "ok"); openDrawer("owner", r.id); 
+      toast(on?"انوقف الحساب.":"انرفع الإيقاف.", "ok"); openDrawer("owner", r.id);
+    } catch(e){ toast(e.message, "bad"); }
+  };
+  const delO = $("#delOwner");
+  if(delO) delO.onclick = async () => {
+    if(!confirm("حذف نهائي — لا يمكن التراجع. متابعة؟")) return;
+    try{
+      await rpc("admin_delete_owner", {p_id:r.id});
+      toast("انحذف الملف.", "ok"); closeDrawer(); refreshBadges(); go(S.view);
     } catch(e){ toast(e.message, "bad"); }
   };
 }
@@ -1453,7 +1462,9 @@ async function drawSeeker(id){
     </dl>
     <div class="acts"><a class="btn sm" href="tel:${esc(r.phone)}">اتصال</a>
       <a class="btn sm" target="_blank" rel="noopener"
-        href="https://wa.me/970${esc(String(r.phone||"").replace(/^0/,""))}">واتساب</a></div>
+        href="https://wa.me/970${esc(String(r.phone||"").replace(/^0/,""))}">واتساب</a>
+      ${isAdmin()?'<button class="btn sm bad" id="delSeeker">حذف الملف نهائياً</button>':""}
+    </div>
     <div class="sec"><h4>مستوى التوثيق</h4><div class="acts">
       ${[0,1,2,3,4].map(n=>'<button class="btn sm" data-pl="'+n+'"'+
         (r.verification_level===n?" disabled":"")+">"+n+"</button>").join("")}</div></div>
@@ -1468,6 +1479,14 @@ async function drawSeeker(id){
       toast("تحدّث المستوى.", "ok"); openDrawer("seeker", r.id);
     } catch(e){ toast(e.message, "bad"); }
   });
+  const delS = $("#delSeeker");
+  if(delS) delS.onclick = async () => {
+    if(!confirm("حذف نهائي — لا يمكن التراجع. متابعة؟")) return;
+    try{
+      await rpc("admin_delete_seeker", {p_id:r.id});
+      toast("انحذف الملف.", "ok"); closeDrawer(); refreshBadges(); go(S.view);
+    } catch(e){ toast(e.message, "bad"); }
+  };
 }
 
 /* ══════════════ ٨ب. طلبات الباحثين ══════════════
