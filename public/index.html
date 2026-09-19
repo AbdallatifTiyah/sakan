@@ -672,7 +672,7 @@ function cardR(x){
   const areas = (x.area_ids||[]).map(areaName).filter(a=>a!=="—");
   return `<div class="card" onclick="openR('${x.id}')">
     <div class="b">
-      <h3>${esc(x.first_name||tt("باحث/ة","Seeker"))} — ${OCC[x.occupation]||""}</h3>
+      <h3>${esc(x.ref)} — ${OCC[x.occupation]||""}</h3>
       <div class="meta">${esc(x.city||"")}${areas.length?" · "+areas.join(" · "):""}</div>
       <div class="price">${tt("حتى","Up to")} ${nis(x.budget_max)}<small> ${tt("/ شهر","/ month")}</small></div>
       <div class="tags">
@@ -845,7 +845,7 @@ function openR(id){
   const x = R.find(a=>a.id===id); if(!x) return;
   const areas = (x.area_ids||[]).map(areaName).filter(a=>a!=="—");
   $("modal").innerHTML = `
-    <div class="mh"><h2>${esc(x.first_name||tt("باحث/ة","Seeker"))} — ${OCC[x.occupation]||""}</h2>
+    <div class="mh"><h2>${esc(x.ref)} — ${OCC[x.occupation]||""}</h2>
       <button class="x" onclick="closeAll()">×</button></div>
     <div class="mb"><div class="sec">
       <div class="row"><span>${tt("الميزانية","Budget")}</span><span>${tt("حتى","Up to")} ${nis(x.budget_max)} ${tt("/ شهر","/ month")}</span></div>
