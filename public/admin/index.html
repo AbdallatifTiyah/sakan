@@ -941,6 +941,9 @@ async function drawListing(id){
       <button class="btn sm" data-vf="video">توثيق بمكالمة فيديو</button>
       <button class="btn sm" data-vf="field">توثيق ميداني</button>
     </div>`:""}
+    ${isAdmin()?`<div class="acts" style="margin-top:8px">
+      <button class="btn sm bad" id="delListing">حذف الإعلان نهائياً</button>
+    </div>`:""}
   </div>
 
   <div class="sec">
@@ -1050,6 +1053,14 @@ async function drawListing(id){
     try{
       await rpc("admin_listing_extend", {p_id:r.id, p_days:null});
       toast("تمدّدت الصلاحية.", "ok"); openDrawer("listing", r.id);
+    } catch(e){ toast(e.message, "bad"); }
+  };
+  const delL = $("#delListing");
+  if(delL) delL.onclick = async () => {
+    if(!confirm("حذف نهائي — لا يمكن التراجع. متابعة؟")) return;
+    try{
+      await rpc("admin_delete_listing", {p_id:r.id});
+      toast("انحذف الإعلان.", "ok"); closeDrawer(); refreshBadges(); go(S.view);
     } catch(e){ toast(e.message, "bad"); }
   };
   $("#copyConfirm").onclick = () => {
@@ -1549,8 +1560,19 @@ async function drawRequest(id){
         قبل النشر: اتصل وتأكد إنه الطلب حقيقي وإنه الميزانية والمناطق منطقية.
         بينعرض بالموقع الاسم الأول فقط — الرقم والصفة ما بينعرضوا.
       </div>
-    </div>`;
+    </div>
+    ${isAdmin()?`<div class="acts" style="margin-top:8px">
+      <button class="btn sm bad" id="delRequest">حذف الطلب نهائياً</button>
+    </div>`:""}`;
   $("#dx").onclick = closeDrawer;
+  const delR = $("#delRequest");
+  if(delR) delR.onclick = async () => {
+    if(!confirm("حذف نهائي — لا يمكن التراجع. متابعة؟")) return;
+    try{
+      await rpc("admin_delete_request", {p_id:r.id});
+      toast("انحذف الطلب.", "ok"); closeDrawer(); refreshBadges(); go(S.view);
+    } catch(e){ toast(e.message, "bad"); }
+  };
   const gs = $("#goSeeker");
   if(gs) gs.onclick = () => r.seeker_id ? openDrawer("seeker", r.seeker_id)
                                         : toast("ما في ملف باحث مربوط.", "bad");
