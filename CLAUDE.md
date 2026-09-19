@@ -5,7 +5,7 @@
 
 > **الاسم سكنّا (Sakanna).** كل نص وواجهة عامة تقول «سكنّا»/Sakanna (النصوص، كود الخصم `SAKANNA50`، مفتاح اللغة `sakanna_lang`).
 > **استثناء موثّق:** بادئة مرجع الإعلان `SK-` (لا `MW-`) — قرار بتاريخ ٢٠٢٦-٠٩-١٤ بإرجاعها لـ«سكن» عمداً رغم إن باقي الواجهة العامة «سكنّا». المصدر الوحيد: `set_listing_ref()` (تريغر على `listings`) + `listing_ref_seq` (أُعيد ضبطه لـ١٠٠١ وقت التبديل — migration `20260914145004_listing_ref_prefix_sk`).
-> **البنية التحتية فقط** ثابتة بـ«سكن» (اسم الـWorker، النطاق، اسم المستودع، وكل الأسماء التقنية بالقاعدة) — بيد أبواللطيف، خارج نطاق مساعدة Claude. لا تخلط بين الاسمين لما تدور بالكود.
+> **البنية التحتية** (اسم الـWorker `sakan`، اسم المستودع، وكل الأسماء التقنية بالقاعدة) ثابتة بـ«سكن» — قرار أبواللطيف، خارج نطاق مساعدة Claude. **استثناء:** النطاق العام الفعلي `sakanna.ps` (لا `sakan.ps`) — اشتراه أبواللطيف من domain.ps وربطه بتاريخ ٢٠٢٦-٠٩-٢٠، مطابقاً لاسم العلامة «سكنّا» لا لاسم الـWorker. لا تخلط بين الاسمين لما تدور بالكود.
 
 **للحالة الحالية (أرقام، آخر جلسة، مهام مفتوحة): `STATUS.md`.**
 هذا الملف للثابت فقط — بنية، صلاحيات، قواعد، تشخيص. ما بينحدّث إلا لما تتغيّر بنية أو قاعدة.
@@ -40,7 +40,7 @@
 - ممنوع حذف/تعديل صفوف `storage.objects` مباشرة بـSQL (حتى بـ`service_role`) — `protect_delete` trigger بيرفض. الحذف عبر Storage API فقط.
 
 **Cloudflare**
-- Worker: `sakan` → `sakan.abdallatif-tiyah.workers.dev`. النشر يدوي: `npx wrangler deploy`. **ما في CI/CD.**
+- Worker: `sakan` → `sakan.abdallatif-tiyah.workers.dev` **و** Custom Domains `sakanna.ps`/`www.sakanna.ps` (الأخير بيحوّل `301` للأول — منطق التحويل بـ`src/worker.js`، مش Cloudflare Redirect Rule). الدومين مسجّل بـdomain.ps، أسماء سيرفراته أشيرت لـCloudflare (`roan.ns.cloudflare.com`/`sue.ns.cloudflare.com`) بتاريخ ٢٠٢٦-٠٩-٢٠. الربط عبر `[[routes]]` بـ`wrangler.toml` (`custom_domain = true` لكل نطاق) — **لازم** `workers_dev = true` مكتوبة صراحة بنفس الملف، وإلا Wrangler بيعطّل رابط `workers.dev` تلقائياً أول ما يلاقي أي route (شوف جدول التشخيص). النشر يدوي: `npx wrangler deploy`. **ما في CI/CD.**
 - أسرار `ADMIN_USER`/`ADMIN_PASS` (Basic Auth القديم) ما عاد الـWorker يستخدمها — الحماية صارت بالقاعدة.
 
 **الجداول (٢٠)**
@@ -190,6 +190,7 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 | مستخدم يقدر يعدّل عموداً ما كان المفروض يلمسه بجدول له RLS سليمة | `grant update on <table> to authenticated` بلا قيد أعمدة يسمح بتعديل **أي** عمود بالصف اللي يملكه، حتى لو `with check` بالسياسة سليم — لأن `with check` يحرس **الصفوف** (مين يملك الصف) لا **الأعمدة** (أي حقل يتغيّر). لازم `revoke update on <table> from authenticated` ثم `grant update (<الأعمدة المسموحة فقط>) on <table> to authenticated`. صار مع `notifications`/`is_read` بتدقيق ٢٠٢٦-٠٩-٠٥. |
 | تسجيل بـ`account.html` يرجع `200` ولا تصل رسالة تأكيد | الخدمة المدمجة ترفض التسليم لغير أعضاء فريق Supabase، **بصمت وبدون خطأ** — راجع `Confirm email`/`Enable custom SMTP` بلوحة `/auth/providers`/`/auth/smtp` قبل افتراض عطل بالكود. مع `Confirm email` مطفأ (الوضع الحالي)، لا رسالة أصلاً — الرد يحتوي `session` مباشرة. |
 | بادئة مرجع الإعلان (`SK-`) طلعت غلط أو محتاج تتغيّر | بتتولّد من `set_listing_ref()` عبر `trg_listing_ref` (`BEFORE INSERT` على `listings`) — مش من `column_default` على `listings.ref` ولا من منطق داخل `submit_listing`. أي تغيير للبادئة = استبدال الدالة (`create or replace function set_listing_ref()`) + `alter sequence listing_ref_seq restart with <n>` بنفس الـmigration. |
+| رابط `workers.dev` رجع `404` بعد إضافة Custom Domain | إضافة أي `[[routes]]` بـ`wrangler.toml` بتعطّل `workers_dev` تلقائياً على أول نشر يليها إذا ما كانت `workers_dev = true` مكتوبة صراحة بنفس الملف — مش تراكمي، بيصير مع أول `wrangler deploy` بعد إضافة الـroute. الإصلاح: ضيف `workers_dev = true` صراحة وأعد النشر. |
 
 ---
 
