@@ -75,6 +75,11 @@ export default {
     const url = new URL(request.url);
     const p = url.pathname;
 
+    if (url.hostname === "www.sakanna.ps") {
+      url.hostname = "sakanna.ps";
+      return Response.redirect(url.toString(), 301);
+    }
+
     if (p === ADMIN_PREFIX || p.startsWith(ADMIN_PREFIX + "/")) {
       const res = await env.ASSETS.fetch(request);
       const out = new Response(res.body, res);

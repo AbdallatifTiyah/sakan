@@ -7,6 +7,10 @@ workers_dev = true
 pattern = "sakanna.ps"
 custom_domain = true
 
+[[routes]]
+pattern = "www.sakanna.ps"
+custom_domain = true
+
 [assets]
 directory = "./public"
 binding = "ASSETS"
