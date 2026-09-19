@@ -402,7 +402,7 @@ async function renderSeekerSection(){
     </div>`).join("") : `<div class="empty">${tt("لا توجد طلبات مسجّلة بعد.","No requests registered yet.")}</div>`}
     <h2>${tt("الوحدات المحفوظة","Saved housing")} (${saved.length})</h2>
     ${saved.length ? saved.map(s => `<div class="card">
-      <div class="title">${esc(s.title||tt("إعلان محذوف","Removed listing"))}</div>
+      <div class="title">${s.ref?esc(s.ref):tt("إعلان محذوف","Removed listing")}</div>
       <div class="meta">${esc(s.city||"")} ${s.area?"— "+esc(s.area):""} ${s.price?"· "+money(s.price):""}</div>
     </div>`).join("") : `<div class="empty">${tt("لم تحفظ أي إعلان بعد.","You haven't saved any listing yet.")}</div>`}
   `;

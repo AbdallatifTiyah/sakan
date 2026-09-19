@@ -631,7 +631,7 @@ function render(){
       (!F.kind || x.kind===F.kind) &&
       (!F.pol  || x.gender_pol===F.pol) &&
       (!F.max  || Number(x.price) <= Number(toEN(F.max))) &&
-      (!q || (x.title||"").toLowerCase().includes(q) || (x.description||"").toLowerCase().includes(q)));
+      (!q || (x.ref||"").toLowerCase().includes(q) || (x.description||"").toLowerCase().includes(q)));
     count.textContent = d.length ? tt(`${d.length} سكن متاح`, `${d.length} homes available`) : "";
     grid.innerHTML = d.length ? d.map(cardL).join("") :
       `<div class="empty">${tt("لا يتوفر سكن يطابق البحث حالياً.","No housing matches your search right now.")}<br><br>
@@ -659,7 +659,7 @@ function cardL(x){
   return `<div class="card" onclick="openL('${x.id}')">
     ${thumb}
     <div class="b">
-      <h3>${esc(x.title)}</h3>
+      <h3>${esc(x.ref)}</h3>
       <div class="meta">${esc(x.city)} · ${esc(x.area)}${x.landmark?" · "+esc(x.landmark):""}</div>
       <div class="price">${nis(x.price)}<small> ${tt("/ شهر","/ month")}${x.bills_included?tt(" — شامل الفواتير"," — bills included"):""}</small></div>
       <div class="tags">${v}${rating}<span class="t">${KIND[x.kind]||""}</span>
@@ -747,15 +747,15 @@ function openL(id){
   const imgs = Array.isArray(x.images) ? x.images : [];
   CUR_IMGS = imgs;
   const gallery = imgs.length
-    ? `<div class="gal">${imgs.map((u,i)=>`<img src="${esc(u)}" alt="${esc(x.title)}" onclick="openLightbox(${i})">`).join("")}</div>` : "";
+    ? `<div class="gal">${imgs.map((u,i)=>`<img src="${esc(u)}" alt="${esc(x.ref)}" onclick="openLightbox(${i})">`).join("")}</div>` : "";
   const thumbs = imgs.length > 1
     ? `<div class="thumbstrip">${imgs.slice(0,4).map((u,i)=>`<img src="${esc(u)}" class="${i===0?"cur":""}" onclick="openLightbox(${i})">`).join("")}${imgs.length>4?`<div class="more" onclick="openLightbox(4)">+${imgs.length-4}</div>`:""}</div>` : "";
 
   $("modal").innerHTML = `
-    <div class="mh"><h2>${esc(x.title)}</h2>
+    <div class="mh"><h2>${esc(x.ref)}</h2>
       <div style="display:flex;gap:8px;align-items:center;flex:none">
         <button class="btn ghost sm" id="shareBtn"
-          onclick="shareListing('${esc(x.ref)}','${esc(x.title)}')">${tt("مشاركة","Share")}</button>
+          onclick="shareListing('${esc(x.ref)}')">${tt("مشاركة","Share")}</button>
         <button class="x" onclick="closeAll()">×</button>
       </div></div>
     ${gallery}
@@ -807,10 +807,10 @@ function openL(id){
 }
 
 /* ═══════════════ مشاركة الإعلان ═══════════════ */
-function shareListing(ref, title){
+function shareListing(ref){
   const url = location.origin + "/?l=" + ref;
   if(navigator.share){
-    navigator.share({title, url}).catch(()=>{});
+    navigator.share({title:"سكنّا — "+ref, url}).catch(()=>{});
     return;
   }
   navigator.clipboard.writeText(url).then(()=>{
