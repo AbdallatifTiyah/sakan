@@ -281,6 +281,9 @@ const FEATURE_LABELS_AR = {wifi:"واي فاي", kitchen:"مطبخ", private_bat
   elevator:"مصعد", near_transport:"قرب وسائل المواصلات", cooking_allowed:"يُسمح بالطبخ",
   private_entrance:"مدخل مستقل", room_lock:"قفل على باب الغرفة"};
 const featureLabel = slug => FEATURE_LABELS_AR[slug] || slug;
+/* profiles.occupation — نفس enum بالموقع العام (occupation_type) */
+const OCC_LABELS_AR = {student:"طالب", employee:"موظّف", family:"عائلة", visitor:"زائر", other:"أخرى"};
+const occLabel = v => v==null ? "—" : (OCC_LABELS_AR[v] || v);
 const money = n => n==null ? "—" : Number(n).toLocaleString("en-US",{maximumFractionDigits:0})+" ₪";
 /* عملة الإعلان (ILS/JOD/USD) — السعر والتأمين فقط، الرسم والميزانية دايماً شيكل */
 const CUR_SYM = {ILS:"₪", JOD:"د.أ", USD:"$"};
@@ -1400,7 +1403,7 @@ async function vVerify(){
         <th>الاسم</th><th>الرقم</th><th>الصفة</th><th>المستوى</th><th>وُثّق</th><th>إجراء</th>
       </tr></thead><tbody>${prof.map(p=>`<tr>
         <td>${esc(p.first_name)}</td><td class="phone">${esc(p.phone)}</td>
-        <td>${esc({student:"طالب",employee:"موظّف",other:"أخرى"}[p.occupation]||p.occupation)}</td>
+        <td>${esc(occLabel(p.occupation))}</td>
         <td>${lvl(p.verification_level)} <span class="num">${p.verification_level}/4</span></td>
         <td style="color:var(--mute)">${dt(p.verified_at)}</td>
         <td><div class="acts">${[0,1,2,3,4].map(n=>
@@ -1560,7 +1563,7 @@ async function vSeekers(){
         <td>${esc(r.first_name)}${r.is_blocked?' <span class="tag t-rejected">موقوف</span>':""}${r.has_account?' <span class="tag t-owner_responded">صاحب حساب</span>':""}</td>
         <td class="phone">${esc(r.phone)}</td>
         <td>${r.gender==="female"?"أنثى":r.gender==="male"?"ذكر":"—"}</td>
-        <td>${esc({student:"طالب",employee:"موظّف",other:"أخرى"}[r.occupation]||"—")}</td>
+        <td>${esc(occLabel(r.occupation))}</td>
         <td>${lvl(r.verification_level)}</td>
         <td class="num">${num(r.requests_total)}</td>
         <td class="num">${num(r.requests_active)}</td>
@@ -1584,7 +1587,7 @@ async function drawSeeker(id){
     <dl class="dl">
       <dt>الرقم</dt><dd class="phone">${esc(r.phone)}</dd>
       <dt>الجنس</dt><dd>${r.gender==="female"?"أنثى":r.gender==="male"?"ذكر":"—"}</dd>
-      <dt>الصفة</dt><dd>${esc({student:"طالب",employee:"موظّف",other:"أخرى"}[r.occupation]||"—")}</dd>
+      <dt>الصفة</dt><dd>${esc(occLabel(r.occupation))}</dd>
       <dt>مسجّل منذ</dt><dd>${dt(r.created_at)}</dd>
       <dt>النشاط</dt><dd class="num">${num(r.requests_total)} طلب · ${num(r.contacts_total)} تواصل · ${num(r.rentals)} تأجير</dd>
     </dl>
@@ -1648,7 +1651,7 @@ async function vRequests(){
         <td class="ref">${esc(r.ref)}</td>
         <td>${esc(r.first_name||"—")}${r.is_blocked?' <span class="tag t-rejected">موقوف</span>':""}</td>
         <td class="phone">${esc(r.phone||"—")}</td>
-        <td>${esc({student:"طالب",employee:"موظّف",other:"أخرى"}[r.occupation]||"—")}</td>
+        <td>${esc(occLabel(r.occupation))}</td>
         <td>${esc(r.city||"—")}</td>
         <td style="color:var(--text-2);font-size:12.5px">${esc(r.areas_ar||"—")}</td>
         <td class="num">${money(r.budget_max)}</td>
@@ -1673,7 +1676,7 @@ async function drawRequest(id){
     <dl class="dl">
       <dt>الحالة</dt><dd>${tag(r.status, REQ_ST)}</dd>
       <dt>الهاتف</dt><dd class="phone">${esc(r.phone||"—")}</dd>
-      <dt>الصفة</dt><dd>${esc({student:"طالب",employee:"موظّف",other:"أخرى"}[r.occupation]||"—")}${r.org_name?" · "+esc(r.org_name):""}</dd>
+      <dt>الصفة</dt><dd>${esc(occLabel(r.occupation))}${r.org_name?" · "+esc(r.org_name):""}</dd>
       <dt>الجنس</dt><dd>${r.gender==="female"?"أنثى":r.gender==="male"?"ذكر":"—"}</dd>
       <dt>المدينة</dt><dd>${esc(r.city||"—")}</dd>
       <dt>المناطق</dt><dd>${esc(r.areas_ar||"مرن — أي منطقة")}</dd>
@@ -2008,7 +2011,7 @@ async function vMatches(){
         <td class="num" style="color:${r.score>=70?"var(--ok)":r.score>=55?"var(--warn)":"var(--mute)"}">${r.score}</td>
         <td class="ref">${esc(r.listing_ref)}</td>
         <td>${esc(r.first_name)}</td>
-        <td>${esc({student:"طالب",employee:"موظّف",other:"أخرى"}[r.occupation]||"—")}</td>
+        <td>${esc(occLabel(r.occupation))}</td>
         <td>${lvl(r.verification_level)}</td>
         <td class="phone">${esc(r.phone)}</td>
         <td class="num">${money(r.budget_max)}</td>

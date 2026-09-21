@@ -377,8 +377,8 @@ const KIND = LANG === "en" ? {room_shared:"Shared room",
 const ICON = {room_shared:"🛏", bed_shared:"🛌", studio:"🏠", apartment:"🏢"};
 const POL  = LANG === "en" ? {female:"Women only", male:"Men only", mixed:"Mixed"}
                             : {female:"إناث فقط", male:"ذكور فقط", mixed:"مختلط"};
-const OCC  = LANG === "en" ? {student:"Student", employee:"Employee", other:"Other"}
-                            : {student:"طالب/ة", employee:"موظف/ة", other:"غير ذلك"};
+const OCC  = LANG === "en" ? {student:"Student", employee:"Employee", family:"Family", visitor:"Visitor", other:"Other"}
+                            : {student:"طالب/ة", employee:"موظف/ة", family:"عائلة", visitor:"زائر/ة", other:"غير ذلك"};
 const VER  = LANG === "en" ? {field:"Field-verified", desk:"Phone-verified", none:"Not verified"}
                             : {field:"موثّق ميدانياً", desk:"موثّق هاتفياً", none:"غير موثّق"};
 /* توثيق ميداني/فيديو لازم يذكر الطريقة والتاريخ حرفياً — ممنوع عرض "موثّق" وحدها. */
@@ -1092,6 +1092,7 @@ function openForm(kind){
           <option value="female">${tt("أنثى","Female")}</option><option value="male">${tt("ذكر","Male")}</option></select></div>
         <div class="fg"><label>${tt("الحالة","Status")}</label><select id="rOcc">
           <option value="student">${OCC.student}</option><option value="employee">${OCC.employee}</option>
+          <option value="family">${OCC.family}</option><option value="visitor">${OCC.visitor}</option>
           <option value="other">${OCC.other}</option></select></div>
         <div class="fg"><label>${tt("أعلى ميزانية (₪)","Max budget (₪)")}</label>
           <input id="rBud" data-num inputmode="numeric" placeholder="${tt("مثلاً ٧٠٠","e.g. 700")}"></div>
