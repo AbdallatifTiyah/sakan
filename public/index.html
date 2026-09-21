@@ -1035,7 +1035,7 @@ function openForm(kind){
           <option value="USD">${tt("دولار أمريكي ($)","US dollar ($)")}</option></select></div>
         <div class="fg"><label>${tt("التأمين (اختياري)","Deposit (optional)")}</label>
           <input id="lDep" data-num inputmode="numeric" placeholder="${tt("مبلغ مسترد","Refundable amount")}"></div>
-        <div class="fg"><label>${tt("النوع","Type")}</label><select id="lKind" onchange="renderFeeInfo()">
+        <div class="fg"><label>${tt("النوع","Type")}</label><select id="lKind">
           ${Object.entries(KIND).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}
         </select></div>
         <div class="fg"><label>${tt("السكن لـ","Housing for")}</label><select id="lPol">
@@ -1059,8 +1059,6 @@ function openForm(kind){
         <div class="fg"><label>${tt("متاح من","Available from")}</label><input id="lFrom" type="date"></div>
       </div>
 
-      <div class="note" id="lFeeInfo" style="margin-top:6px"></div>
-
       <div class="fg"><label>${tt("مواصفات السكن","Housing features")}</label>
         ${chipsHTML("lFeat", FEATURES, {val:f=>f.slug, lbl:f=>tt(f.ar,f.en)})}
         <div class="hint">${tt("أشّر على كل ما هو متوفر — هذا أكثر ما يسأل عنه الباحثون.","Check everything that's available — this is what seekers ask about most.")}</div></div>
@@ -1071,6 +1069,13 @@ function openForm(kind){
         <input id="lOcc" placeholder="${tt("طالبتان في جامعة بيرزيت","Two students at Birzeit University")}"></div>
       <div class="fg"><label>${tt("وصف السكن","Housing description")}</label>
         <textarea id="lDesc" placeholder="${tt("المساحة، القفل، المطبخ، المواصلات…","Size, lock, kitchen, transport…")}"></textarea></div>
+
+      <div class="fg"><label>${tt("كود الخصم (إن وُجد)","Discount code (if you have one)")}</label>
+        <div style="display:flex;gap:8px">
+          <input id="lPromo" style="flex:1" placeholder="${tt("اكتب الكود هون","Enter the code here")}">
+          <button type="button" class="btn sm" onclick="applyPromo()">${tt("تطبيق الخصم","Apply discount")}</button>
+        </div>
+        <div id="lPromoMsg" style="margin-top:6px"></div></div>
 
       <div id="lErr"></div>
       <div id="lWrap"><button class="btn acc" style="width:100%" onclick="subListing()">
@@ -1129,14 +1134,14 @@ function openForm(kind){
         ${tt("سجّل طلبي","Register my request")}</button></div>
     </div></div>`;
   wireDigits($("modal"));
-  if(kind==="listing"){ restoreDraftIfAny(); renderFeeInfo(); }
+  if(kind==="listing"){ restoreDraftIfAny(); }
   $("ov").classList.add("on");
 }
 
 /* ═══════════════ مسودة الإعلان (محلياً — النموذج طويل) ═══════════════ */
 const DRAFT_KEY = "sakanna_listing_draft";
 const DRAFT_FIELDS = ["lName","lDial","lPhone","lTitle","lCity","lArea","lPrice","lCur","lDep",
-  "lKind","lPol","lFurn","lBillsWater","lBillsElec","lBillsNet","lRooms","lMin","lFrom","lLand","lOcc","lDesc"];
+  "lKind","lPol","lFurn","lBillsWater","lBillsElec","lBillsNet","lRooms","lMin","lFrom","lLand","lOcc","lDesc","lPromo"];
 
 function saveDraft(){
   if(!$("lTitle")) return;
@@ -1172,41 +1177,30 @@ function discardDraft(){
 
 const num = id => { const v = toEN($(id).value).replace(/[^\d.]/g,""); return v ? Number(v) : null; };
 
-/* رسم النجاح — يُجلب من quote_listing_fee دايماً، بدون أي حساب هون.
-   كود الخصم النشط (إن وجد) يُعرض للعلم فقط عبر active_promo، بدون حقل إدخال (قاعدة ١٧). */
-let ACTIVE_PROMO_CACHE;
-async function getActivePromo(){
-  if(ACTIVE_PROMO_CACHE === undefined){
-    try{
-      const rows = await rpc("active_promo", {});
-      ACTIVE_PROMO_CACHE = (rows && rows[0]) || null;
-    }catch(e){ ACTIVE_PROMO_CACHE = null; }
+/* كود الخصم يدخله المالك ذاتياً وقت التسجيل (قرار ٢٠٢٦-٠٩-٢١، يلغي المنع بقاعدة ١٧ القديمة).
+   quote_promo_discount() تتحقق من الكود وترجّع الخصم الفعلي من القاعدة — ما بنكتب أي نص "صفر" ثابت هون. */
+async function applyPromo(){
+  const code = $("lPromo").value.trim();
+  const msg = $("lPromoMsg");
+  if(!code){
+    msg.innerHTML = `<div class="err">${tt("اكتب كود الخصم أولاً.","Enter the discount code first.")}</div>`;
+    return;
   }
-  return ACTIVE_PROMO_CACHE;
-}
-async function renderFeeInfo(){
-  const box = $("lFeeInfo"); if(!box) return;
-  const kind = $("lKind").value;
-  let fee = null;
-  try{ fee = await rpc("quote_listing_fee", {p_kind: kind}); }catch(e){}
-  let html = "";
-  if(fee !== null && fee !== undefined){
-    html += `<div>${tt(
-      `رسم النجاح: ${fee} شيكل — يُدفع مرة واحدة بعد تأكيد التأجير، وأقل من نصف أجرة الشهر الأول. الباحث لا يدفع شيئاً.`,
-      `Success fee: ${fee} shekels — paid once after the rental is confirmed, less than half the first month's rent. Seekers pay nothing.`
-    )}</div>`;
+  msg.innerHTML = `<div class="note">${tt("جارِ التحقق من الكود…","Checking the code…")}</div>`;
+  try{
+    const rows = await rpc("quote_promo_discount", {p_code: code, p_kind: $("lKind").value});
+    const r = rows && rows[0];
+    if(!r) throw {data:null};
+    const free = Number(r.fee_after) === 0;
+    const arMsg = `تم تطبيق الخصم — كود <b>${esc(r.code)}</b> (خصم ${r.discount_pct}٪).`
+      + (free ? " رسم النجاح عليك سيكون <b>صفر شيكل</b>." : ` رسم النجاح المتوقع: <b>${r.fee_after} شيكل</b> بدل ${r.fee_before}.`);
+    const enMsg = `Discount applied — code <b>${esc(r.code)}</b> (${r.discount_pct}% off).`
+      + (free ? " Your success fee will be <b>zero shekels</b>." : ` Expected success fee: <b>${r.fee_after} shekels</b> instead of ${r.fee_before}.`);
+    msg.innerHTML = `<div class="done">${tt(arMsg, enMsg)}</div>`;
+  }catch(e){
+    const serverMsg = e && e.data && e.data.message;
+    msg.innerHTML = `<div class="err">${serverMsg ? esc(serverMsg) : tt("كود الخصم غير صالح.","This discount code isn't valid.")}</div>`;
   }
-  const promo = await getActivePromo();
-  if(promo){
-    const validStr = promo.valid_until
-      ? new Date(promo.valid_until).toLocaleDateString(LANG==="en"?"en-US":"ar-EG", {day:"numeric", month:"long", year:"numeric"})
-      : tt("بدون تاريخ انتهاء","No expiry date");
-    html += `<div>${tt(
-      `كود خصم فعّال: <b>${esc(promo.code)}</b> — خصم ${promo.discount_pct}٪، صالح حتى ${validStr}`,
-      `Active promo code: <b>${esc(promo.code)}</b> — ${promo.discount_pct}% off, valid until ${validStr}`
-    )}</div>`;
-  }
-  box.innerHTML = html;
 }
 
 async function subListing(){
@@ -1232,7 +1226,8 @@ async function subListing(){
     p_bills_electricity: $("lBillsElec").value === "true",
     p_bills_internet: $("lBillsNet").value === "true",
     p_rooms: num("lRooms"),
-    p_min_stay: num("lMin")
+    p_min_stay: num("lMin"),
+    p_promo_code: $("lPromo").value.trim() || null
   };
   const bad = m => { $("lErr").innerHTML = `<div class="err">${m}</div>`; return null; };
   if(v.p_name.length < 2)  return bad(tt("اكتب اسمك.","Enter your name."));
@@ -1252,7 +1247,8 @@ async function subListing(){
     selectedImages = [];
     clearDraft();
   }catch(e){
-    $("lErr").innerHTML = `<div class="err">${tt("حدث خطأ أثناء الإرسال. حاول مرة أخرى بعد قليل.","Something went wrong sending this. Try again in a bit.")}</div>`;
+    const serverMsg = e && e.data && e.data.message;
+    $("lErr").innerHTML = `<div class="err">${serverMsg ? esc(serverMsg) : tt("حدث خطأ أثناء الإرسال. حاول مرة أخرى بعد قليل.","Something went wrong sending this. Try again in a bit.")}</div>`;
     if(btn){ btn.disabled = false; btn.textContent = tt("أرسل الإعلان للمراجعة","Submit listing for review"); }
   }
 }
