@@ -424,6 +424,7 @@ const TAGS = [
   {slug:"tidy",              ar:"منظّم/ة",            en:"Tidy / organized"},
   {slug:"religious",         ar:"ملتزم/ة دينياً",      en:"Religiously observant"},
   {slug:"no_guests",         ar:"بدون استقبال ضيوف",   en:"Doesn't host guests"},
+  {slug:"hosts_guests",      ar:"يستقبل/تستقبل ضيوف",  en:"Hosts guests"},
   {slug:"early_riser",       ar:"يستيقظ/تستيقظ باكراً", en:"Early riser"}
 ];
 const TAG_LABEL = slug => {
@@ -467,6 +468,10 @@ const rpc = (fn, body) => api("rpc/"+fn, {method:"POST", body:JSON.stringify(bod
 const esc = s => String(s??"").replace(/[&<>"']/g,
   c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const nis = n => Number(n).toLocaleString(LANG==="en"?"en-US":"ar-EG")+" ₪";
+/* عملة الإعلان — تُخزَّن كرمز ثابت (ILS/JOD/USD) بعمود listings.currency، السعر والتأمين
+   بنفس الإعلان دايماً بنفس العملة. القديم بدون عمود عملة بيرجع ILS تلقائياً (COALESCE بالقاعدة). */
+const CUR_SYM = {ILS:"₪", JOD:tt("د.أ","JOD"), USD:"$"};
+const price = (n, cur) => Number(n).toLocaleString(LANG==="en"?"en-US":"ar-EG")+" "+(CUR_SYM[cur]||"₪");
 const dt  = d => d ? new Date(d).toLocaleDateString(LANG==="en"?"en-US":"ar-EG",{day:"numeric",month:"long"}) : "—";
 const $   = id => document.getElementById(id);
 
@@ -661,7 +666,7 @@ function cardL(x){
     <div class="b">
       <h3>${esc(x.ref)}</h3>
       <div class="meta">${esc(x.city)} · ${esc(x.area)}${x.landmark?" · "+esc(x.landmark):""}</div>
-      <div class="price">${nis(x.price)}<small> ${tt("/ شهر","/ month")}${x.bills_included?tt(" — شامل الفواتير"," — bills included"):""}</small></div>
+      <div class="price">${price(x.price,x.currency)}<small> ${tt("/ شهر","/ month")}${x.bills_included?tt(" — شامل الفواتير"," — bills included"):""}</small></div>
       <div class="tags">${v}${rating}<span class="t">${KIND[x.kind]||""}</span>
         <span class="t">${POL[x.gender_pol]||""}</span>
         ${x.furnished?`<span class="t">${tt("مفروش","Furnished")}</span>`:""}
@@ -762,7 +767,7 @@ function openL(id){
     ${thumbs}
     <div class="mb">
       <div class="sec">
-        <div class="price" style="font-size:26px">${nis(x.price)}<small> ${tt("/ شهر","/ month")}</small></div>
+        <div class="price" style="font-size:26px">${price(x.price,x.currency)}<small> ${tt("/ شهر","/ month")}</small></div>
         <div class="tags" style="margin:10px 0 14px">
           ${verifBadge(x)}
           <span class="t">${KIND[x.kind]||""}</span><span class="t">${POL[x.gender_pol]||""}</span>
@@ -775,8 +780,10 @@ function openL(id){
         <div class="row"><span>${tt("أقل مدة","Min. stay")}</span><span>${x.min_stay_months?x.min_stay_months+" "+tt("شهر","months"):"—"}</span></div>
         <div class="row"><span>${tt("عدد الغرف بالسكن","Rooms in the unit")}</span><span>${x.rooms_total||"—"}</span></div>
         <div class="row"><span>${tt("الساكنون حالياً","Current occupants")}</span><span>${x.occupants_now??"—"}</span></div>
-        <div class="row"><span>${tt("الفواتير","Bills")}</span><span>${x.bills_included?tt("مشمولة بالسعر","Included in price"):tt("غير محسوبة بالسعر","Not included")}</span></div>
-        ${x.deposit?`<div class="row"><span>${tt("التأمين (مسترد)","Deposit (refundable)")}</span><span>${nis(x.deposit)}</span></div>`:""}
+        <div class="row"><span>${tt("فاتورة المياه","Water bill")}</span><span>${x.bills_water?tt("مشمولة بالسعر","Included in price"):tt("غير مشمولة بالسعر","Not included")}</span></div>
+        <div class="row"><span>${tt("فاتورة الكهرباء","Electricity bill")}</span><span>${x.bills_electricity?tt("مشمولة بالسعر","Included in price"):tt("غير مشمولة بالسعر","Not included")}</span></div>
+        <div class="row"><span>${tt("فاتورة الإنترنت","Internet bill")}</span><span>${x.bills_internet?tt("مشمولة بالسعر","Included in price"):tt("غير مشمولة بالسعر","Not included")}</span></div>
+        ${x.deposit?`<div class="row"><span>${tt("التأمين (مسترد)","Deposit (refundable)")}</span><span>${price(x.deposit,x.currency)}</span></div>`:""}
         ${x.occupants_note?`<div class="note">${esc(x.occupants_note)}</div>`:""}
       </div>
       ${feats}
@@ -799,7 +806,7 @@ function openL(id){
         <button class="linkish" onclick="openReport('${x.id}','${esc(x.ref)}')">${tt("قدّم بلاغ","Report it")}</button></div>
     </div>
     <div class="stickyBar">
-      <b>${nis(x.price)}</b>
+      <b>${price(x.price,x.currency)}</b>
       <button class="btn acc" onclick="document.getElementById('cName').scrollIntoView({behavior:'smooth',block:'center'});document.getElementById('cName').focus()">${tt("اطلب تواصل","Request contact")}</button>
     </div>`;
   wireDigits($("modal"));
@@ -1020,9 +1027,13 @@ function openForm(kind){
         <div class="fg"><label>${tt("المدينة","City")}</label>${citySelect("lCity","onFormCity()")}</div>
         <div class="fg"><label>${tt("المنطقة","Area")}</label>
           <select id="lArea"><option value="">${tt("اختر المدينة أولاً","Choose a city first")}</option></select></div>
-        <div class="fg"><label>${tt("السعر الشهري (₪)","Monthly price (₪)")}</label>
+        <div class="fg"><label>${tt("السعر الشهري","Monthly price")}</label>
           <input id="lPrice" data-num inputmode="numeric" placeholder="${tt("مثلاً ٨٠٠","e.g. 800")}"></div>
-        <div class="fg"><label>${tt("التأمين (₪ — اختياري)","Deposit (₪ — optional)")}</label>
+        <div class="fg"><label>${tt("العملة","Currency")}</label><select id="lCur">
+          <option value="ILS">${tt("شيكل (₪)","Shekel (₪)")}</option>
+          <option value="JOD">${tt("دينار أردني (د.أ)","Jordanian dinar (JOD)")}</option>
+          <option value="USD">${tt("دولار أمريكي ($)","US dollar ($)")}</option></select></div>
+        <div class="fg"><label>${tt("التأمين (اختياري)","Deposit (optional)")}</label>
           <input id="lDep" data-num inputmode="numeric" placeholder="${tt("مبلغ مسترد","Refundable amount")}"></div>
         <div class="fg"><label>${tt("النوع","Type")}</label><select id="lKind" onchange="renderFeeInfo()">
           ${Object.entries(KIND).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}
@@ -1032,8 +1043,14 @@ function openForm(kind){
           <option value="mixed">${POL.mixed}</option></select></div>
         <div class="fg"><label>${tt("مفروش؟","Furnished?")}</label><select id="lFurn">
           <option value="true">${tt("مفروش","Furnished")}</option><option value="false">${tt("غير مفروش","Unfurnished")}</option></select></div>
-        <div class="fg"><label>${tt("الفواتير","Bills")}</label><select id="lBills">
-          <option value="false">${tt("غير محسوبة بالسعر","Not included")}</option>
+        <div class="fg"><label>${tt("فاتورة المياه","Water bill")}</label><select id="lBillsWater">
+          <option value="false">${tt("غير مشمولة بالسعر","Not included")}</option>
+          <option value="true">${tt("مشمولة بالسعر","Included in price")}</option></select></div>
+        <div class="fg"><label>${tt("فاتورة الكهرباء","Electricity bill")}</label><select id="lBillsElec">
+          <option value="false">${tt("غير مشمولة بالسعر","Not included")}</option>
+          <option value="true">${tt("مشمولة بالسعر","Included in price")}</option></select></div>
+        <div class="fg"><label>${tt("فاتورة الإنترنت","Internet bill")}</label><select id="lBillsNet">
+          <option value="false">${tt("غير مشمولة بالسعر","Not included")}</option>
           <option value="true">${tt("مشمولة بالسعر","Included in price")}</option></select></div>
         <div class="fg"><label>${tt("عدد الغرف بالسكن (اختياري)","Rooms in the unit (optional)")}</label>
           ${roomChipsHTML("lRooms")}</div>
@@ -1089,7 +1106,7 @@ function openForm(kind){
         <div class="fg"><label>${tt("أقل مدة بالشهور (اختياري)","Min. months (optional)")}</label>
           <input id="rMin" data-num inputmode="numeric" placeholder="${tt("مثلاً ٦","e.g. 6")}"></div>
         <div class="fg"><label>${tt("هل تدخّن؟","Do you smoke?")}</label><select id="rSmoke">
-          <option value="">${tt("أفضّل عدم التحديد","Prefer not to say")}</option><option value="false">${tt("لا","No")}</option>
+          <option value="false">${tt("لا","No")}</option>
           <option value="true">${tt("نعم","Yes")}</option></select></div>
       </div>
 
@@ -1117,8 +1134,8 @@ function openForm(kind){
 
 /* ═══════════════ مسودة الإعلان (محلياً — النموذج طويل) ═══════════════ */
 const DRAFT_KEY = "sakanna_listing_draft";
-const DRAFT_FIELDS = ["lName","lDial","lPhone","lTitle","lCity","lArea","lPrice","lDep",
-  "lKind","lPol","lFurn","lBills","lRooms","lMin","lFrom","lLand","lOcc","lDesc"];
+const DRAFT_FIELDS = ["lName","lDial","lPhone","lTitle","lCity","lArea","lPrice","lCur","lDep",
+  "lKind","lPol","lFurn","lBillsWater","lBillsElec","lBillsNet","lRooms","lMin","lFrom","lLand","lOcc","lDesc"];
 
 function saveDraft(){
   if(!$("lTitle")) return;
@@ -1209,7 +1226,10 @@ async function subListing(){
     p_desc: $("lDesc").value.trim() || null,
     p_features: chipsValue("lFeat"),
     p_deposit: num("lDep"),
-    p_bills: $("lBills").value === "true",
+    p_currency: $("lCur").value,
+    p_bills_water: $("lBillsWater").value === "true",
+    p_bills_electricity: $("lBillsElec").value === "true",
+    p_bills_internet: $("lBillsNet").value === "true",
     p_rooms: num("lRooms"),
     p_min_stay: num("lMin")
   };

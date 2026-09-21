@@ -8,7 +8,7 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g,
 async function fetchListing(ref) {
   const r = await fetch(
     SUPABASE_URL + "/rest/v1/v_listings_public?ref=eq." + encodeURIComponent(ref) +
-      "&select=ref,city,area,price,images",
+      "&select=ref,city,area,price,currency,images",
     { headers: { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY } }
   );
   if (!r.ok) return null;
@@ -46,7 +46,10 @@ function sitemapXml(origin, listings) {
 // بيبني كارت مشاركة (WhatsApp/فيسبوك) لإعلان محدّد — بيبدّل meta tags بس، الصفحة نفسها SPA واحدة.
 function withListingMeta(res, listing, canonicalUrl) {
   const title = listing.ref + " — سكنّا";
-  const price = listing.price ? Number(listing.price).toLocaleString("ar-EG") + " ₪/شهر — " : "";
+  const CUR_SYM = { ILS: "₪", JOD: "د.أ", USD: "$" };
+  const price = listing.price
+    ? Number(listing.price).toLocaleString("ar-EG") + " " + (CUR_SYM[listing.currency] || "₪") + "/شهر — "
+    : "";
   const desc = price + listing.city + " · " + listing.area + ". غرفة موثّقة على سكنّا.";
   const img = Array.isArray(listing.images) && listing.images[0] ? listing.images[0] : null;
 

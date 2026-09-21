@@ -273,9 +273,18 @@ const num = n => n==null ? "—" : Number(n).toLocaleString("en-US");
    هون بنعرض العربي دايماً، اللوحة كلها عربي. */
 const TAG_LABELS_AR = {quiet:"هادئ/ة", non_smoker:"غير مدخّن/ة", wfh:"بشتغل من البيت",
   university_hours:"دوام جامعي", tidy:"بحب النظام", religious:"ملتزم/ة دينياً",
-  no_guests:"ما بستقبل ضيوف", early_riser:"صاحي/ة بكير"};
+  no_guests:"ما بستقبل ضيوف", hosts_guests:"بستقبل ضيوف", early_riser:"صاحي/ة بكير"};
 const tagLabel = slug => TAG_LABELS_AR[slug] || slug;
+/* listings.features — نفس تخزين الموقع العام (slug ثابت)، معروضة عربي دايماً هون */
+const FEATURE_LABELS_AR = {wifi:"واي فاي", kitchen:"مطبخ", private_bathroom:"حمام خاص", washer:"غسالة",
+  heating:"تدفئة", ac:"مكيّف", hot_water:"ماء ساخن", balcony:"بلكونة", parking:"موقف سيارة",
+  elevator:"مصعد", near_transport:"قرب وسائل المواصلات", cooking_allowed:"يُسمح بالطبخ",
+  private_entrance:"مدخل مستقل", room_lock:"قفل على باب الغرفة"};
+const featureLabel = slug => FEATURE_LABELS_AR[slug] || slug;
 const money = n => n==null ? "—" : Number(n).toLocaleString("en-US",{maximumFractionDigits:0})+" ₪";
+/* عملة الإعلان (ILS/JOD/USD) — السعر والتأمين فقط، الرسم والميزانية دايماً شيكل */
+const CUR_SYM = {ILS:"₪", JOD:"د.أ", USD:"$"};
+const priceStr = (n, cur) => n==null ? "—" : Number(n).toLocaleString("en-US",{maximumFractionDigits:0})+" "+(CUR_SYM[cur]||"₪");
 
 function dt(s, withTime){
   if(!s) return "—";
@@ -677,14 +686,16 @@ async function vQueue(){
       ${rows.length ? "" : '<div class="empty"><b>الطابور فاضي</b>ما في إعلان مستني مراجعة.</div>'}
       <div class="tw" ${rows.length?"":'style="display:none"'}>
       <table><thead><tr>
-        <th>الرمز</th><th>العنوان</th><th>المنطقة</th><th>السعر</th>
+        <th>الرمز</th><th>العنوان</th><th>المنطقة</th><th>السعر</th><th>الغرف</th><th>أقل مدة</th>
         <th>المالك</th><th>الرقم</th><th>منذ</th><th>إجراء</th>
       </tr></thead><tbody>
       ${rows.map(r=>`<tr data-id="${r.id}">
         <td class="ref">${esc(r.ref)}</td>
         <td>${esc(r.title)}</td>
         <td>${esc(r.area)}</td>
-        <td class="num">${money(r.price)}</td>
+        <td class="num">${priceStr(r.price,r.currency)}</td>
+        <td class="num">${r.rooms_total||"—"}</td>
+        <td class="num">${r.min_stay_months?r.min_stay_months+" شهر":"—"}</td>
         <td>${esc(r.owner_name)} ${lvl(r.owner_level)}</td>
         <td class="phone">${esc(r.owner_phone)}</td>
         <td style="color:var(--mute)">${ago(r.created_at)}</td>
@@ -761,7 +772,7 @@ async function vListings(){
   $("#expListings").onclick = () => exportCSV("sakanna-listings.csv", [
     {label:"الرمز", get:r=>r.ref}, {label:"العنوان", get:r=>r.title},
     {label:"المدينة", get:r=>r.city}, {label:"المنطقة", get:r=>r.area},
-    {label:"السعر", get:r=>r.price}, {label:"الحالة", get:r=>L_STATUS[r.status]||r.status},
+    {label:"السعر", get:r=>r.price}, {label:"العملة", get:r=>r.currency}, {label:"الحالة", get:r=>L_STATUS[r.status]||r.status},
     {label:"التوثيق", get:r=>L_VERIF[r.verification]||r.verification},
     {label:"ينتهي بعد (يوم)", get:r=>r.days_left},
     {label:"طلبات تواصل", get:r=>r.contacts}, {label:"مشاهدات", get:r=>r.view_count},
@@ -804,7 +815,7 @@ async function loadListings(f){
       <td class="ref">${esc(r.ref)}</td>
       <td>${esc(r.title)}${r.open_reports>0?' <span class="tag t-open">'+r.open_reports+' بلاغ</span>':""}</td>
       <td>${esc(r.area)}</td>
-      <td class="num">${money(r.price)}</td>
+      <td class="num">${priceStr(r.price,r.currency)}</td>
       <td>${tag(r.status, L_STATUS)}</td>
       <td>${tag(r.verification, L_VERIF)}</td>
       <td class="num" style="color:${r.days_left!=null&&r.days_left<=3?"var(--warn)":"var(--mute)"}">
@@ -859,8 +870,13 @@ async function drawListing(id){
 
   <dl class="dl">
     <dt>النوع</dt><dd>${esc(L_KIND[r.kind]||r.kind)}</dd>
-    <dt>السعر</dt><dd class="num">${money(r.price)} ${r.bills_included?"— شامل الفواتير":"— غير شامل"}</dd>
-    <dt>التأمين</dt><dd class="num">${money(r.deposit)}</dd>
+    <dt>السعر</dt><dd class="num">${priceStr(r.price,r.currency)} / شهر</dd>
+    <dt>التأمين</dt><dd class="num">${priceStr(r.deposit,r.currency)}</dd>
+    <dt>عدد الغرف</dt><dd>${r.rooms_total||"—"}</dd>
+    <dt>أقل مدة إيجار</dt><dd>${r.min_stay_months?r.min_stay_months+" شهر":"—"}</dd>
+    <dt>فاتورة المياه</dt><dd>${yn(r.bills_water)}</dd>
+    <dt>فاتورة الكهرباء</dt><dd>${yn(r.bills_electricity)}</dd>
+    <dt>فاتورة الإنترنت</dt><dd>${yn(r.bills_internet)}</dd>
     <dt>الموقع</dt><dd>${esc(r.city)} — ${esc(r.area)}${r.landmark?" · "+esc(r.landmark):""}</dd>
     <dt>العنوان الدقيق</dt><dd>${esc(r.exact_address)||'<span style="color:var(--mute)">غير مسجّل</span>'}</dd>
     <dt>السياسة</dt><dd>${esc(L_POL[r.gender_pol]||r.gender_pol)} · ${r.furnished?"مفروش":"غير مفروش"}</dd>
@@ -872,6 +888,47 @@ async function drawListing(id){
     ${r.reject_reason?'<dt>سبب الرفض</dt><dd style="color:var(--bad)">'+esc(r.reject_reason)+"</dd>":""}
   </dl>
   ${r.description?'<div style="color:var(--text-2);font-size:13px">'+esc(r.description)+"</div>":""}
+  ${(r.features||[]).length?`<div class="sec"><h4>مواصفات السكن</h4>
+    <div>${r.features.map(f=>'<span class="tag">'+esc(featureLabel(f))+"</span>").join(" ")}</div></div>`:""}
+
+  <div class="sec">
+    <h4>تعديل بيانات الإعلان</h4>
+    <button class="btn sm" id="toggleEditListing">تعديل البيانات</button>
+    <div id="editListingBox" style="display:none;margin-top:10px">
+      <div class="field"><label>عنوان الإعلان</label><input id="elTitle"></div>
+      <div class="field"><label>الوصف</label><textarea id="elDesc" rows="3"></textarea></div>
+      <div class="field"><label>السعر الشهري</label><input id="elPrice" type="number"></div>
+      <div class="field"><label>العملة</label><select id="elCur">
+        <option value="ILS">شيكل (₪)</option><option value="JOD">دينار أردني (د.أ)</option>
+        <option value="USD">دولار أمريكي ($)</option></select></div>
+      <div class="field"><label>التأمين</label><input id="elDep" type="number"></div>
+      <div class="field"><label>النوع</label><select id="elKind">
+        ${Object.entries(L_KIND).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select></div>
+      <div class="field"><label>السكن لـ</label><select id="elPol">
+        ${Object.entries(L_POL).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select></div>
+      <div class="field"><label>مفروش؟</label><select id="elFurn">
+        <option value="true">مفروش</option><option value="false">غير مفروش</option></select></div>
+      <div class="field"><label>فاتورة المياه</label><select id="elBillsWater">
+        <option value="false">غير مشمولة بالسعر</option><option value="true">مشمولة بالسعر</option></select></div>
+      <div class="field"><label>فاتورة الكهرباء</label><select id="elBillsElec">
+        <option value="false">غير مشمولة بالسعر</option><option value="true">مشمولة بالسعر</option></select></div>
+      <div class="field"><label>فاتورة الإنترنت</label><select id="elBillsNet">
+        <option value="false">غير مشمولة بالسعر</option><option value="true">مشمولة بالسعر</option></select></div>
+      <div class="field"><label>عدد الغرف</label><input id="elRooms" type="number" min="1"></div>
+      <div class="field"><label>أقل مدة إيجار (شهور)</label><input id="elMin" type="number" min="0"></div>
+      <div class="field"><label>متاح من</label><input id="elFrom" type="date"></div>
+      <div class="field"><label>علامة مميزة قريبة</label><input id="elLand"></div>
+      <div class="field"><label>الساكنون حالياً</label><input id="elOcc"></div>
+      <div class="field"><label>المدينة</label><select id="elCity"></select></div>
+      <div class="field"><label>المنطقة</label><select id="elArea"></select></div>
+      <div class="field"><label>مواصفات السكن</label><div id="elFeats">
+        ${Object.entries(FEATURE_LABELS_AR).map(([slug,label],i)=>
+          `<div class="chk"><input type="checkbox" id="ef${i}" data-slug="${slug}"><label for="ef${i}">${label}</label></div>`).join("")}
+      </div></div>
+      <div class="err" id="elErr"></div>
+      <button class="btn sm primary" id="saveListingEdit">حفظ التعديلات</button>
+    </div>
+  </div>
 
   <div class="sec">
     <h4>صور الإعلان (<span id="imgCount">${imgs.length}</span>/6)</h4>
@@ -967,6 +1024,77 @@ async function drawListing(id){
   <div class="sec"><h4>سجل هذا الإعلان</h4><div id="lhist" class="feed"></div></div>`;
 
   $("#dx").onclick = closeDrawer;
+
+  const toggleEditL = $("#toggleEditListing");
+  if(toggleEditL) toggleEditL.onclick = async () => {
+    const box = $("#editListingBox");
+    const show = box.style.display === "none";
+    box.style.display = show ? "block" : "none";
+    if(show) await fillListingEditForm(r);
+  };
+  async function fillListingEditForm(r){
+    $("#elTitle").value = r.title||"";
+    $("#elDesc").value = r.description||"";
+    $("#elPrice").value = r.price??"";
+    $("#elCur").value = r.currency||"ILS";
+    $("#elDep").value = r.deposit??"";
+    $("#elKind").value = r.kind;
+    $("#elPol").value = r.gender_pol;
+    $("#elFurn").value = r.furnished ? "true" : "false";
+    $("#elBillsWater").value = r.bills_water ? "true" : "false";
+    $("#elBillsElec").value = r.bills_electricity ? "true" : "false";
+    $("#elBillsNet").value = r.bills_internet ? "true" : "false";
+    $("#elRooms").value = r.rooms_total??"";
+    $("#elMin").value = r.min_stay_months??"";
+    $("#elFrom").value = r.available_from ? String(r.available_from).slice(0,10) : "";
+    $("#elLand").value = r.landmark||"";
+    $("#elOcc").value = r.occupants_note||"";
+    (r.features||[]).forEach(slug => {
+      const el = $("#editListingBox").querySelector(`[data-slug="${CSS.escape(slug)}"]`);
+      if(el) el.checked = true;
+    });
+    const cities = S.cache.cities || (S.cache.cities = await get("/cities?select=id,name_ar&order=id"));
+    const areas = S.cache.areas || (S.cache.areas = await get("/areas?select=id,name_ar,city_id&order=city_id,sort_order"));
+    $("#elCity").innerHTML = cities.map(c=>`<option value="${c.id}">${esc(c.name_ar)}</option>`).join("");
+    $("#elCity").value = r.city_id;
+    const paintAreas = () => {
+      const cid = Number($("#elCity").value);
+      $("#elArea").innerHTML = areas.filter(a=>a.city_id===cid).map(a=>`<option value="${a.id}">${esc(a.name_ar)}</option>`).join("");
+      $("#elArea").value = r.area_id;
+    };
+    paintAreas();
+    $("#elCity").onchange = paintAreas;
+  }
+  const saveListingEdit = $("#saveListingEdit");
+  if(saveListingEdit) saveListingEdit.onclick = async () => {
+    $("#elErr").textContent = "";
+    const feats = [...$("#editListingBox").querySelectorAll("[data-slug]:checked")].map(el=>el.dataset.slug);
+    try{
+      await rpc("admin_listing_update", {
+        p_id: r.id,
+        p_title: $("#elTitle").value.trim(),
+        p_description: $("#elDesc").value.trim() || null,
+        p_price: Number($("#elPrice").value),
+        p_currency: $("#elCur").value,
+        p_deposit: $("#elDep").value === "" ? null : Number($("#elDep").value),
+        p_kind: $("#elKind").value,
+        p_pol: $("#elPol").value,
+        p_furnished: $("#elFurn").value === "true",
+        p_bills_water: $("#elBillsWater").value === "true",
+        p_bills_electricity: $("#elBillsElec").value === "true",
+        p_bills_internet: $("#elBillsNet").value === "true",
+        p_rooms: $("#elRooms").value === "" ? null : Number($("#elRooms").value),
+        p_min_stay: $("#elMin").value === "" ? null : Number($("#elMin").value),
+        p_from: $("#elFrom").value || null,
+        p_landmark: $("#elLand").value.trim() || null,
+        p_occ: $("#elOcc").value.trim() || null,
+        p_features: feats,
+        p_area: Number($("#elArea").value)
+      });
+      toast("انحفظت تعديلات الإعلان.", "ok");
+      openDrawer("listing", r.id); go(S.view);
+    } catch(e){ $("#elErr").textContent = e.message; }
+  };
 
   function paintImgs(){
     $("#imgCount").textContent = curImages.length;
@@ -1189,7 +1317,7 @@ async function vPipeline(){
         <td>${esc(r.seeker_profile_name||r.seeker_name)} ${lvl(r.seeker_level)}</td>
         <td class="phone">${esc(r.seeker_profile_phone||r.seeker_phone)}</td>
         <td><span class="ref">${esc(r.listing_ref)}</span> ${esc(r.listing_title)}</td>
-        <td class="num">${money(r.price)}</td>
+        <td class="num">${priceStr(r.price,r.currency)}</td>
         <td>${tag(r.status,C_STATUS)}</td>
         <td>${r.fee_id?tag(r.fee_status,F_STATUS):"—"}</td>
         <td style="color:var(--mute)">${ago(r.created_at)}</td>
@@ -1208,7 +1336,7 @@ async function drawContact(id){
       <dt>رقم الباحث</dt><dd class="phone">${esc(phone)}</dd>
       <dt>الإعلان</dt><dd><span class="ref">${esc(r.listing_ref)}</span> ${esc(r.listing_title)}</dd>
       <dt>الموقع</dt><dd>${esc(r.city)} — ${esc(r.area)}</dd>
-      <dt>السعر</dt><dd class="num">${money(r.price)}</dd>
+      <dt>السعر</dt><dd class="num">${priceStr(r.price,r.currency)}</dd>
       <dt>المالك</dt><dd>${esc(r.owner_name)} · <span class="phone">${esc(r.owner_phone)}</span></dd>
       ${r.fee_id?'<dt>الرسم</dt><dd>'+money(r.amount_due)+" "+tag(r.fee_status,F_STATUS)+"</dd>":""}
     </dl>
@@ -1562,6 +1690,35 @@ async function drawRequest(id){
       <div>${r.lifestyle_tags.map(t=>'<span class="tag">'+esc(tagLabel(t))+"</span>").join(" ")}</div></div>`:""}
     ${r.note?`<div class="sec"><h4>ملاحظاته</h4><div style="font-size:13px">${esc(r.note)}</div></div>`:""}
 
+    <div class="sec">
+      <h4>تعديل بيانات الطلب</h4>
+      <button class="btn sm" id="toggleEditRequest">تعديل البيانات</button>
+      <div id="editRequestBox" style="display:none;margin-top:10px">
+        <div class="field"><label>أعلى ميزانية</label><input id="erBud" type="number"></div>
+        <div class="field"><label>الجنس</label><select id="erG">
+          <option value="female">أنثى</option><option value="male">ذكر</option></select></div>
+        <div class="field"><label>نوع السكن المفضّل</label><select id="erKind">
+          <option value="">مرن — أي نوع</option>
+          ${Object.entries(L_KIND).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select></div>
+        <div class="field"><label>مفروش؟</label><select id="erFurn">
+          <option value="">مرن</option><option value="true">يفضّل مفروش</option>
+          <option value="false">غير ضروري</option></select></div>
+        <div class="field"><label>تاريخ الانتقال</label><input id="erDate" type="date"></div>
+        <div class="field"><label>أقل مدة (شهور)</label><input id="erMin" type="number" min="0"></div>
+        <div class="field"><label>التدخين</label><select id="erSmoke">
+          <option value="">غير محدد</option><option value="false">لا</option><option value="true">نعم</option></select></div>
+        <div class="field"><label>المدينة</label><select id="erCity"></select></div>
+        <div class="field"><label>المناطق المفضّلة</label><div id="erAreas"></div></div>
+        <div class="field"><label>صفاته كساكن</label><div id="erTags">
+          ${Object.entries(TAG_LABELS_AR).map(([slug,label],i)=>
+            `<div class="chk"><input type="checkbox" id="et${i}" data-slug="${slug}"><label for="et${i}">${label}</label></div>`).join("")}
+        </div></div>
+        <div class="field"><label>ملاحظات</label><textarea id="erNote" rows="2"></textarea></div>
+        <div class="err" id="erErr"></div>
+        <button class="btn sm primary" id="saveRequestEdit">حفظ التعديلات</button>
+      </div>
+    </div>
+
     <div class="acts">
       <a class="btn sm" href="tel:${esc(r.phone||"")}">اتصال</a>
       <a class="btn sm" target="_blank" rel="noopener"
@@ -1584,6 +1741,66 @@ async function drawRequest(id){
       <button class="btn sm bad" id="delRequest">حذف الطلب نهائياً</button>
     </div>`:""}`;
   $("#dx").onclick = closeDrawer;
+
+  const toggleEditR = $("#toggleEditRequest");
+  if(toggleEditR) toggleEditR.onclick = async () => {
+    const box = $("#editRequestBox");
+    const show = box.style.display === "none";
+    box.style.display = show ? "block" : "none";
+    if(show) await fillRequestEditForm(r);
+  };
+  async function fillRequestEditForm(r){
+    $("#erBud").value = r.budget_max??"";
+    $("#erG").value = r.gender||"female";
+    $("#erKind").value = r.kind_pref||"";
+    $("#erFurn").value = r.furnished_pref===true?"true":r.furnished_pref===false?"false":"";
+    $("#erDate").value = r.move_in_date ? String(r.move_in_date).slice(0,10) : "";
+    $("#erMin").value = r.min_stay_months??"";
+    $("#erSmoke").value = r.smoker===true?"true":r.smoker===false?"false":"";
+    $("#erNote").value = r.note||"";
+    (r.lifestyle_tags||[]).forEach(slug => {
+      const el = $("#editRequestBox").querySelector(`[data-slug="${CSS.escape(slug)}"]`);
+      if(el) el.checked = true;
+    });
+    const cities = S.cache.cities || (S.cache.cities = await get("/cities?select=id,name_ar&order=id"));
+    const areas = S.cache.areas || (S.cache.areas = await get("/areas?select=id,name_ar,city_id&order=city_id,sort_order"));
+    $("#erCity").innerHTML = cities.map(c=>`<option value="${c.id}">${esc(c.name_ar)}</option>`).join("");
+    $("#erCity").value = r.city_id;
+    const paintAreas = () => {
+      const cid = Number($("#erCity").value);
+      const sel = new Set(r.area_ids||[]);
+      $("#erAreas").innerHTML = areas.filter(a=>a.city_id===cid).map((a,i)=>
+        `<div class="chk"><input type="checkbox" id="ea${i}" data-area="${a.id}" ${sel.has(a.id)?"checked":""}><label for="ea${i}">${esc(a.name_ar)}</label></div>`).join("");
+    };
+    paintAreas();
+    $("#erCity").onchange = paintAreas;
+  }
+  const saveRequestEdit = $("#saveRequestEdit");
+  if(saveRequestEdit) saveRequestEdit.onclick = async () => {
+    $("#erErr").textContent = "";
+    const tags = [...$("#editRequestBox").querySelectorAll("[data-slug]:checked")].map(el=>el.dataset.slug);
+    const areaIds = [...$("#erAreas").querySelectorAll("[data-area]:checked")].map(el=>Number(el.dataset.area));
+    const tri = id => { const v = $(id).value; return v==="" ? null : v==="true"; };
+    try{
+      await rpc("admin_request_update", {
+        p_id: r.id,
+        p_budget: Number($("#erBud").value),
+        p_gender: $("#erG").value,
+        p_kind: $("#erKind").value || null,
+        p_furnished: tri("#erFurn"),
+        p_move_in: $("#erDate").value || null,
+        p_min_stay: $("#erMin").value === "" ? null : Number($("#erMin").value),
+        p_smoker: tri("#erSmoke"),
+        p_tags: tags,
+        p_note: $("#erNote").value.trim() || null,
+        p_city: Number($("#erCity").value),
+        p_areas: areaIds
+      });
+      toast("انحفظت تعديلات الطلب.", "ok");
+      openDrawer("request", r.id); go(S.view);
+    } catch(e){ $("#erErr").textContent = e.message; }
+  };
+
   const delR = $("#delRequest");
   if(delR) delR.onclick = async () => {
     if(!confirm("حذف نهائي — لا يمكن التراجع. متابعة؟")) return;

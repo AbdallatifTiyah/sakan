@@ -144,6 +144,8 @@ const H = {apikey:SUPABASE_ANON_KEY, Authorization:"Bearer "+SUPABASE_ANON_KEY, 
 const esc = s => String(s??"").replace(/[&<>"']/g,
   c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const money = n => n==null ? "—" : Number(n).toLocaleString("ar-EG")+" ₪";
+const CUR_SYM = {ILS:"₪", JOD:"د.أ", USD:"$"};
+const priceMoney = (n, cur) => n==null ? "—" : Number(n).toLocaleString("ar-EG")+" "+(CUR_SYM[cur]||"₪");
 const dt = d => d ? new Date(d).toLocaleDateString("ar-EG",{day:"numeric",month:"long"}) : "—";
 
 const L_STATUS = {draft:"مسودّة",pending:"بانتظار المراجعة",published:"منشور",rejected:"مرفوض",
@@ -236,7 +238,7 @@ function listingCard(l, requests){
         <div class="lref">${esc(l.ref)}</div>
         <div class="lloc">${esc(l.city)} — ${esc(l.area)}</div>
       </div>
-      <div class="lprice">${money(l.price)}<span style="font-weight:400;color:var(--mut);font-size:12px"> / شهر</span></div>
+      <div class="lprice">${priceMoney(l.price,l.currency)}<span style="font-weight:400;color:var(--mut);font-size:12px"> / شهر</span></div>
     </div>
     <div class="tags">
       <span class="t ${statusCls(l.status)}">${esc(L_STATUS[l.status]||l.status)}</span>

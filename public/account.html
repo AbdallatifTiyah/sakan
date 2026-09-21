@@ -151,6 +151,8 @@ const esc = s => String(s??"").replace(/[&<>"']/g,
   c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const $ = id => document.getElementById(id);
 const money = n => n==null ? "—" : Number(n).toLocaleString(LANG==="en"?"en-US":"ar-EG")+" ₪";
+const CUR_SYM = {ILS:"₪", JOD:tt("د.أ","JOD"), USD:"$"};
+const priceMoney = (n, cur) => n==null ? "—" : Number(n).toLocaleString(LANG==="en"?"en-US":"ar-EG")+" "+(CUR_SYM[cur]||"₪");
 const dt = d => d ? new Date(d).toLocaleDateString(LANG==="en"?"en-US":"ar-EG",{day:"numeric",month:"long"}) : "—";
 
 /* ═══════════════ الجلسة — access_token/refresh_token بـsessionStorage فقط ═══════════════ */
@@ -342,7 +344,7 @@ function listingCard(l){
     <div class="row">
       <div>
         <div class="title">${esc(l.title)}</div>
-        <div class="ref">${esc(l.ref)} · ${esc(l.city)} — ${esc(l.area)} · ${money(l.price)}/${tt("شهر","mo")}</div>
+        <div class="ref">${esc(l.ref)} · ${esc(l.city)} — ${esc(l.area)} · ${priceMoney(l.price,l.currency)}/${tt("شهر","mo")}</div>
       </div>
       <div class="tags">
         <span class="t ${statusCls(l.status)}">${esc(L_STATUS[l.status]||l.status)}</span>
@@ -403,7 +405,7 @@ async function renderSeekerSection(){
     <h2>${tt("الوحدات المحفوظة","Saved housing")} (${saved.length})</h2>
     ${saved.length ? saved.map(s => `<div class="card">
       <div class="title">${s.ref?esc(s.ref):tt("إعلان محذوف","Removed listing")}</div>
-      <div class="meta">${esc(s.city||"")} ${s.area?"— "+esc(s.area):""} ${s.price?"· "+money(s.price):""}</div>
+      <div class="meta">${esc(s.city||"")} ${s.area?"— "+esc(s.area):""} ${s.price?"· "+priceMoney(s.price,s.currency):""}</div>
     </div>`).join("") : `<div class="empty">${tt("لم تحفظ أي إعلان بعد.","You haven't saved any listing yet.")}</div>`}
   `;
 }
