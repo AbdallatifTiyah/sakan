@@ -401,8 +401,8 @@ const FEATURES = [
   {slug:"washer",           ar:"غسالة",                en:"Washing machine"},
   {slug:"heating",          ar:"تدفئة",                en:"Heating"},
   {slug:"ac",               ar:"مكيّف",                 en:"Air conditioning"},
-  {slug:"hot_water_electric", ar:"ماء ساخن — بويلر كهرباء", en:"Hot water — electric boiler"},
-  {slug:"hot_water_solar",  ar:"ماء ساخن — حمام شمسي",   en:"Hot water — solar heater"},
+  {slug:"hot_water_electric", ar:"بويلر كهرباء",         en:"Electric boiler"},
+  {slug:"hot_water_solar",  ar:"حمام شمسي",              en:"Solar heater"},
   {slug:"balcony",          ar:"بلكونة",                en:"Balcony"},
   {slug:"parking",          ar:"موقف سيارة",            en:"Parking"},
   {slug:"elevator",         ar:"مصعد",                 en:"Elevator"},
@@ -726,7 +726,6 @@ function openL(id){
       ${x.no_indoor_cameras===true?"":chk3(x.no_indoor_cameras,tt("لم نشاهد كاميرات داخل السكن وقت الزيارة","No indoor cameras seen during the visit"))}
       ${chk3(x.private_bathroom,tt("حمام خاص","Private bathroom"))}
       ${chk3(x.kitchen_access,tt("وصول للمطبخ","Kitchen access"))}
-      ${chk3(x.hot_water,tt("ماء ساخن","Hot water"))}
       ${chk3(x.heating,tt("تدفئة","Heating"))}
       ${chk3(x.internet,tt("إنترنت","Internet"))}
       ${chk3(x.exterior_lighting,tt("إنارة خارجية كافية","Adequate outdoor lighting"))}

@@ -277,9 +277,8 @@ const TAG_LABELS_AR = {quiet:"هادئ/ة", non_smoker:"غير مدخّن/ة", w
 const tagLabel = slug => TAG_LABELS_AR[slug] || slug;
 /* listings.features — نفس تخزين الموقع العام (slug ثابت)، معروضة عربي دايماً هون */
 const FEATURE_LABELS_AR = {wifi:"واي فاي", kitchen:"مطبخ", private_bathroom:"حمام خاص", washer:"غسالة",
-  heating:"تدفئة", ac:"مكيّف", hot_water:"ماء ساخن", hot_water_electric:"ماء ساخن — بويلر كهرباء",
-  hot_water_solar:"ماء ساخن — حمام شمسي", balcony:"بلكونة", parking:"موقف سيارة",
-  elevator:"مصعد", near_transport:"قرب وسائل المواصلات", cooking_allowed:"يُسمح بالطبخ",
+  heating:"تدفئة", ac:"مكيّف", hot_water_electric:"بويلر كهرباء", hot_water_solar:"حمام شمسي",
+  balcony:"بلكونة", parking:"موقف سيارة", elevator:"مصعد", near_transport:"قرب وسائل المواصلات",
   private_entrance:"مدخل مستقل", room_lock:"قفل على باب الغرفة"};
 const featureLabel = slug => FEATURE_LABELS_AR[slug] || slug;
 /* profiles.occupation — نفس enum بالموقع العام (occupation_type) */
@@ -970,7 +969,6 @@ async function drawListing(id){
     <div class="chk"><input type="checkbox" id="s7" ${r.gas_detector?"checked":""}><label for="s7">كاشف غاز</label></div>
     <div class="chk"><input type="checkbox" id="s8" ${r.private_bathroom?"checked":""}><label for="s8">حمام خاص</label></div>
     <div class="chk"><input type="checkbox" id="s9" ${r.kitchen_access?"checked":""}><label for="s9">وصول للمطبخ</label></div>
-    <div class="chk"><input type="checkbox" id="s10" ${r.hot_water?"checked":""}><label for="s10">ماء ساخن</label></div>
     <div class="chk"><input type="checkbox" id="s11" ${r.heating?"checked":""}><label for="s11">تدفئة</label></div>
     <div class="chk"><input type="checkbox" id="s12" ${r.internet?"checked":""}><label for="s12">إنترنت</label></div>
     <div class="chk"><input type="checkbox" id="s13" ${r.emergency_exit?"checked":""}><label for="s13">مخرج طوارئ</label></div>
@@ -1214,7 +1212,7 @@ async function drawListing(id){
         p_listing:r.id, p_visit:new Date().toISOString().slice(0,10),
         p_room:v(1), p_photos:v(2), p_lock:v(3), p_nocam:v(4), p_occ:v(5),
         p_light:v(6), p_gas:v(7), p_notes:$("#snote").value.trim()||null,
-        p_extras:{ private_bathroom:v(8), kitchen_access:v(9), hot_water:v(10),
+        p_extras:{ private_bathroom:v(8), kitchen_access:v(9),
                    heating:v(11), internet:v(12), emergency_exit:v(13),
                    street_access:v(14), owner_met:v(15) } });
       toast(passed ? "انحفظت الزيارة — الإعلان ترقّى لتوثيق ميداني."
