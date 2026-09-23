@@ -568,6 +568,13 @@ function syncRoomChip(id){
   box.querySelectorAll(".chip-btn").forEach(b=>b.classList.toggle("on", Number(b.dataset.n)===v));
 }
 
+/* خانة عدد الغرف المفضّل عند الباحث — تظهر فقط لو اختار "شقة" */
+function onReqKind(){
+  const isApt = $("rKind").value === "apartment";
+  $("rRoomsWrap").style.display = isApt ? "" : "none";
+  if(!isApt){ $("rRooms").value = ""; syncRoomChip("rRooms"); }
+}
+
 /* ═══════════════ التبويبات والفلاتر ═══════════════ */
 function setTab(t){
   TAB=t; F={};
@@ -854,6 +861,7 @@ function openR(id){
       <div class="row"><span>${tt("المدينة","City")}</span><span>${esc(x.city||"—")}</span></div>
       <div class="row"><span>${tt("المناطق المفضّلة","Preferred areas")}</span><span>${areas.join(" · ")||tt("مرن — أي منطقة","Flexible — any area")}</span></div>
       <div class="row"><span>${tt("نوع السكن","Housing type")}</span><span>${KIND[x.kind_pref]||tt("مرن","Flexible")}</span></div>
+      ${x.rooms_pref?`<div class="row"><span>${tt("عدد الغرف المفضّل","Preferred rooms")}</span><span>${x.rooms_pref}</span></div>`:""}
       <div class="row"><span>${tt("مدة الإيجار المطلوبة","Rental period sought")}</span><span>${x.rental_period_pref?PERIOD[x.rental_period_pref]:tt("مرن","Flexible")}</span></div>
       <div class="row"><span>${tt("مفروش؟","Furnished?")}</span><span>${x.furnished_pref===null||x.furnished_pref===undefined?tt("مرن","Flexible"):(x.furnished_pref?tt("يفضّل مفروش","Prefers furnished"):tt("غير ضروري","Not required"))}</span></div>
       <div class="row"><span>${tt("تاريخ الانتقال","Move-in date")}</span><span>${dt(x.move_in_date)}</span></div>
@@ -1102,10 +1110,12 @@ function openForm(kind){
         <div class="fg"><label>${tt("أعلى ميزانية (₪)","Max budget (₪)")}</label>
           <input id="rBud" data-num inputmode="numeric" placeholder="${tt("مثلاً ٧٠٠","e.g. 700")}"></div>
         <div class="fg"><label>${tt("تاريخ الانتقال","Move-in date")}</label><input id="rDate" type="date"></div>
-        <div class="fg"><label>${tt("نوع السكن المفضّل","Preferred housing type")}</label><select id="rKind">
+        <div class="fg"><label>${tt("نوع السكن المفضّل","Preferred housing type")}</label><select id="rKind" onchange="onReqKind()">
           <option value="">${tt("مرن — أي نوع","Flexible — any type")}</option>
           ${Object.entries(KIND).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}
         </select></div>
+        <div class="fg" id="rRoomsWrap" style="display:none"><label>${tt("عدد الغرف المفضّل","Preferred rooms")}</label>
+          ${roomChipsHTML("rRooms")}</div>
         <div class="fg"><label>${tt("مفروش؟","Furnished?")}</label><select id="rFurn">
           <option value="">${tt("مرن","Flexible")}</option><option value="true">${tt("يفضّل مفروش","Prefers furnished")}</option>
           <option value="false">${tt("غير ضروري","Not required")}</option></select></div>
@@ -1139,7 +1149,7 @@ function openForm(kind){
         ${tt("سجّل طلبي","Register my request")}</button></div>
     </div></div>`;
   wireDigits($("modal"));
-  if(kind==="listing"){ restoreDraftIfAny(); }
+  if(kind==="listing"){ restoreDraftIfAny(); } else if(kind==="request"){ onReqKind(); }
   $("ov").classList.add("on");
 }
 
@@ -1283,7 +1293,8 @@ async function subRequest(){
     p_furnished: tri("rFurn"),
     p_min_stay: num("rMin"),
     p_smoker: tri("rSmoke"),
-    p_rental_period_pref: $("rPeriod").value || null
+    p_rental_period_pref: $("rPeriod").value || null,
+    p_rooms_pref: $("rKind").value === "apartment" ? num("rRooms") : null
   };
   const bad = m => { $("rErr").innerHTML = `<div class="err">${m}</div>`; return null; };
   if(v.p_name.length < 2) return bad(tt("اكتب اسمك.","Enter your name."));

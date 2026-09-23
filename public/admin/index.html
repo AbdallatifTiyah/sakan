@@ -1691,6 +1691,7 @@ async function drawRequest(id){
       <dt>المناطق</dt><dd>${esc(r.areas_ar||"مرن — أي منطقة")}</dd>
       <dt>الميزانية</dt><dd class="num">حتى ${money(r.budget_max)}</dd>
       <dt>نوع السكن</dt><dd>${esc(L_KIND[r.kind_pref]||"مرن")}</dd>
+      ${r.rooms_pref?`<dt>عدد الغرف المفضّل</dt><dd>${r.rooms_pref}</dd>`:""}
       <dt>مدة الإيجار المطلوبة</dt><dd>${r.rental_period_pref?esc(L_PERIOD[r.rental_period_pref]):"مرن"}</dd>
       <dt>مفروش</dt><dd>${yn(r.furnished_pref)}</dd>
       <dt>الانتقال</dt><dd>${dt(r.move_in_date)}</dd>
@@ -1713,6 +1714,7 @@ async function drawRequest(id){
         <div class="field"><label>نوع السكن المفضّل</label><select id="erKind">
           <option value="">مرن — أي نوع</option>
           ${Object.entries(L_KIND).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select></div>
+        <div class="field"><label>عدد الغرف المفضّل (لو شقة)</label><input id="erRooms" type="number" min="1"></div>
         <div class="field"><label>مفروش؟</label><select id="erFurn">
           <option value="">مرن</option><option value="true">يفضّل مفروش</option>
           <option value="false">غير ضروري</option></select></div>
@@ -1769,6 +1771,7 @@ async function drawRequest(id){
     $("#erBud").value = r.budget_max??"";
     $("#erG").value = r.gender||"female";
     $("#erKind").value = r.kind_pref||"";
+    $("#erRooms").value = r.rooms_pref??"";
     $("#erFurn").value = r.furnished_pref===true?"true":r.furnished_pref===false?"false":"";
     $("#erDate").value = r.move_in_date ? String(r.move_in_date).slice(0,10) : "";
     $("#erPeriod").value = r.rental_period_pref||"";
@@ -1812,7 +1815,8 @@ async function drawRequest(id){
         p_note: $("#erNote").value.trim() || null,
         p_city: Number($("#erCity").value),
         p_areas: areaIds,
-        p_rental_period_pref: $("#erPeriod").value || null
+        p_rental_period_pref: $("#erPeriod").value || null,
+        p_rooms_pref: $("#erRooms").value === "" ? null : Number($("#erRooms").value)
       });
       toast("انحفظت تعديلات الطلب.", "ok");
       openDrawer("request", r.id); go(S.view);
