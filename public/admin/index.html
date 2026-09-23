@@ -347,6 +347,8 @@ const L_VERIF  = {none:"غير موثّق",desk:"توثيق مكتبي",video:"�
 const L_KIND   = {room_shared:"غرفة بسكن مشترك",bed_shared:"سرير بغرفة مشتركة",
                   studio:"ستوديو",apartment:"شقة"};
 const L_POL    = {female:"إناث فقط",male:"ذكور فقط",mixed:"مختلط"};
+const L_PERIOD      = {monthly:"شهري",weekly:"أسبوعي",daily:"يومي"};
+const L_PERIOD_UNIT = {monthly:"شهر",weekly:"أسبوع",daily:"يوم"};
 const C_STATUS = {new:"جديد",forwarded:"محوّل للمالك",owner_responded:"المالك ردّ",
                   viewing_set:"معاينة محدّدة",rented:"تم التأجير",dead:"مغلق"};
 const R_STATUS = {open:"مفتوح",investigating:"قيد التحقيق",actioned:"تم التصرّف",dismissed:"مرفوض"};
@@ -775,7 +777,8 @@ async function vListings(){
   $("#expListings").onclick = () => exportCSV("sakanna-listings.csv", [
     {label:"الرمز", get:r=>r.ref}, {label:"العنوان", get:r=>r.title},
     {label:"المدينة", get:r=>r.city}, {label:"المنطقة", get:r=>r.area},
-    {label:"السعر", get:r=>r.price}, {label:"العملة", get:r=>r.currency}, {label:"الحالة", get:r=>L_STATUS[r.status]||r.status},
+    {label:"السعر", get:r=>r.price}, {label:"العملة", get:r=>r.currency},
+    {label:"مدة الإيجار", get:r=>L_PERIOD[r.rental_period]||r.rental_period}, {label:"الحالة", get:r=>L_STATUS[r.status]||r.status},
     {label:"التوثيق", get:r=>L_VERIF[r.verification]||r.verification},
     {label:"ينتهي بعد (يوم)", get:r=>r.days_left},
     {label:"طلبات تواصل", get:r=>r.contacts}, {label:"مشاهدات", get:r=>r.view_count},
@@ -811,7 +814,7 @@ async function loadListings(f){
       return;
     }
     $("#ltable").innerHTML = `<div class="tw"><table><thead><tr>
-      <th>الرمز</th><th>العنوان</th><th>المنطقة</th><th>السعر</th><th>الحالة</th>
+      <th>الرمز</th><th>العنوان</th><th>المنطقة</th><th>السعر</th><th>المدة</th><th>الحالة</th>
       <th>التوثيق</th><th>ينتهي</th><th>تواصل</th><th>مشاهدات</th><th>المالك</th>
     </tr></thead><tbody>
     ${rows.map(r=>`<tr data-id="${r.id}">
@@ -819,6 +822,7 @@ async function loadListings(f){
       <td>${esc(r.title)}${r.open_reports>0?' <span class="tag t-open">'+r.open_reports+' بلاغ</span>':""}</td>
       <td>${esc(r.area)}</td>
       <td class="num">${priceStr(r.price,r.currency)}</td>
+      <td>${esc(L_PERIOD[r.rental_period]||r.rental_period)}</td>
       <td>${tag(r.status, L_STATUS)}</td>
       <td>${tag(r.verification, L_VERIF)}</td>
       <td class="num" style="color:${r.days_left!=null&&r.days_left<=3?"var(--warn)":"var(--mute)"}">
@@ -873,7 +877,8 @@ async function drawListing(id){
 
   <dl class="dl">
     <dt>النوع</dt><dd>${esc(L_KIND[r.kind]||r.kind)}</dd>
-    <dt>السعر</dt><dd class="num">${priceStr(r.price,r.currency)} / شهر</dd>
+    <dt>مدة الإيجار</dt><dd>${esc(L_PERIOD[r.rental_period]||r.rental_period)}</dd>
+    <dt>السعر</dt><dd class="num">${priceStr(r.price,r.currency)} / ${L_PERIOD_UNIT[r.rental_period]||"شهر"}</dd>
     <dt>التأمين</dt><dd class="num">${priceStr(r.deposit,r.currency)}</dd>
     <dt>عدد الغرف</dt><dd>${r.rooms_total||"—"}</dd>
     <dt>أقل مدة إيجار</dt><dd>${r.min_stay_months?r.min_stay_months+" شهر":"—"}</dd>
@@ -918,6 +923,8 @@ async function drawListing(id){
       <div class="field"><label>فاتورة الإنترنت</label><select id="elBillsNet">
         <option value="false">غير مشمولة بالسعر</option><option value="true">مشمولة بالسعر</option></select></div>
       <div class="field"><label>عدد الغرف</label><input id="elRooms" type="number" min="1"></div>
+      <div class="field"><label>مدة الإيجار</label><select id="elPeriod">
+        ${Object.entries(L_PERIOD).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select></div>
       <div class="field"><label>أقل مدة إيجار (شهور)</label><input id="elMin" type="number" min="0"></div>
       <div class="field"><label>متاح من</label><input id="elFrom" type="date"></div>
       <div class="field"><label>علامة مميزة قريبة</label><input id="elLand"></div>
@@ -1047,6 +1054,7 @@ async function drawListing(id){
     $("#elBillsElec").value = r.bills_electricity ? "true" : "false";
     $("#elBillsNet").value = r.bills_internet ? "true" : "false";
     $("#elRooms").value = r.rooms_total??"";
+    $("#elPeriod").value = r.rental_period||"monthly";
     $("#elMin").value = r.min_stay_months??"";
     $("#elFrom").value = r.available_from ? String(r.available_from).slice(0,10) : "";
     $("#elLand").value = r.landmark||"";
@@ -1086,6 +1094,7 @@ async function drawListing(id){
         p_bills_electricity: $("#elBillsElec").value === "true",
         p_bills_internet: $("#elBillsNet").value === "true",
         p_rooms: $("#elRooms").value === "" ? null : Number($("#elRooms").value),
+        p_rental_period: $("#elPeriod").value,
         p_min_stay: $("#elMin").value === "" ? null : Number($("#elMin").value),
         p_from: $("#elFrom").value || null,
         p_landmark: $("#elLand").value.trim() || null,
@@ -1643,7 +1652,7 @@ async function vRequests(){
       ${rows.length?"":'<div class="empty"><b>ما في طلبات</b>أول طلب سكن من الموقع بيظهر هون.</div>'}
       <div class="tw" ${rows.length?"":'style="display:none"'}><table><thead><tr>
         <th>الرقم</th><th>الباحث</th><th>الهاتف</th><th>الصفة</th><th>المدينة</th>
-        <th>المناطق</th><th>الميزانية</th><th>الانتقال</th><th>التوثيق</th>
+        <th>المناطق</th><th>الميزانية</th><th>المدة</th><th>الانتقال</th><th>التوثيق</th>
         <th>الحالة</th><th>مسجّل</th>
       </tr></thead><tbody>
       ${rows.map(r=>`<tr data-id="${r.id}">
@@ -1654,6 +1663,7 @@ async function vRequests(){
         <td>${esc(r.city||"—")}</td>
         <td style="color:var(--text-2);font-size:12.5px">${esc(r.areas_ar||"—")}</td>
         <td class="num">${money(r.budget_max)}</td>
+        <td>${r.rental_period_pref?esc(L_PERIOD[r.rental_period_pref]):"مرن"}</td>
         <td>${dt(r.move_in_date)}</td>
         <td>${lvl(r.seeker_level)}</td>
         <td>${tag(r.status, REQ_ST)}</td>
@@ -1681,6 +1691,7 @@ async function drawRequest(id){
       <dt>المناطق</dt><dd>${esc(r.areas_ar||"مرن — أي منطقة")}</dd>
       <dt>الميزانية</dt><dd class="num">حتى ${money(r.budget_max)}</dd>
       <dt>نوع السكن</dt><dd>${esc(L_KIND[r.kind_pref]||"مرن")}</dd>
+      <dt>مدة الإيجار المطلوبة</dt><dd>${r.rental_period_pref?esc(L_PERIOD[r.rental_period_pref]):"مرن"}</dd>
       <dt>مفروش</dt><dd>${yn(r.furnished_pref)}</dd>
       <dt>الانتقال</dt><dd>${dt(r.move_in_date)}</dd>
       <dt>أقل مدة</dt><dd>${r.min_stay_months?r.min_stay_months+" شهر":"—"}</dd>
@@ -1706,6 +1717,9 @@ async function drawRequest(id){
           <option value="">مرن</option><option value="true">يفضّل مفروش</option>
           <option value="false">غير ضروري</option></select></div>
         <div class="field"><label>تاريخ الانتقال</label><input id="erDate" type="date"></div>
+        <div class="field"><label>مدة الإيجار المطلوبة</label><select id="erPeriod">
+          <option value="">مرن</option>
+          ${Object.entries(L_PERIOD).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select></div>
         <div class="field"><label>أقل مدة (شهور)</label><input id="erMin" type="number" min="0"></div>
         <div class="field"><label>التدخين</label><select id="erSmoke">
           <option value="">غير محدد</option><option value="false">لا</option><option value="true">نعم</option></select></div>
@@ -1757,6 +1771,7 @@ async function drawRequest(id){
     $("#erKind").value = r.kind_pref||"";
     $("#erFurn").value = r.furnished_pref===true?"true":r.furnished_pref===false?"false":"";
     $("#erDate").value = r.move_in_date ? String(r.move_in_date).slice(0,10) : "";
+    $("#erPeriod").value = r.rental_period_pref||"";
     $("#erMin").value = r.min_stay_months??"";
     $("#erSmoke").value = r.smoker===true?"true":r.smoker===false?"false":"";
     $("#erNote").value = r.note||"";
@@ -1796,7 +1811,8 @@ async function drawRequest(id){
         p_tags: tags,
         p_note: $("#erNote").value.trim() || null,
         p_city: Number($("#erCity").value),
-        p_areas: areaIds
+        p_areas: areaIds,
+        p_rental_period_pref: $("#erPeriod").value || null
       });
       toast("انحفظت تعديلات الطلب.", "ok");
       openDrawer("request", r.id); go(S.view);

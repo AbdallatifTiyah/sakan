@@ -55,7 +55,7 @@
 - `saved_listings` — سياسة `self_all` (`account_uid = auth.uid()`)، PK مركّب `(account_uid, listing_id)`.
 - محفزات إشعار تلقائي: `notify_contact_request` (AFTER INSERT على `contact_requests`) · `notify_listing_change` (AFTER UPDATE OF status,verification على `listings` — وفيها منطق تطابق للباحثين المنشورين عند أول نشر) · `notify_request_published` (AFTER UPDATE OF status على `seeker_requests`) · `notify_expiring_soon` (مجدولة عبر `pg_cron`، مش RPC عام — القيمة من `settings.expiring_soon_days` مش رقم ثابت).
 
-**الأنواع (enums) الإضافية:** `staff_role` (`admin` · `agent`) · `institution_org_type` · `institution_lead_status` · `currency_code` (`ILS`/`JOD`/`USD` — عملة `listings.price`/`listings.deposit` معاً، عمود واحد لكل إعلان)
+**الأنواع (enums) الإضافية:** `staff_role` (`admin` · `agent`) · `institution_org_type` · `institution_lead_status` · `currency_code` (`ILS`/`JOD`/`USD` — عملة `listings.price`/`listings.deposit` معاً، عمود واحد لكل إعلان) · `rental_period` (`monthly`/`weekly`/`daily` — `listings.rental_period` غير قابل للـnull، افتراضي `monthly`؛ `seeker_requests.rental_period_pref` نفس النوع لكن قابل للـnull = مرن)
 
 **ربط حساب طاقم جديد** (بعد إنشائه من Dashboard بـAuto Confirm):
 ```sql
@@ -166,7 +166,9 @@ select link_staff('email@example.com', 'الاسم بالعربي', 'agent', 'us
 
 ## خارج النطاق (لا تبنيه)
 
-شات داخلي · بوابة دفع · حساب ضمان (escrow) · تطبيق أصلي · إيجار يومي/سياحي · أي ميزة بتأخّر الإطلاق.
+شات داخلي · بوابة دفع · حساب ضمان (escrow) · تطبيق أصلي · أي ميزة بتأخّر الإطلاق.
+
+> **إيجار يومي/سياحي كان مستثنى، وانعكس القرار بتاريخ ٢٠٢٦-٠٩-٢٣.** التمييز الآن حقل بيانات فقط (`rental_period` على `listings` بقيم `monthly`/`weekly`/`daily`، افتراضي `monthly` لعدم كسر الإعلانات القديمة؛ `seeker_requests.rental_period_pref` مطابق لكن نفس العمود nullable = مرن/أي مدة) — بدون أي منطق تسعير أو فلترة أو صفحة مخصّصة لإيجار يومي/سياحي. لو توسّع لاحقاً (فلاتر بحث، تسعير مختلف حسب المدة، صفحة سياحية) هذا قرار منتج جديد يحتاج نقاش منفصل، مش امتداد تلقائي لهاي الإضافة.
 
 > **الحساب اختياري وإضافي، مش شرط.** التصفّح وإضافة إعلان وتسجيل طلب بحث وطلب التواصل **تبقى شغّالة بالكامل بدون تسجيل دخول** — هذا يبقى المسار الافتراضي والمُعلن. الروابط الموقّعة (`confirm_token`/`owner_token`) تبقى شغّالة كما هي، بالتوازي. حساب `public/account.html` (Supabase Auth بريد/كلمة سر) طبقة إضافية تعطي متابعة وإشعارات فقط — لا يجبر أي مستخدم على التسجيل، وأي تعديل يجبر عليه = خطأ يُرفض.
 

@@ -381,6 +381,10 @@ const OCC  = LANG === "en" ? {student:"Student", employee:"Employee", family:"Fa
                             : {student:"طالب/ة", employee:"موظف/ة", family:"عائلة", visitor:"زائر/ة", other:"غير ذلك"};
 const VER  = LANG === "en" ? {field:"Field-verified", desk:"Phone-verified", none:"Not verified"}
                             : {field:"موثّق ميدانياً", desk:"موثّق هاتفياً", none:"غير موثّق"};
+const PERIOD = LANG === "en" ? {monthly:"Monthly", weekly:"Weekly", daily:"Daily"}
+                              : {monthly:"شهري", weekly:"أسبوعي", daily:"يومي"};
+const PERIOD_UNIT = LANG === "en" ? {monthly:"month", weekly:"week", daily:"day"}
+                                   : {monthly:"شهر", weekly:"أسبوع", daily:"يوم"};
 /* توثيق ميداني/فيديو لازم يذكر الطريقة والتاريخ حرفياً — ممنوع عرض "موثّق" وحدها. */
 function verifBadge(x){
   if(x.verification==="field")
@@ -666,9 +670,10 @@ function cardL(x){
     <div class="b">
       <h3>${esc(x.ref)}</h3>
       <div class="meta">${esc(x.city)} · ${esc(x.area)}${x.landmark?" · "+esc(x.landmark):""}</div>
-      <div class="price">${price(x.price,x.currency)}<small> ${tt("/ شهر","/ month")}${x.bills_included?tt(" — شامل الفواتير"," — bills included"):""}</small></div>
+      <div class="price">${price(x.price,x.currency)}<small> / ${PERIOD_UNIT[x.rental_period]||PERIOD_UNIT.monthly}${x.bills_included?tt(" — شامل الفواتير"," — bills included"):""}</small></div>
       <div class="tags">${v}${rating}<span class="t">${KIND[x.kind]||""}</span>
         <span class="t">${POL[x.gender_pol]||""}</span>
+        ${x.rental_period && x.rental_period!=="monthly"?`<span class="t">${PERIOD[x.rental_period]}</span>`:""}
         ${x.furnished?`<span class="t">${tt("مفروش","Furnished")}</span>`:""}
         <span class="t">${tt("متاح","Available")} ${dt(x.available_from)}</span></div>
     </div></div>`;
@@ -679,10 +684,11 @@ function cardR(x){
     <div class="b">
       <h3>${esc(x.ref)} — ${OCC[x.occupation]||""}</h3>
       <div class="meta">${esc(x.city||"")}${areas.length?" · "+areas.join(" · "):""}</div>
-      <div class="price">${tt("حتى","Up to")} ${nis(x.budget_max)}<small> ${tt("/ شهر","/ month")}</small></div>
+      <div class="price">${tt("حتى","Up to")} ${nis(x.budget_max)}<small> / ${x.rental_period_pref?(PERIOD_UNIT[x.rental_period_pref]||PERIOD_UNIT.monthly):PERIOD_UNIT.monthly}</small></div>
       <div class="tags">
         <span class="t">${POL[x.gender]||""}</span>
         ${x.kind_pref?`<span class="t">${KIND[x.kind_pref]}</span>`:""}
+        ${x.rental_period_pref && x.rental_period_pref!=="monthly"?`<span class="t">${PERIOD[x.rental_period_pref]}</span>`:""}
         ${x.smoker===false?`<span class="t">${tt("غير مدخّن/ة","Non-smoker")}</span>`:""}
         ${(x.lifestyle_tags||[]).slice(0,3).map(t=>`<span class="t">${esc(TAG_LABEL(t))}</span>`).join("")}
         <span class="t">${tt("من","From")} ${dt(x.move_in_date)}</span></div>
@@ -766,7 +772,7 @@ function openL(id){
     ${thumbs}
     <div class="mb">
       <div class="sec">
-        <div class="price" style="font-size:26px">${price(x.price,x.currency)}<small> ${tt("/ شهر","/ month")}</small></div>
+        <div class="price" style="font-size:26px">${price(x.price,x.currency)}<small> / ${PERIOD_UNIT[x.rental_period]||PERIOD_UNIT.monthly}</small></div>
         <div class="tags" style="margin:10px 0 14px">
           ${verifBadge(x)}
           <span class="t">${KIND[x.kind]||""}</span><span class="t">${POL[x.gender_pol]||""}</span>
@@ -776,6 +782,7 @@ function openL(id){
         <div class="row"><span>${tt("المنطقة","Area")}</span><span>${esc(x.area)}</span></div>
         ${x.landmark?`<div class="row"><span>${tt("علامة مميزة","Landmark")}</span><span>${esc(x.landmark)}</span></div>`:""}
         <div class="row"><span>${tt("متاح من","Available from")}</span><span>${dt(x.available_from)}</span></div>
+        <div class="row"><span>${tt("مدة الإيجار","Rental period")}</span><span>${PERIOD[x.rental_period]||PERIOD.monthly}</span></div>
         <div class="row"><span>${tt("أقل مدة","Min. stay")}</span><span>${x.min_stay_months?x.min_stay_months+" "+tt("شهر","months"):"—"}</span></div>
         <div class="row"><span>${tt("عدد الغرف بالسكن","Rooms in the unit")}</span><span>${x.rooms_total||"—"}</span></div>
         <div class="row"><span>${tt("الساكنون حالياً","Current occupants")}</span><span>${x.occupants_now??"—"}</span></div>
@@ -854,10 +861,11 @@ function openR(id){
     <div class="mh"><h2>${esc(x.ref)} — ${OCC[x.occupation]||""}</h2>
       <button class="x" onclick="closeAll()">×</button></div>
     <div class="mb"><div class="sec">
-      <div class="row"><span>${tt("الميزانية","Budget")}</span><span>${tt("حتى","Up to")} ${nis(x.budget_max)} ${tt("/ شهر","/ month")}</span></div>
+      <div class="row"><span>${tt("الميزانية","Budget")}</span><span>${tt("حتى","Up to")} ${nis(x.budget_max)} / ${x.rental_period_pref?(PERIOD_UNIT[x.rental_period_pref]||PERIOD_UNIT.monthly):PERIOD_UNIT.monthly}</span></div>
       <div class="row"><span>${tt("المدينة","City")}</span><span>${esc(x.city||"—")}</span></div>
       <div class="row"><span>${tt("المناطق المفضّلة","Preferred areas")}</span><span>${areas.join(" · ")||tt("مرن — أي منطقة","Flexible — any area")}</span></div>
       <div class="row"><span>${tt("نوع السكن","Housing type")}</span><span>${KIND[x.kind_pref]||tt("مرن","Flexible")}</span></div>
+      <div class="row"><span>${tt("مدة الإيجار المطلوبة","Rental period sought")}</span><span>${x.rental_period_pref?PERIOD[x.rental_period_pref]:tt("مرن","Flexible")}</span></div>
       <div class="row"><span>${tt("مفروش؟","Furnished?")}</span><span>${x.furnished_pref===null||x.furnished_pref===undefined?tt("مرن","Flexible"):(x.furnished_pref?tt("يفضّل مفروش","Prefers furnished"):tt("غير ضروري","Not required"))}</span></div>
       <div class="row"><span>${tt("تاريخ الانتقال","Move-in date")}</span><span>${dt(x.move_in_date)}</span></div>
       <div class="row"><span>${tt("أقل مدة","Min. stay")}</span><span>${x.min_stay_months?x.min_stay_months+" "+tt("شهر","months"):"—"}</span></div>
@@ -1053,6 +1061,10 @@ function openForm(kind){
           <option value="true">${tt("مشمولة بالسعر","Included in price")}</option></select></div>
         <div class="fg"><label>${tt("عدد الغرف بالسكن (اختياري)","Rooms in the unit (optional)")}</label>
           ${roomChipsHTML("lRooms")}</div>
+        <div class="fg"><label>${tt("مدة الإيجار","Rental period")}</label><select id="lPeriod">
+          <option value="monthly">${PERIOD.monthly}</option>
+          <option value="weekly">${PERIOD.weekly}</option>
+          <option value="daily">${PERIOD.daily}</option></select></div>
         <div class="fg"><label>${tt("أقل مدة إيجار بالشهور (اختياري)","Min. rental period, months (optional)")}</label>
           <input id="lMin" data-num inputmode="numeric" placeholder="${tt("مثلاً ٦","e.g. 6")}"></div>
         <div class="fg"><label>${tt("متاح من","Available from")}</label><input id="lFrom" type="date"></div>
@@ -1110,6 +1122,11 @@ function openForm(kind){
           <option value="false">${tt("غير ضروري","Not required")}</option></select></div>
         <div class="fg"><label>${tt("أقل مدة بالشهور (اختياري)","Min. months (optional)")}</label>
           <input id="rMin" data-num inputmode="numeric" placeholder="${tt("مثلاً ٦","e.g. 6")}"></div>
+        <div class="fg"><label>${tt("مدة الإيجار المطلوبة","Rental period sought")}</label><select id="rPeriod">
+          <option value="">${tt("مرن","Flexible")}</option>
+          <option value="monthly">${PERIOD.monthly}</option>
+          <option value="weekly">${PERIOD.weekly}</option>
+          <option value="daily">${PERIOD.daily}</option></select></div>
         <div class="fg"><label>${tt("هل تدخّن؟","Do you smoke?")}</label><select id="rSmoke">
           <option value="false">${tt("لا","No")}</option>
           <option value="true">${tt("نعم","Yes")}</option></select></div>
@@ -1140,7 +1157,7 @@ function openForm(kind){
 /* ═══════════════ مسودة الإعلان (محلياً — النموذج طويل) ═══════════════ */
 const DRAFT_KEY = "sakanna_listing_draft";
 const DRAFT_FIELDS = ["lName","lDial","lPhone","lTitle","lCity","lArea","lPrice","lCur","lDep",
-  "lKind","lPol","lFurn","lBillsWater","lBillsElec","lBillsNet","lRooms","lMin","lFrom","lLand","lOcc","lDesc","lPromo"];
+  "lKind","lPol","lFurn","lBillsWater","lBillsElec","lBillsNet","lRooms","lPeriod","lMin","lFrom","lLand","lOcc","lDesc","lPromo"];
 
 function saveDraft(){
   if(!$("lTitle")) return;
@@ -1226,7 +1243,8 @@ async function subListing(){
     p_bills_internet: $("lBillsNet").value === "true",
     p_rooms: num("lRooms"),
     p_min_stay: num("lMin"),
-    p_promo_code: $("lPromo").value.trim() || null
+    p_promo_code: $("lPromo").value.trim() || null,
+    p_rental_period: $("lPeriod").value
   };
   const bad = m => { $("lErr").innerHTML = `<div class="err">${m}</div>`; return null; };
   if(v.p_name.length < 2)  return bad(tt("اكتب اسمك.","Enter your name."));
@@ -1275,7 +1293,8 @@ async function subRequest(){
     p_kind: $("rKind").value || null,
     p_furnished: tri("rFurn"),
     p_min_stay: num("rMin"),
-    p_smoker: tri("rSmoke")
+    p_smoker: tri("rSmoke"),
+    p_rental_period_pref: $("rPeriod").value || null
   };
   const bad = m => { $("rErr").innerHTML = `<div class="err">${m}</div>`; return null; };
   if(v.p_name.length < 2) return bad(tt("اكتب اسمك.","Enter your name."));
