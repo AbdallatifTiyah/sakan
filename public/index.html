@@ -1359,6 +1359,8 @@ async function subRequest(){
   if(!phone)              return bad(telError("rDial"));
   if(!v.p_city)           return bad(tt("اختر المدينة.","Choose a city."));
   if(!v.p_budget)         return bad(tt("اكتب أعلى ميزانية.","Enter your max budget."));
+  const btn = $("rWrap").querySelector("button");
+  if(btn){ btn.disabled = true; btn.textContent = tt("جارِ الإرسال…","Sending…"); }
   try{
     const ref = await rpc("submit_request", v);
     $("modal").innerHTML = `
@@ -1371,6 +1373,7 @@ async function subRequest(){
     setTimeout(closeAll, 4000);
   }catch(e){
     $("rErr").innerHTML = `<div class="err">${tt("حدث خطأ أثناء الإرسال. حاول مرة أخرى بعد قليل.","Something went wrong sending this. Try again in a bit.")}</div>`;
+    if(btn){ btn.disabled = false; btn.textContent = tt("سجّل طلبي","Register my request"); }
   }
 }
 
