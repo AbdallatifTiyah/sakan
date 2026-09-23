@@ -346,7 +346,7 @@ const L_STATUS = {draft:"مسودّة",pending:"بانتظار المراجعة"
 const L_VERIF  = {none:"غير موثّق",desk:"توثيق مكتبي",video:"توثيق بمكالمة فيديو",field:"توثيق ميداني"};
 const L_KIND   = {room_shared:"غرفة بسكن مشترك",bed_shared:"سرير بغرفة مشتركة",
                   studio:"ستوديو",apartment:"شقة"};
-const L_POL    = {female:"إناث فقط",male:"ذكور فقط",mixed:"مختلط"};
+const L_POL    = {female:"إناث فقط",male:"ذكور فقط",mixed:"عائلات"};
 const L_PERIOD      = {monthly:"شهري",weekly:"أسبوعي",daily:"يومي"};
 const L_PERIOD_UNIT = {monthly:"شهر",weekly:"أسبوع",daily:"يوم"};
 const C_STATUS = {new:"جديد",forwarded:"محوّل للمالك",owner_responded:"المالك ردّ",
@@ -864,6 +864,7 @@ async function drawListing(id){
   if(!r) return ($("#dpanel").innerHTML = '<div class="empty">الإعلان مش موجود.</div>');
   const imgs = Array.isArray(r.images) ? r.images : [];
   let curImages = imgs.slice();
+  let curVideo = r.video_url || null;
   const safetyDone = r.visit_date != null;
 
   $("#dpanel").innerHTML = `
@@ -941,10 +942,18 @@ async function drawListing(id){
   </div>
 
   <div class="sec">
-    <h4>صور الإعلان (<span id="imgCount">${imgs.length}</span>/6)</h4>
+    <h4>صور الإعلان (<span id="imgCount">${imgs.length}</span>/10)</h4>
     <div class="imgs-edit" id="imgsEdit"></div>
     <input type="file" id="addImgInput" accept="image/jpeg,image/png,image/webp" multiple style="display:none">
     <button class="btn sm" id="addImgBtn" style="margin-top:8px">+ إضافة صورة</button>
+  </div>
+
+  <div class="sec">
+    <h4>فيديو الإعلان</h4>
+    <div id="videoEdit"></div>
+    <input type="file" id="addVideoInput" accept="video/mp4,video/webm,video/quicktime" style="display:none">
+    <button class="btn sm" id="addVideoBtn" style="margin-top:8px">${r.video_url?"استبدال الفيديو":"+ إضافة فيديو"}</button>
+    ${r.video_url?'<button class="btn sm bad" id="delVideoBtn" style="margin-top:8px">حذف الفيديو</button>':""}
   </div>
 
   <div class="sec">
@@ -1118,7 +1127,7 @@ async function drawListing(id){
           <button class="btn sm bad" type="button" data-del="${i}" title="حذف">حذف</button>
         </div>
       </div>`).join("") : '<div class="hint">ما في صور.</div>';
-    $("#addImgBtn").disabled = curImages.length >= 6;
+    $("#addImgBtn").disabled = curImages.length >= 10;
 
     $("#imgsEdit").querySelectorAll("[data-del]").forEach(b => b.onclick = async () => {
       const i = +b.dataset.del, url = curImages[i];
@@ -1135,7 +1144,7 @@ async function drawListing(id){
   }
   async function saveImages(list, msg){
     try{
-      await rpc("admin_listing_images", {p_id:r.id, p_images:list});
+      await rpc("admin_listing_images", {p_id:r.id, p_images:list, p_video_url:curVideo});
       curImages = list;
       paintImgs();
       if(msg) toast(msg, "ok");
@@ -1151,7 +1160,7 @@ async function drawListing(id){
   paintImgs();
   $("#addImgBtn").onclick = () => $("#addImgInput").click();
   $("#addImgInput").onchange = async e => {
-    const room = 6 - curImages.length;
+    const room = 10 - curImages.length;
     const files = Array.from(e.target.files||[])
       .filter(f => ["image/jpeg","image/png","image/webp"].includes(f.type) && f.size <= 5*1024*1024)
       .slice(0, room);
@@ -1173,6 +1182,55 @@ async function drawListing(id){
     }
     if(!urls.length) return toast("فشل رفع الصور.", "bad");
     await saveImages(curImages.concat(urls), "انضافت الصور.");
+  };
+
+  function paintVideo(){
+    $("#videoEdit").innerHTML = curVideo
+      ? `<video src="${esc(curVideo)}" controls style="width:100%;max-height:220px;border-radius:8px"></video>` : '<div class="hint">ما في فيديو.</div>';
+  }
+  async function saveVideo(url, msg){
+    try{
+      await rpc("admin_listing_images", {p_id:r.id, p_images:curImages, p_video_url:url});
+      curVideo = url;
+      openDrawer("listing", r.id);
+      if(msg) toast(msg, "ok");
+    } catch(e){ toast(e.message, "bad"); }
+  }
+  function deleteVideoStorageObject(url){
+    const marker = "/object/public/listing-videos/";
+    const idx = url.indexOf(marker);
+    if(idx<0) return;
+    fetch(SUPA+"/storage/v1/object/listing-videos/"+url.slice(idx+marker.length),
+      {method:"DELETE", headers:{apikey:SUPABASE_ANON_KEY, Authorization:"Bearer "+S.token}}).catch(()=>{});
+  }
+  paintVideo();
+  $("#addVideoBtn").onclick = () => $("#addVideoInput").click();
+  $("#addVideoInput").onchange = async e => {
+    const f = (e.target.files||[])[0];
+    e.target.value = "";
+    if(!f) return;
+    if(!["video/mp4","video/webm","video/quicktime"].includes(f.type)) return toast("صيغة الفيديو غير مدعومة.", "bad");
+    if(f.size > 50*1024*1024) return toast("حجم الفيديو أكبر من ٥٠ م.ب.", "bad");
+    toast("عم يرفع الفيديو…", "warn");
+    const ext = f.type==="video/webm" ? "webm" : f.type==="video/quicktime" ? "mov" : "mp4";
+    const path = crypto.randomUUID()+"/"+Date.now()+"."+ext;
+    try{
+      const res = await fetch(SUPA+"/storage/v1/object/listing-videos/"+path, {
+        method:"POST",
+        headers:{ apikey:SUPABASE_ANON_KEY, Authorization:"Bearer "+S.token, "Content-Type":f.type },
+        body:f
+      });
+      if(!res.ok) return toast("فشل رفع الفيديو.", "bad");
+      const oldUrl = curVideo;
+      await saveVideo(SUPA+"/storage/v1/object/public/listing-videos/"+path, "انضاف الفيديو.");
+      if(oldUrl) deleteVideoStorageObject(oldUrl);
+    } catch(err){ toast("فشل رفع الفيديو.", "bad"); }
+  };
+  const delVideoBtn = $("#delVideoBtn");
+  if(delVideoBtn) delVideoBtn.onclick = async () => {
+    const oldUrl = curVideo;
+    await saveVideo(null, "انحذف الفيديو.");
+    if(oldUrl) deleteVideoStorageObject(oldUrl);
   };
 
   $("#goOwner").onclick = () => openDrawer("owner", r.owner_id);
