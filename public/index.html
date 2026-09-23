@@ -1240,11 +1240,16 @@ async function subListing(){
   try{
     v.p_images = await uploadImages();
     const ref = await rpc("submit_listing", v);
-    $("lWrap").innerHTML = `<div class="done">${tt("تم استلام إعلانك ✓ رقمه","Your listing is in ✓ its ID is")} <b>${esc(ref)}</b>.<br>
-      ${tt("سنتواصل معك خلال ٢٤ ساعة للتوثيق.","We'll contact you within 24 hours for verification.")}</div>`;
-    $("lErr").innerHTML = "";
     selectedImages = [];
     clearDraft();
+    $("modal").innerHTML = `
+      <div class="mh"><h2>${tt("تم استلام إعلانك","Your listing was received")}</h2><button class="x" onclick="closeAll()">×</button></div>
+      <div class="mb"><div class="sec">
+        <div class="done">${tt("تم استلام إعلانك ✓ رقمه","Your listing is in ✓ its ID is")} <b>${esc(ref)}</b>.<br>
+          ${tt("سنتواصل معك خلال ٢٤ ساعة للتوثيق.","We'll contact you within 24 hours for verification.")}</div>
+        <button class="btn acc" style="width:100%;margin-top:16px" onclick="closeAll()">${tt("تم","Done")}</button>
+      </div></div>`;
+    setTimeout(closeAll, 4000);
   }catch(e){
     const serverMsg = e && e.data && e.data.message;
     $("lErr").innerHTML = `<div class="err">${serverMsg ? esc(serverMsg) : tt("حدث خطأ أثناء الإرسال. حاول مرة أخرى بعد قليل.","Something went wrong sending this. Try again in a bit.")}</div>`;
@@ -1279,9 +1284,14 @@ async function subRequest(){
   if(!v.p_budget)         return bad(tt("اكتب أعلى ميزانية.","Enter your max budget."));
   try{
     const ref = await rpc("submit_request", v);
-    $("rWrap").innerHTML = `<div class="done">${tt("تم تسجيل طلبك ✓ رقمه","Your request is registered ✓ its ID is")} <b>${esc(ref)}</b>.<br>
-      ${tt("سنراجعه ونخبرك فور توفّر سكن يناسبك.","We'll review it and notify you as soon as a matching room is listed.")}</div>`;
-    $("rErr").innerHTML = "";
+    $("modal").innerHTML = `
+      <div class="mh"><h2>${tt("تم تسجيل طلبك","Your request was registered")}</h2><button class="x" onclick="closeAll()">×</button></div>
+      <div class="mb"><div class="sec">
+        <div class="done">${tt("تم تسجيل طلبك ✓ رقمه","Your request is registered ✓ its ID is")} <b>${esc(ref)}</b>.<br>
+          ${tt("سنراجعه ونخبرك فور توفّر سكن يناسبك.","We'll review it and notify you as soon as a matching room is listed.")}</div>
+        <button class="btn acc" style="width:100%;margin-top:16px" onclick="closeAll()">${tt("تم","Done")}</button>
+      </div></div>`;
+    setTimeout(closeAll, 4000);
   }catch(e){
     $("rErr").innerHTML = `<div class="err">${tt("حدث خطأ أثناء الإرسال. حاول مرة أخرى بعد قليل.","Something went wrong sending this. Try again in a bit.")}</div>`;
   }
