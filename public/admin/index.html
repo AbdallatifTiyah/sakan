@@ -734,6 +734,17 @@ async function rejectFlow(id){
   if(!reason) return toast("لازم سبب.", "bad");
   await setStatus(id, "rejected", reason);
 }
+async function rentedFlow(id){
+  const viaPlatform = confirm(
+    "تأجّر عن طريق المنصة — يعني باحث تواصل من عندنا وأدّى فعلياً للتأجير؟\n\n" +
+    "موافق = نعم، عن طريقنا\n" +
+    "إلغاء = لا، تأجّر بشكل خارجي (ما بيدخل حساب متوسط أيام التأجير)");
+  try{
+    await rpc("admin_listing_status", {p_id:id, p_status:"rented", p_reason:null, p_rented_via_platform:viaPlatform});
+    toast("تم: "+L_STATUS.rented, "ok");
+    closeDrawer(); refreshBadges(); go(S.view);
+  } catch(e){ toast(e.message, "bad"); }
+}
 
 /* ══════════════ ٣. كل الإعلانات ══════════════ */
 async function vListings(){
@@ -1006,6 +1017,9 @@ async function drawListing(id){
 
   <div class="sec">
     <h4>الحالة ودورة الحياة</h4>
+    ${r.status==="rented"?'<div class="note" style="margin-bottom:8px">تأجّر عن طريق المنصة: '+
+      (r.rented_via_platform===false?'<b style="color:var(--bad)">لا — خارجي، ما بيدخل حساب متوسط أيام التأجير</b>':
+       r.rented_via_platform===true?'<b style="color:var(--ok)">نعم</b>':'<span style="color:var(--mute)">غير محدّد</span>')+'</div>':""}
     <div class="acts">
       ${r.status!=="published"?'<button class="btn sm ok" data-st="published">نشر</button>':""}
       ${r.status!=="rejected" ?'<button class="btn sm bad" data-st="rejected">رفض</button>':""}
@@ -1239,6 +1253,7 @@ async function drawListing(id){
   $("#dpanel").querySelectorAll("[data-st]").forEach(b => b.onclick = async () => {
     const st = b.dataset.st;
     if(st==="rejected") return rejectFlow(r.id);
+    if(st==="rented") return rentedFlow(r.id);
     await setStatus(r.id, st);
   });
   $("#dpanel").querySelectorAll("[data-vf]").forEach(b => b.onclick = async () => {
