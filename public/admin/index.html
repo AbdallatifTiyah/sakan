@@ -876,6 +876,8 @@ async function drawListing(id){
   ${r.open_reports>0?'<div class="warnbox">عليه '+r.open_reports+' بلاغ مفتوح — راجع البلاغات قبل النشر.</div>':""}
   ${r.owner_blocked?'<div class="warnbox">حساب المالك موقوف.</div>':""}
 
+  ${notesSectionHtml()}
+
   <dl class="dl">
     <dt>النوع</dt><dd>${esc(L_KIND[r.kind]||r.kind)}</dd>
     <dt>مدة الإيجار</dt><dd>${esc(L_PERIOD[r.rental_period]||r.rental_period)}</dd>
@@ -1292,6 +1294,8 @@ async function drawListing(id){
     .then(h => $("#lhist").innerHTML = h.length ? h.map(feedRow).join("") :
       '<div style="color:var(--mute);font-size:12.5px">ما في سجل بعد.</div>')
     .catch(()=>{});
+
+  wireNotesSection("listing", r.id);
 }
 
 /* ══════════════ ٤. البلاغات ══════════════ */
@@ -1740,6 +1744,8 @@ async function drawRequest(id){
       <div class="ref">${esc(r.ref)} · ${lvl(r.seeker_level)} ${r.seeker_level}/4</div></div>
       <button class="btn sm" id="dx">إغلاق</button></div>
 
+    ${notesSectionHtml()}
+
     <dl class="dl">
       <dt>الحالة</dt><dd>${tag(r.status, REQ_ST)}</dd>
       <dt>الهاتف</dt><dd class="phone">${esc(r.phone||"—")}</dd>
@@ -1905,6 +1911,8 @@ async function drawRequest(id){
       openDrawer("request", r.id); go(S.view); refreshBadges();
     } catch(e){ toast(e.message, "bad"); }
   });
+
+  wireNotesSection("request", r.id);
 }
 
 /* ══════════════ طلبات المؤسسات — تسعير معكوس، متابعة يدوية بالكامل ══════════════ */
@@ -2113,6 +2121,55 @@ function feedRow(a){
       ${a.reason?'<span style="color:var(--text-2)"> · '+esc(a.reason)+"</span>":""}</span>
   </div>`;
 }
+
+/* ══════════════ ملاحظات داخلية — إعلان/طلب ══════════════ */
+function notesSectionHtml(){
+  return `<div class="sec">
+    <h4>ملاحظات داخلية</h4>
+    <div class="note" style="font-size:11.5px;color:var(--mute);margin-bottom:6px">يشوفها الطاقم فقط — ما بتظهر لا للمالك ولا للباحث.</div>
+    <div id="notesList" class="feed"></div>
+    <div class="field" style="margin-top:8px">
+      <textarea id="noteBody" rows="2" placeholder="اكتب ملاحظة..."></textarea>
+    </div>
+    <button class="btn sm primary" id="addNoteBtn">إضافة ملاحظة</button>
+  </div>`;
+}
+function noteRow(n){
+  return `<div class="fitem">
+    <span class="ts">${dt(n.created_at,true)}</span>
+    <span class="who2">${esc(n.created_by)}</span>
+    <span style="flex:1;white-space:pre-wrap">${esc(n.body)}</span>
+    <button class="btn sm bad" data-delnote="${n.id}" style="padding:2px 8px">حذف</button>
+  </div>`;
+}
+async function wireNotesSection(kind, id){
+  const col = kind==="listing" ? "listing_id" : "request_id";
+  async function reload(){
+    const rows = await get("/internal_notes?select=*&"+col+"=eq."+id+"&order=created_at.desc");
+    $("#notesList").innerHTML = rows.length ? rows.map(noteRow).join("") :
+      '<div style="color:var(--mute);font-size:12.5px">ما في ملاحظات بعد.</div>';
+    $("#notesList").querySelectorAll("[data-delnote]").forEach(b => b.onclick = async () => {
+      if(!confirm("حذف هذه الملاحظة؟")) return;
+      try{ await rpc("admin_delete_note", {p_id:b.dataset.delnote}); await reload(); }
+      catch(e){ toast(e.message, "bad"); }
+    });
+  }
+  await reload();
+  $("#addNoteBtn").onclick = async () => {
+    const body = $("#noteBody").value.trim();
+    if(!body) return;
+    try{
+      await rpc("admin_add_note", {
+        p_listing_id: kind==="listing" ? id : null,
+        p_request_id: kind==="request" ? id : null,
+        p_body: body
+      });
+      $("#noteBody").value = "";
+      await reload();
+    } catch(e){ toast(e.message, "bad"); }
+  };
+}
+
 async function vActivity(){
   loading("نشاط المنصة");
   try{
