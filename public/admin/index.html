@@ -2395,12 +2395,50 @@ async function vMatchCompare(score, listingId, requestId){
         </div>
       </div>
 
+      ${l.open_reports>0?'<div class="warnbox">على الإعلان '+l.open_reports+' بلاغ مفتوح.</div>':""}
+      ${l.owner_blocked?'<div class="warnbox">حساب المالك موقوف.</div>':""}
+      ${r.is_blocked?'<div class="warnbox">حساب الباحث موقوف.</div>':""}
+
       <div class="tw"><table><thead><tr>
         <th>الحقل</th><th>الإعلان ${esc(l.ref)}</th><th>طلب الباحث ${esc(r.ref)}</th>
       </tr></thead><tbody>
       ${rows.map(x=>`<tr><td>${x[0]}</td><td>${x[1]}</td><td>${x[2]}</td></tr>`).join("")}
-      </tbody></table></div>`;
+      </tbody></table></div>
+
+      <div class="grid k2" style="margin-top:14px">
+        <div class="card">
+          <h4 style="margin:0 0 10px;font-size:12.5px;color:var(--text-2)">تفاصيل إضافية — الإعلان</h4>
+          <dl class="dl">
+            <dt>التأمين</dt><dd>${priceStr(l.deposit,l.currency)}</dd>
+            <dt>الفواتير</dt><dd>مياه ${yn(l.bills_water)} · كهرباء ${yn(l.bills_electricity)} · إنترنت ${yn(l.bills_internet)}</dd>
+            <dt>العنوان الدقيق</dt><dd>${esc(l.exact_address)||"غير مسجّل"}${l.landmark?" · "+esc(l.landmark):""}</dd>
+            <dt>الساكنون الحاليون</dt><dd>${esc(l.occupants_note)||"—"}${l.occupants_now!=null?" · "+l.occupants_now+" شخص":""}</dd>
+            <dt>مشاهدات</dt><dd>${num(l.view_count)} زائر · ${num(l.contacts)} تواصل · ${num(l.reviews_count)} تقييم</dd>
+          </dl>
+          ${l.description?`<div class="sec"><h4>الوصف</h4><div style="font-size:13px;color:var(--text-2);white-space:pre-wrap">${esc(l.description)}</div></div>`:""}
+          ${(l.features||[]).length?`<div class="sec"><h4>مواصفات السكن</h4>
+            <div>${l.features.map(f=>'<span class="tag">'+esc(featureLabel(f))+"</span>").join(" ")}</div></div>`:""}
+          ${notesSectionHtml("L")}
+        </div>
+        <div class="card">
+          <h4 style="margin:0 0 10px;font-size:12.5px;color:var(--text-2)">تفاصيل إضافية — طلب الباحث</h4>
+          <dl class="dl">
+            <dt>الصفة</dt><dd>${esc(occLabel(r.occupation))}${r.org_name?" · "+esc(r.org_name):""}</dd>
+            <dt>التدخين</dt><dd>${yn(r.smoker)}</dd>
+            <dt>مسجّل</dt><dd>${dt(r.created_at)}</dd>
+            <dt>ينتهي</dt><dd>${dt(r.expires_at,true)}</dd>
+          </dl>
+          ${(r.lifestyle_tags||[]).length?`<div class="sec"><h4>صفاته كساكن</h4>
+            <div>${r.lifestyle_tags.map(t=>'<span class="tag">'+esc(tagLabel(t))+"</span>").join(" ")}</div></div>`:""}
+          ${r.note?`<div class="sec"><h4>ملاحظاته</h4><div style="font-size:13px;color:var(--text-2);white-space:pre-wrap">${esc(r.note)}</div></div>`:""}
+          ${notesSectionHtml("R")}
+        </div>
+      </div>`;
     $("#backToMatches").onclick = () => go("matches");
+    await Promise.all([
+      wireNotesSection("listing", listingId, "L"),
+      wireNotesSection("request", requestId, "R")
+    ]);
   } catch(e){ fail(e); }
 }
 
@@ -2422,15 +2460,15 @@ function feedRow(a){
 }
 
 /* ══════════════ ملاحظات داخلية — إعلان/طلب ══════════════ */
-function notesSectionHtml(){
+function notesSectionHtml(sfx=""){
   return `<div class="sec">
     <h4>ملاحظات داخلية</h4>
     <div class="note" style="font-size:11.5px;color:var(--mute);margin-bottom:6px">يشوفها الطاقم فقط — ما بتظهر لا للمالك ولا للباحث.</div>
-    <div id="notesList" class="feed"></div>
+    <div id="notesList${sfx}" class="feed"></div>
     <div class="field" style="margin-top:8px">
-      <textarea id="noteBody" rows="2" placeholder="اكتب ملاحظة..."></textarea>
+      <textarea id="noteBody${sfx}" rows="2" placeholder="اكتب ملاحظة..."></textarea>
     </div>
-    <button class="btn sm primary" id="addNoteBtn">إضافة ملاحظة</button>
+    <button class="btn sm primary" id="addNoteBtn${sfx}">إضافة ملاحظة</button>
   </div>`;
 }
 function noteRow(n){
@@ -2441,21 +2479,21 @@ function noteRow(n){
     <button class="btn sm bad" data-delnote="${n.id}" style="padding:2px 8px">حذف</button>
   </div>`;
 }
-async function wireNotesSection(kind, id){
+async function wireNotesSection(kind, id, sfx=""){
   const col = kind==="listing" ? "listing_id" : "request_id";
   async function reload(){
     const rows = await get("/internal_notes?select=*&"+col+"=eq."+id+"&order=created_at.desc");
-    $("#notesList").innerHTML = rows.length ? rows.map(noteRow).join("") :
+    $("#notesList"+sfx).innerHTML = rows.length ? rows.map(noteRow).join("") :
       '<div style="color:var(--mute);font-size:12.5px">ما في ملاحظات بعد.</div>';
-    $("#notesList").querySelectorAll("[data-delnote]").forEach(b => b.onclick = async () => {
+    $("#notesList"+sfx).querySelectorAll("[data-delnote]").forEach(b => b.onclick = async () => {
       if(!confirm("حذف هذه الملاحظة؟")) return;
       try{ await rpc("admin_delete_note", {p_id:b.dataset.delnote}); await reload(); }
       catch(e){ toast(e.message, "bad"); }
     });
   }
   await reload();
-  $("#addNoteBtn").onclick = async () => {
-    const body = $("#noteBody").value.trim();
+  $("#addNoteBtn"+sfx).onclick = async () => {
+    const body = $("#noteBody"+sfx).value.trim();
     if(!body) return;
     try{
       await rpc("admin_add_note", {
@@ -2463,7 +2501,7 @@ async function wireNotesSection(kind, id){
         p_request_id: kind==="request" ? id : null,
         p_body: body
       });
-      $("#noteBody").value = "";
+      $("#noteBody"+sfx).value = "";
       await reload();
     } catch(e){ toast(e.message, "bad"); }
   };
