@@ -109,6 +109,10 @@ tbody tr:hover{background:#182234;cursor:pointer}
 .t-rejected,.t-open,.t-dead,.t-lost{border-color:var(--bad);color:var(--bad)}
 .t-expired,.t-none,.t-draft,.t-waived,.t-dismissed,.t-closed{border-color:var(--line);color:var(--mute)}
 .t-owner_responded,.t-viewing_set{border-color:var(--info);color:var(--info)}
+.t-not_contacted{color:var(--mute)}
+.t-no_answer{border-color:var(--warn);color:var(--warn)}
+.t-called,.t-whatsapp_sent{border-color:var(--ok);color:var(--ok)}
+.t-viewing_scheduled{border-color:var(--info);color:var(--info)}
 .lv{display:inline-flex;gap:2px;vertical-align:middle}
 .lv i{width:7px;height:7px;border-radius:2px;background:var(--line)}
 .lv i.f{background:var(--gold)}
@@ -369,6 +373,8 @@ const R_STATUS = {open:"مفتوح",investigating:"قيد التحقيق",action
 const R_CAT    = {fake_listing:"إعلان وهمي",already_rented:"مؤجّر أصلاً",harassment:"تحرّش",
                   entered_room:"دخول الغرفة بدون إذن",deposit:"نزاع تأمين",camera:"كاميرا داخلية",other:"أخرى"};
 const F_STATUS = {due:"مستحق",collected:"محصّل",waived:"معفى",lost:"ضائع"};
+const OUT_STATUS = {not_contacted:"لسا ما تواصلنا",no_answer:"تواصلنا — ما ردّ",called:"تواصلنا هاتفياً",
+                    whatsapp_sent:"أرسلنا واتساب",viewing_scheduled:"معاينة محدّدة"};
 const I_TYPE   = {ngo:"منظمة غير حكومية",university:"جامعة",company:"شركة",government:"جهة حكومية",other:"غير ذلك"};
 const I_STATUS = {new:"جديد",contacted:"تم التواصل",negotiating:"قيد التفاوض",won:"اتفاق",lost:"مغلق"};
 const V_STAGE  = {day30:"بعد ٣٠ يوماً",move_out:"بعد الانتقال"};
@@ -695,41 +701,53 @@ async function vAlerts(){
 }
 
 /* ══════════════ ٢. طابور المراجعة ══════════════ */
+let QUEUE_ROWS = [];
 async function vQueue(){
   loading("بانتظار المراجعة");
+  const f = S.filters.queue = S.filters.queue || {outreach:""};
   try{
-    const rows = await get("/v_admin_listings?select=*&status=eq.pending&order=created_at.asc");
-    $("#main").innerHTML = `
-      <div class="head"><h2>بانتظار المراجعة</h2>
-        <span class="note">${rows.length} إعلان · الأقدم أولاً</span></div>
-      ${rows.length ? "" : '<div class="empty"><b>الطابور فاضي</b>ما في إعلان مستني مراجعة.</div>'}
-      <div class="tw" ${rows.length?"":'style="display:none"'}>
-      <table><thead><tr>
-        <th>الرمز</th><th>العنوان</th><th>المنطقة</th><th>السعر</th><th>الغرف</th><th>أقل مدة</th>
-        <th>المالك</th><th>الرقم</th><th>منذ</th><th>إجراء</th>
-      </tr></thead><tbody>
-      ${rows.map(r=>`<tr data-id="${r.id}">
-        <td class="ref">${esc(r.ref)}</td>
-        <td>${esc(r.title)}</td>
-        <td>${esc(r.area)}</td>
-        <td class="num">${priceStr(r.price,r.currency)}</td>
-        <td class="num">${r.rooms_total||"—"}</td>
-        <td class="num">${r.min_stay_months?r.min_stay_months+" شهر":"—"}</td>
-        <td>${esc(r.owner_name)} ${lvl(r.owner_level)}</td>
-        <td class="phone">${esc(r.owner_phone)}</td>
-        <td style="color:var(--mute)">${ago(r.created_at)}</td>
-        <td><div class="acts">
-          <button class="btn sm ok" data-a="pub" data-id="${r.id}">نشر</button>
-          <button class="btn sm bad" data-a="rej" data-id="${r.id}">رفض</button>
-        </div></td></tr>`).join("")}
-      </tbody></table></div>`;
-    wireRows("listing");
-    $("#main").querySelectorAll("[data-a]").forEach(b => b.onclick = async ev => {
-      ev.stopPropagation();
-      if(b.dataset.a==="pub") await setStatus(b.dataset.id, "published");
-      else await rejectFlow(b.dataset.id);
-    });
+    QUEUE_ROWS = await get("/v_admin_listings?select=*&status=eq.pending&order=created_at.asc");
+    renderQueue(f);
   } catch(e){ fail(e); }
+}
+function renderQueue(f){
+  const rows = QUEUE_ROWS.filter(r => !f.outreach || r.outreach_status===f.outreach);
+  $("#main").innerHTML = `
+    <div class="head"><h2>بانتظار المراجعة</h2>
+      <span class="note">${rows.length} من ${QUEUE_ROWS.length} إعلان · الأقدم أولاً</span></div>
+    <div class="bars">
+      <select id="fout"><option value="">كل حالات التواصل</option>
+        ${Object.entries(OUT_STATUS).map(([k,v])=>`<option value="${k}" ${f.outreach===k?"selected":""}>${v}</option>`).join("")}</select>
+    </div>
+    ${rows.length ? "" : '<div class="empty"><b>ما في نتائج</b>'+(QUEUE_ROWS.length?"جرّب توسّع الفلتر.":"ما في إعلان مستني مراجعة.")+'</div>'}
+    <div class="tw" ${rows.length?"":'style="display:none"'}>
+    <table><thead><tr>
+      <th>الرمز</th><th>العنوان</th><th>المنطقة</th><th>السعر</th><th>الغرف</th><th>أقل مدة</th>
+      <th>المالك</th><th>الرقم</th><th>التواصل</th><th>منذ</th><th>إجراء</th>
+    </tr></thead><tbody>
+    ${rows.map(r=>`<tr data-id="${r.id}">
+      <td class="ref">${esc(r.ref)}</td>
+      <td>${esc(r.title)}</td>
+      <td>${esc(r.area)}</td>
+      <td class="num">${priceStr(r.price,r.currency)}</td>
+      <td class="num">${r.rooms_total||"—"}</td>
+      <td class="num">${r.min_stay_months?r.min_stay_months+" شهر":"—"}</td>
+      <td>${esc(r.owner_name)} ${lvl(r.owner_level)}</td>
+      <td class="phone">${esc(r.owner_phone)}</td>
+      <td>${tag(r.outreach_status,OUT_STATUS)}</td>
+      <td style="color:var(--mute)">${ago(r.created_at)}</td>
+      <td><div class="acts">
+        <button class="btn sm ok" data-a="pub" data-id="${r.id}">نشر</button>
+        <button class="btn sm bad" data-a="rej" data-id="${r.id}">رفض</button>
+      </div></td></tr>`).join("")}
+    </tbody></table></div>`;
+  $("#fout").onchange = () => { f.outreach = $("#fout").value; renderQueue(f); };
+  wireRows("listing");
+  $("#main").querySelectorAll("[data-a]").forEach(b => b.onclick = async ev => {
+    ev.stopPropagation();
+    if(b.dataset.a==="pub") await setStatus(b.dataset.id, "published");
+    else await rejectFlow(b.dataset.id);
+  });
 }
 
 async function setStatus(id, status, reason){
@@ -917,7 +935,7 @@ async function drawListing(id){
   $("#dpanel").innerHTML = `
   <div class="dhead">
     <div><h3>${esc(r.title)}</h3>
-      <div class="ref">${esc(r.ref)} · ${tag(r.status,L_STATUS)} ${tag(r.verification,L_VERIF)}</div></div>
+      <div class="ref">${esc(r.ref)} · ${tag(r.status,L_STATUS)} ${tag(r.verification,L_VERIF)} ${tag(r.outreach_status,OUT_STATUS)}</div></div>
     <button class="btn sm" id="dx">إغلاق</button>
   </div>
   ${r.open_reports>0?'<div class="warnbox">عليه '+r.open_reports+' بلاغ مفتوح — راجع البلاغات قبل النشر.</div>':""}
@@ -1016,6 +1034,14 @@ async function drawListing(id){
       <a class="btn sm" target="_blank" rel="noopener"
          href="https://wa.me/970${esc(String(r.owner_phone||"").replace(/^0/,""))}">واتساب</a>
       <button class="btn sm" id="goOwner">ملف المالك</button>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h4>حالة التواصل مع المالك</h4>
+    <div class="acts">
+      ${Object.entries(OUT_STATUS).map(([k,v])=>
+        '<button class="btn sm" data-out="'+k+'"'+(r.outreach_status===k?" disabled":"")+'>'+v+"</button>").join("")}
     </div>
   </div>
 
@@ -1296,6 +1322,12 @@ async function drawListing(id){
     try{
       await rpc("admin_listing_verification", {p_id:r.id, p_level:b.dataset.vf});
       toast("تحدّث التوثيق.", "ok"); openDrawer("listing", r.id); go(S.view);
+    } catch(e){ toast(e.message, "bad"); }
+  });
+  $("#dpanel").querySelectorAll("[data-out]").forEach(b => b.onclick = async () => {
+    try{
+      await rpc("admin_listing_outreach", {p_id:r.id, p_status:b.dataset.out});
+      toast("تحدّثت حالة التواصل.", "ok"); openDrawer("listing", r.id); go(S.view);
     } catch(e){ toast(e.message, "bad"); }
   });
   const ex = $("#extend");
@@ -1857,43 +1889,59 @@ async function drawSeeker(id){
    بالموقع أبداً مهما رفعت مستوى توثيق الباحث. */
 const REQ_ST = {pending:"بانتظار المراجعة", published:"منشور", closed:"مغلق"};
 
+let REQUESTS_ROWS = [];
 async function vRequests(){
   loading("طلبات الباحثين");
+  const f = S.filters.requests = S.filters.requests || {outreach:"", status:""};
   try{
-    const rows = await get("/v_admin_requests?select=*&order=created_at.desc&limit=300");
-    const pend = rows.filter(r=>r.status==="pending");
-    const pub  = rows.filter(r=>r.status==="published");
-    $("#main").innerHTML = `
-      <div class="head"><h2>طلبات الباحثين</h2>
-        <span class="note">النشر بيخلّي الطلب يظهر بتبويب «باحثون عن سكن» بالموقع العام</span></div>
-      <div class="grid k4" style="margin-bottom:14px">
-        <div class="card kpi ${pend.length?"warn":""}"><div class="lab">بانتظار المراجعة</div>
-          <div class="val">${num(pend.length)}</div></div>
-        <div class="card kpi"><div class="lab">منشورة</div><div class="val">${num(pub.length)}</div></div>
-        <div class="card kpi"><div class="lab">الكل</div><div class="val">${num(rows.length)}</div></div>
-      </div>
-      ${rows.length?"":'<div class="empty"><b>ما في طلبات</b>أول طلب سكن من الموقع بيظهر هون.</div>'}
-      <div class="tw" ${rows.length?"":'style="display:none"'}><table><thead><tr>
-        <th>الرقم</th><th>الباحث</th><th>الهاتف</th><th>الصفة</th><th>المدينة</th>
-        <th>المناطق</th><th>الميزانية</th><th>المدة</th><th>الانتقال</th><th>التوثيق</th>
-        <th>الحالة</th><th>مسجّل</th>
-      </tr></thead><tbody>
-      ${rows.map(r=>`<tr data-id="${r.id}">
-        <td class="ref">${esc(r.ref)}</td>
-        <td>${esc(r.first_name||"—")}${r.is_blocked?' <span class="tag t-rejected">موقوف</span>':""}</td>
-        <td class="phone">${esc(r.phone||"—")}</td>
-        <td>${esc(occLabel(r.occupation))}</td>
-        <td>${esc(r.city||"—")}</td>
-        <td style="color:var(--text-2);font-size:12.5px">${esc(r.areas_ar||"—")}</td>
-        <td class="num">${money(r.budget_max)}</td>
-        <td>${r.rental_period_pref?esc(L_PERIOD[r.rental_period_pref]):"مرن"}</td>
-        <td>${dt(r.move_in_date)}</td>
-        <td>${lvl(r.seeker_level)}</td>
-        <td>${tag(r.status, REQ_ST)}</td>
-        <td style="color:var(--mute)">${ago(r.created_at)}</td>
-      </tr>`).join("")}</tbody></table></div>`;
-    wireRows("request");
+    REQUESTS_ROWS = await get("/v_admin_requests?select=*&order=created_at.desc&limit=300");
+    renderRequests(f);
   } catch(e){ fail(e); }
+}
+function renderRequests(f){
+  const all = REQUESTS_ROWS;
+  const rows = all.filter(r => (!f.outreach || r.outreach_status===f.outreach) && (!f.status || r.status===f.status));
+  const pend = all.filter(r=>r.status==="pending");
+  const pub  = all.filter(r=>r.status==="published");
+  $("#main").innerHTML = `
+    <div class="head"><h2>طلبات الباحثين</h2>
+      <span class="note">النشر بيخلّي الطلب يظهر بتبويب «باحثون عن سكن» بالموقع العام</span></div>
+    <div class="grid k4" style="margin-bottom:14px">
+      <div class="card kpi ${pend.length?"warn":""}"><div class="lab">بانتظار المراجعة</div>
+        <div class="val">${num(pend.length)}</div></div>
+      <div class="card kpi"><div class="lab">منشورة</div><div class="val">${num(pub.length)}</div></div>
+      <div class="card kpi"><div class="lab">الكل</div><div class="val">${num(all.length)}</div></div>
+    </div>
+    <div class="bars">
+      <select id="fst"><option value="">كل الحالات</option>
+        ${Object.entries(REQ_ST).map(([k,v])=>`<option value="${k}" ${f.status===k?"selected":""}>${v}</option>`).join("")}</select>
+      <select id="fout"><option value="">كل حالات التواصل</option>
+        ${Object.entries(OUT_STATUS).map(([k,v])=>`<option value="${k}" ${f.outreach===k?"selected":""}>${v}</option>`).join("")}</select>
+    </div>
+    ${rows.length?"":'<div class="empty"><b>ما في نتائج</b>'+(all.length?"جرّب توسّع الفلاتر.":"أول طلب سكن من الموقع بيظهر هون.")+'</div>'}
+    <div class="tw" ${rows.length?"":'style="display:none"'}><table><thead><tr>
+      <th>الرقم</th><th>الباحث</th><th>الهاتف</th><th>الصفة</th><th>المدينة</th>
+      <th>المناطق</th><th>الميزانية</th><th>المدة</th><th>الانتقال</th><th>التوثيق</th>
+      <th>الحالة</th><th>التواصل</th><th>مسجّل</th>
+    </tr></thead><tbody>
+    ${rows.map(r=>`<tr data-id="${r.id}">
+      <td class="ref">${esc(r.ref)}</td>
+      <td>${esc(r.first_name||"—")}${r.is_blocked?' <span class="tag t-rejected">موقوف</span>':""}</td>
+      <td class="phone">${esc(r.phone||"—")}</td>
+      <td>${esc(occLabel(r.occupation))}</td>
+      <td>${esc(r.city||"—")}</td>
+      <td style="color:var(--text-2);font-size:12.5px">${esc(r.areas_ar||"—")}</td>
+      <td class="num">${money(r.budget_max)}</td>
+      <td>${r.rental_period_pref?esc(L_PERIOD[r.rental_period_pref]):"مرن"}</td>
+      <td>${dt(r.move_in_date)}</td>
+      <td>${lvl(r.seeker_level)}</td>
+      <td>${tag(r.status, REQ_ST)}</td>
+      <td>${tag(r.outreach_status, OUT_STATUS)}</td>
+      <td style="color:var(--mute)">${ago(r.created_at)}</td>
+    </tr>`).join("")}</tbody></table></div>`;
+  $("#fst").onchange = () => { f.status = $("#fst").value; renderRequests(f); };
+  $("#fout").onchange = () => { f.outreach = $("#fout").value; renderRequests(f); };
+  wireRows("request");
 }
 
 async function drawRequest(id){
@@ -1902,7 +1950,7 @@ async function drawRequest(id){
   const yn = v => v===null||v===undefined ? "مرن" : (v ? "نعم" : "لا");
   $("#dpanel").innerHTML = `
     <div class="dhead"><div><h3>${esc(r.first_name||"باحث/ة")}</h3>
-      <div class="ref">${esc(r.ref)} · ${lvl(r.seeker_level)} ${r.seeker_level}/4</div></div>
+      <div class="ref">${esc(r.ref)} · ${lvl(r.seeker_level)} ${r.seeker_level}/4 · ${tag(r.status,REQ_ST)} ${tag(r.outreach_status,OUT_STATUS)}</div></div>
       <button class="btn sm" id="dx">إغلاق</button></div>
 
     ${notesSectionHtml()}
@@ -1980,9 +2028,16 @@ async function drawRequest(id){
         بينعرض بالموقع الاسم الأول فقط — الرقم والصفة ما بينعرضوا.
       </div>
     </div>
+    <div class="sec"><h4>حالة التواصل مع الباحث</h4>
+      <div class="acts">
+        ${Object.entries(OUT_STATUS).map(([k,v])=>
+          '<button class="btn sm" data-out="'+k+'"'+(r.outreach_status===k?" disabled":"")+'>'+v+"</button>").join("")}
+      </div>
+    </div>
     ${isAdmin()?`<div class="acts" style="margin-top:8px">
       <button class="btn sm bad" id="delRequest">حذف الطلب نهائياً</button>
-    </div>`:""}`;
+    </div>`:""}
+    <div class="sec"><h4>سجل هذا الطلب</h4><div id="rhist" class="feed"></div></div>`;
   $("#dx").onclick = closeDrawer;
 
   const toggleEditR = $("#toggleEditRequest");
@@ -2072,8 +2127,19 @@ async function drawRequest(id){
       openDrawer("request", r.id); go(S.view); refreshBadges();
     } catch(e){ toast(e.message, "bad"); }
   });
+  $("#dpanel").querySelectorAll("[data-out]").forEach(b => b.onclick = async () => {
+    try{
+      await rpc("admin_request_outreach", {p_id:r.id, p_status:b.dataset.out});
+      toast("تحدّثت حالة التواصل.", "ok"); openDrawer("request", r.id); go(S.view);
+    } catch(e){ toast(e.message, "bad"); }
+  });
 
   wireNotesSection("request", r.id);
+
+  get("/v_admin_activity?select=*&subject_id=eq."+r.id+"&order=created_at.desc&limit=25")
+    .then(h => $("#rhist").innerHTML = h.length ? h.map(feedRow).join("") :
+      '<div style="color:var(--mute);font-size:12.5px">ما في سجل بعد.</div>')
+    .catch(()=>{});
 }
 
 /* ══════════════ طلبات المؤسسات — تسعير معكوس، متابعة يدوية بالكامل ══════════════ */
@@ -2270,8 +2336,9 @@ async function vMatches(){
 /* ══════════════ ١١. النشاط ══════════════ */
 function feedRow(a){
   const ACT = {listing_status:"حالة إعلان",listing_verification:"توثيق إعلان",listing_expiry:"تمديد صلاحية",
-    profile_level:"مستوى توثيق",profile_block:"إيقاف حساب",profile_unblock:"رفع إيقاف",
+    listing_outreach:"تواصل مع المالك",profile_level:"مستوى توثيق",profile_block:"إيقاف حساب",profile_unblock:"رفع إيقاف",
     report_status:"حالة بلاغ",fee_status:"حالة رسم",contact_status:"حالة تواصل",
+    request_status:"حالة طلب",request_outreach:"تواصل مع الباحث",
     setting_change:"تغيير إعداد",field_visit:"زيارة ميدانية",
     listing_created:"إعلان جديد",listing_expired:"انتهى إعلان",request_created:"طلب جديد"};
   return `<div class="fitem">
