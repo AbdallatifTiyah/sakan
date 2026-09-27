@@ -149,6 +149,14 @@ tbody tr:hover{background:#182234;cursor:pointer}
 
 .warnbox{background:rgba(232,163,61,.09);border:1px solid rgba(232,163,61,.4);border-radius:var(--r);
   padding:9px 12px;font-size:12.5px;color:#f0bd6d;margin-bottom:12px}
+
+/* ═══════════════ نافذة تأكيد فوق الدرج ═══════════════ */
+#modal{position:fixed;inset:0;background:rgba(4,8,14,.78);display:none;z-index:70;align-items:center;justify-content:center;padding:20px}
+#modal.on{display:flex}
+.mbox{width:100%;max-width:400px;background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:22px}
+.mbox h3{margin:0 0 12px;font-size:16px;letter-spacing:-.3px}
+.mbox .acts{flex-direction:column}
+.mbox .acts .btn{width:100%;justify-content:center;text-align:center}
 .feed{max-height:calc(100vh - 220px);overflow-y:auto}
 .fitem{display:flex;gap:10px;padding:9px 4px;border-bottom:1px solid #1c2838;font-size:13px}
 .fitem .ts{color:var(--mute);font-size:11.5px;white-space:nowrap;font-variant-numeric:tabular-nums;min-width:96px}
@@ -203,6 +211,7 @@ tbody tr:hover{background:#182234;cursor:pointer}
 </div>
 
 <div id="drawer"><div class="dpanel" id="dpanel"></div></div>
+<div id="modal"><div class="mbox" id="mbox"></div></div>
 <div id="toast"></div>
 
 <script>
@@ -734,16 +743,36 @@ async function rejectFlow(id){
   if(!reason) return toast("لازم سبب.", "bad");
   await setStatus(id, "rejected", reason);
 }
-async function rentedFlow(id){
-  const viaPlatform = confirm(
-    "تأجّر عن طريق المنصة — يعني باحث تواصل من عندنا وأدّى فعلياً للتأجير؟\n\n" +
-    "موافق = نعم، عن طريقنا\n" +
-    "إلغاء = لا، تأجّر بشكل خارجي (ما بيدخل حساب متوسط أيام التأجير)");
-  try{
-    await rpc("admin_listing_status", {p_id:id, p_status:"rented", p_reason:null, p_rented_via_platform:viaPlatform});
-    toast("تم: "+L_STATUS.rented, "ok");
-    closeDrawer(); refreshBadges(); go(S.view);
-  } catch(e){ toast(e.message, "bad"); }
+function rentedFlow(r){
+  $("#mbox").innerHTML = `
+    <h3>تعليم مؤجّر</h3>
+    <dl class="dl" style="grid-template-columns:82px 1fr">
+      <dt>الإعلان</dt><dd><span class="ref">${esc(r.ref)}</span> ${esc(r.title)}</dd>
+      <dt>الموقع</dt><dd>${esc(r.city)} — ${esc(r.area)}</dd>
+      <dt>السعر</dt><dd class="num">${priceStr(r.price,r.currency)}</dd>
+      <dt>المالك</dt><dd>${esc(r.owner_name)} · <span class="phone">${esc(r.owner_phone)}</span></dd>
+    </dl>
+    <div style="font-size:12.5px;color:var(--text-2);margin:14px 0">
+      تأجّر عن طريق المنصة؟ يعني باحث تواصل من عندنا وأدّى فعلياً للتأجير —
+      اختيارك بيأثّر على مؤشر متوسط أيام التأجير.
+    </div>
+    <div class="acts">
+      <button class="btn ok" id="mYes">نعم — عن طريق سكنّا</button>
+      <button class="btn" id="mNo">لا — تأجّر خارجياً</button>
+      <button class="btn sm" id="mCancel" style="margin-top:2px">إلغاء</button>
+    </div>`;
+  $("#modal").classList.add("on");
+  const finish = async (viaPlatform) => {
+    closeModal();
+    try{
+      await rpc("admin_listing_status", {p_id:r.id, p_status:"rented", p_reason:null, p_rented_via_platform:viaPlatform});
+      toast("تم: "+L_STATUS.rented, "ok");
+      closeDrawer(); refreshBadges(); go(S.view);
+    } catch(e){ toast(e.message, "bad"); }
+  };
+  $("#mYes").onclick = () => finish(true);
+  $("#mNo").onclick = () => finish(false);
+  $("#mCancel").onclick = closeModal;
 }
 
 /* ══════════════ ٣. كل الإعلانات ══════════════ */
@@ -852,7 +881,9 @@ function wireRows(kind){
 }
 function closeDrawer(){ $("#drawer").classList.remove("on"); }
 $("#drawer").addEventListener("click", e => { if(e.target.id==="drawer") closeDrawer(); });
-document.addEventListener("keydown", e => { if(e.key==="Escape") closeDrawer(); });
+function closeModal(){ $("#modal").classList.remove("on"); $("#mbox").innerHTML = ""; }
+$("#modal").addEventListener("click", e => { if(e.target.id==="modal") closeModal(); });
+document.addEventListener("keydown", e => { if(e.key==="Escape"){ closeModal(); closeDrawer(); } });
 
 async function openDrawer(kind, id){
   $("#drawer").classList.add("on");
@@ -1253,7 +1284,7 @@ async function drawListing(id){
   $("#dpanel").querySelectorAll("[data-st]").forEach(b => b.onclick = async () => {
     const st = b.dataset.st;
     if(st==="rejected") return rejectFlow(r.id);
-    if(st==="rented") return rentedFlow(r.id);
+    if(st==="rented") return rentedFlow(r);
     await setStatus(r.id, st);
   });
   $("#dpanel").querySelectorAll("[data-vf]").forEach(b => b.onclick = async () => {
@@ -1399,12 +1430,13 @@ async function vPipeline(){
       </div>
       ${rows.length?"":'<div class="empty"><b>ما في طلبات تواصل</b>لما يوصل أول طلب بيظهر هون.</div>'}
       <div class="tw" ${rows.length?"":'style="display:none"'}><table><thead><tr>
-        <th>الباحث</th><th>الرقم</th><th>الإعلان</th><th>السعر</th><th>الحالة</th><th>الرسم</th><th>منذ</th>
+        <th>الباحث</th><th>الرقم</th><th>الإعلان</th><th>المنطقة</th><th>السعر</th><th>الحالة</th><th>الرسم</th><th>منذ</th>
       </tr></thead><tbody>
       ${rows.map(r=>`<tr data-id="${r.id}">
         <td>${esc(r.seeker_profile_name||r.seeker_name)} ${lvl(r.seeker_level)}</td>
         <td class="phone">${esc(r.seeker_profile_phone||r.seeker_phone)}</td>
-        <td><span class="ref">${esc(r.listing_ref)}</span> ${esc(r.listing_title)}</td>
+        <td><div class="ref">${esc(r.listing_ref)}</div>${esc(r.listing_title)}</td>
+        <td>${esc(r.city)} — ${esc(r.area)}</td>
         <td class="num">${priceStr(r.price,r.currency)}</td>
         <td>${tag(r.status,C_STATUS)}</td>
         <td>${r.fee_id?tag(r.fee_status,F_STATUS):"—"}</td>
