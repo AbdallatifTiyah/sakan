@@ -543,6 +543,12 @@ function buildNav(){
   $("#nav").querySelectorAll("a").forEach(a => a.onclick = () => go(a.dataset.v));
 }
 function go(v){
+  if(v.indexOf("matchcompare/")===0){
+    const [,score,lid,rid] = v.split("/");
+    S.view = v; location.hash = v;
+    $("#nav").querySelectorAll("a").forEach(a => a.classList.toggle("on", a.dataset.v==="matches"));
+    return vMatchCompare(score, lid, rid);
+  }
   if(!VIEWS.some(x => x.id===v && can(x))) v = "dash";
   S.view = v; location.hash = v;
   $("#nav").querySelectorAll("a").forEach(a => a.classList.toggle("on", a.dataset.v===v));
@@ -2318,7 +2324,7 @@ async function vMatches(){
         <th>الدرجة</th><th>الإعلان</th><th>الباحث</th><th>الصفة</th><th>التوثيق</th>
         <th>الرقم</th><th>الميزانية</th><th>تاريخ الانتقال</th>
       </tr></thead><tbody>
-      ${rows.map(r=>`<tr data-id="${r.listing_id}">
+      ${rows.map(r=>`<tr data-id="${r.listing_id}" data-req="${r.request_id}" data-score="${r.score}">
         <td class="num" style="color:${r.score>=70?"var(--ok)":r.score>=55?"var(--warn)":"var(--mute)"}">${r.score}</td>
         <td class="ref">${esc(r.listing_ref)}</td>
         <td>${esc(r.first_name)}</td>
@@ -2328,7 +2334,73 @@ async function vMatches(){
         <td class="num">${money(r.budget_max)}</td>
         <td>${dt(r.move_in_date)}</td>
       </tr>`).join("")}</tbody></table></div>`;
-    wireRows("listing");
+    $("#main").querySelectorAll("tr[data-id]").forEach(tr => tr.onclick = () =>
+      go("matchcompare/"+tr.dataset.score+"/"+tr.dataset.id+"/"+tr.dataset.req));
+  } catch(e){ fail(e); }
+}
+
+/* ══════════════ صفحة مقارنة مطابقة — إعلان مقابل طلب باحث ══════════════ */
+async function vMatchCompare(score, listingId, requestId){
+  loading("مقارنة مطابقة");
+  try{
+    const [ls, rs] = await Promise.all([
+      get("/v_admin_listings?select=*&id=eq."+listingId),
+      get("/v_admin_requests?select=*&id=eq."+requestId)
+    ]);
+    const l = ls[0], r = rs[0];
+    if(!l || !r) return ($("#main").innerHTML = '<div class="warnbox">الإعلان أو الطلب غير موجود.</div>');
+    const yn = v => v===null||v===undefined ? "مرن" : (v ? "نعم" : "لا");
+    const rows = [
+      ["الحالة", tag(l.status,L_STATUS), tag(r.status,REQ_ST)],
+      ["التوثيق / المستوى", tag(l.verification,L_VERIF), lvl(r.seeker_level)+" · "+r.seeker_level+"/4"],
+      ["الاسم", esc(l.owner_name||"—"), esc(r.first_name||"—")],
+      ["الهاتف", '<span class="phone">'+esc(l.owner_phone||"—")+'</span>', '<span class="phone">'+esc(r.phone||"—")+'</span>'],
+      ["المدينة", esc(l.city||"—"), esc(r.city||"—")],
+      ["المنطقة", esc(l.area||"—"), esc(r.areas_ar||"مرن — أي منطقة")],
+      ["نوع السكن", esc(L_KIND[l.kind]||l.kind), esc(L_KIND[r.kind_pref]||"مرن")],
+      ["مدة الإيجار", esc(L_PERIOD[l.rental_period]||l.rental_period), r.rental_period_pref?esc(L_PERIOD[r.rental_period_pref]):"مرن"],
+      ["السعر / الميزانية", priceStr(l.price,l.currency), "حتى "+money(r.budget_max)],
+      ["عدد الغرف", l.rooms_total??"—", r.rooms_pref??"—"],
+      ["مفروش", l.furnished?"نعم":"لا", yn(r.furnished_pref)],
+      ["أقل مدة إيجار", l.min_stay_months?l.min_stay_months+" شهر":"—", r.min_stay_months?r.min_stay_months+" شهر":"—"],
+      ["تاريخ التوفر / الانتقال", dt(l.available_from), dt(r.move_in_date)],
+      ["السياسة / الجنس", esc(L_POL[l.gender_pol]||l.gender_pol), r.gender==="female"?"أنثى":r.gender==="male"?"ذكر":"—"],
+    ];
+    $("#main").innerHTML = `
+      <div class="head">
+        <h2>مقارنة مطابقة
+          <span style="color:${score>=70?"var(--ok)":score>=55?"var(--warn)":"var(--mute)"}">— درجة ${esc(score)}</span></h2>
+        <button class="btn sm" id="backToMatches">رجوع لكل المطابقات</button>
+      </div>
+      <div class="warnbox">أداة داخلية عشان المندوب يوصل الطرفين — ما بتظهر بأي واجهة عامة.</div>
+
+      <div class="grid k2" style="margin-bottom:14px">
+        <div class="card">
+          <h3>${esc(l.title)}</h3>
+          <div class="ref">${esc(l.ref)} · ${tag(l.status,L_STATUS)} ${tag(l.verification,L_VERIF)}</div>
+          <div class="acts" style="margin-top:8px">
+            <a class="btn sm" href="tel:${esc(l.owner_phone||"")}">اتصال بالمالك</a>
+            <a class="btn sm" target="_blank" rel="noopener"
+              href="https://wa.me/${esc(String(l.owner_phone||"").replace(/[^\d]/g,""))}">واتساب المالك</a>
+          </div>
+        </div>
+        <div class="card">
+          <h3>${esc(r.first_name||"باحث/ة")}</h3>
+          <div class="ref">${esc(r.ref)} · ${tag(r.status,REQ_ST)} · ${lvl(r.seeker_level)} ${r.seeker_level}/4</div>
+          <div class="acts" style="margin-top:8px">
+            <a class="btn sm" href="tel:${esc(r.phone||"")}">اتصال بالباحث</a>
+            <a class="btn sm" target="_blank" rel="noopener"
+              href="https://wa.me/${esc(String(r.phone||"").replace(/[^\d]/g,""))}">واتساب الباحث</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tw"><table><thead><tr>
+        <th>الحقل</th><th>الإعلان ${esc(l.ref)}</th><th>طلب الباحث ${esc(r.ref)}</th>
+      </tr></thead><tbody>
+      ${rows.map(x=>`<tr><td>${x[0]}</td><td>${x[1]}</td><td>${x[2]}</td></tr>`).join("")}
+      </tbody></table></div>`;
+    $("#backToMatches").onclick = () => go("matches");
   } catch(e){ fail(e); }
 }
 
