@@ -389,7 +389,7 @@ const VIEWS = [
   {id:"requests",t:"طلبات الباحثين",   grp:"", both:true, badge:"reqs"},
   {id:"institutions",t:"طلبات المؤسسات", grp:"", both:true, badge:"inst"},
   {id:"reports", t:"البلاغات",        grp:"", both:false, badge:"reports"},
-  {id:"pipeline",t:"مسار التأجير",     grp:"", both:true},
+  {id:"pipeline",t:"طلب تواصل مع مالك",     grp:"", both:true},
   {id:"listings",t:"كل الإعلانات",    grp:"المخزون", both:true},
   {id:"verify",  t:"التوثيق",         grp:"", both:true},
   {id:"matches", t:"المطابقة العكسية", grp:"", both:true},
@@ -1454,12 +1454,12 @@ async function drawReport(id){
 
 /* ══════════════ ٥. مسار التأجير ══════════════ */
 async function vPipeline(){
-  loading("مسار التأجير");
+  loading("طلب تواصل مع مالك");
   try{
     const rows = await get("/v_admin_pipeline?select=*&order=created_at.desc&limit=300");
     const by = k => rows.filter(r=>r.status===k).length;
     $("#main").innerHTML = `
-      <div class="head"><h2>مسار التأجير</h2><span class="note">${rows.length} طلب تواصل</span></div>
+      <div class="head"><h2>طلب تواصل مع مالك</h2><span class="note">${rows.length} طلب تواصل</span></div>
       <div class="grid k4" style="margin-bottom:14px">
         ${["new","forwarded","owner_responded","viewing_set","rented","dead"].map(k=>
           '<div class="card kpi"><div class="lab">'+C_STATUS[k]+'</div><div class="val">'+by(k)+"</div></div>").join("")}
