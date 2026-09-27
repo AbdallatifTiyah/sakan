@@ -111,8 +111,7 @@ tbody tr:hover{background:#182234;cursor:pointer}
 .t-owner_responded,.t-viewing_set{border-color:var(--info);color:var(--info)}
 .t-not_contacted{color:var(--mute)}
 .t-no_answer{border-color:var(--warn);color:var(--warn)}
-.t-called,.t-whatsapp_sent{border-color:var(--ok);color:var(--ok)}
-.t-viewing_scheduled{border-color:var(--info);color:var(--info)}
+.t-called,.t-whatsapp_sent,.t-confirmed{border-color:var(--ok);color:var(--ok)}
 .lv{display:inline-flex;gap:2px;vertical-align:middle}
 .lv i{width:7px;height:7px;border-radius:2px;background:var(--line)}
 .lv i.f{background:var(--gold)}
@@ -374,7 +373,7 @@ const R_CAT    = {fake_listing:"إعلان وهمي",already_rented:"مؤجّر 
                   entered_room:"دخول الغرفة بدون إذن",deposit:"نزاع تأمين",camera:"كاميرا داخلية",other:"أخرى"};
 const F_STATUS = {due:"مستحق",collected:"محصّل",waived:"معفى",lost:"ضائع"};
 const OUT_STATUS = {not_contacted:"لسا ما تواصلنا",no_answer:"تواصلنا — ما ردّ",called:"تواصلنا هاتفياً",
-                    whatsapp_sent:"أرسلنا واتساب",viewing_scheduled:"معاينة محدّدة"};
+                    whatsapp_sent:"أرسلنا واتساب",confirmed:"تأكّدت المعلومات"};
 const I_TYPE   = {ngo:"منظمة غير حكومية",university:"جامعة",company:"شركة",government:"جهة حكومية",other:"غير ذلك"};
 const I_STATUS = {new:"جديد",contacted:"تم التواصل",negotiating:"قيد التفاوض",won:"اتفاق",lost:"مغلق"};
 const V_STAGE  = {day30:"بعد ٣٠ يوماً",move_out:"بعد الانتقال"};
