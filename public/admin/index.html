@@ -1502,12 +1502,14 @@ async function drawContact(id){
     <div class="dhead"><div><h3>${esc(r.seeker_profile_name||r.seeker_name)} ${lvl(r.seeker_level)}</h3>
       <div class="ref">${dt(r.created_at,true)} · ${esc(ago(r.created_at))}</div></div>
       <button class="btn sm" id="dx">إغلاق النافذة</button></div>
+    <div id="seekerReqReminder"></div>
     <dl class="dl">
       <dt>رقم الباحث</dt><dd class="phone">${esc(phone)}</dd>
       <dt>الإعلان</dt><dd><span class="ref">${esc(r.listing_ref)}</span> ${esc(r.listing_title)}
         ${tag(r.listing_status,L_STATUS)} ${tag(r.listing_verification,L_VERIF)}</dd>
       <dt>الموقع</dt><dd>${esc(r.city)} — ${esc(r.area)}</dd>
       <dt>السعر</dt><dd class="num">${priceStr(r.price,r.currency)}</dd>
+      <dt id="listingMoreDt" style="display:none">تفاصيل أكتر</dt><dd id="listingMore" style="display:none"></dd>
       <dt>المالك</dt><dd>${esc(r.owner_name)} ${lvl(r.owner_level)} · <span class="phone">${esc(r.owner_phone)}</span></dd>
       ${r.fee_id?'<dt>الرسم</dt><dd>'+money(r.amount_due)+" "+tag(r.fee_status,F_STATUS)+"</dd>":""}
     </dl>
@@ -1570,6 +1572,36 @@ async function drawContact(id){
     .then(h => $("#chist").innerHTML = h.length ? h.map(feedRow).join("") :
       '<div style="color:var(--mute);font-size:12.5px">ما في سجل بعد.</div>')
     .catch(()=>{});
+
+  get("/v_admin_listings?select=kind,gender_pol,furnished,rooms_total,deposit,min_stay_months&id=eq."+r.listing_id)
+    .then(h => {
+      const l = h[0];
+      if(!l) return;
+      $("#listingMoreDt").style.display = "";
+      const lm = $("#listingMore");
+      lm.style.display = "";
+      lm.innerHTML = esc(L_KIND[l.kind]||l.kind) + " · " + esc(L_POL[l.gender_pol]||l.gender_pol) +
+        " · " + (l.furnished?"مفروش":"غير مفروش") +
+        (l.rooms_total?" · "+l.rooms_total+" غرف":"") +
+        (l.deposit!=null?" · تأمين "+priceStr(l.deposit,r.currency):"") +
+        (l.min_stay_months?" · أقل مدة "+l.min_stay_months+" شهر":"");
+    }).catch(()=>{});
+
+  if(phone){
+    get("/v_admin_requests?select=id,ref,status,created_at,city,budget_max&phone=eq."+encodeURIComponent(phone)+"&order=created_at.desc&limit=5")
+      .then(reqs => {
+        if(!reqs.length) return;
+        $("#seekerReqReminder").innerHTML = `
+          <div class="warnbox" style="background:rgba(58,99,240,.09);border-color:rgba(58,99,240,.4);color:var(--info)">
+            لهاد الباحث ${reqs.length>1?reqs.length+" طلبات بحث مسجّلة":"طلب بحث مسجّل"} —
+            ${reqs.map(x=>'<a href="#" data-openreq="'+esc(x.id)+'" style="color:inherit">'+esc(x.ref)+
+              " "+tag(x.status,REQ_ST)+" · "+esc(x.city)+" حتى "+money(x.budget_max)+"</a>").join("، ")}
+          </div>`;
+        $("#seekerReqReminder").querySelectorAll("[data-openreq]").forEach(a => a.onclick = (e) => {
+          e.preventDefault(); openDrawer("request", a.dataset.openreq);
+        });
+      }).catch(()=>{});
+  }
 }
 
 /* ══════════════ ٦. التوثيق ══════════════ */
