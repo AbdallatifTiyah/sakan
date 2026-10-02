@@ -1,7 +1,19 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+// key.properties/keystore يعيشان برّا الريبو عمداً (قاعدة ٥ بـCLAUDE.md — ممنوع
+// أي مفتاح سري بالريبو). على أي جهاز تاني بدون هالملف، البناء بيرجع تلقائياً
+// لتوقيع debug بدل ما يفشل بالكامل.
+val sakannaKeyPropertiesFile = file("C:/Users/abdti/sakanna-keystore/key.properties")
+val sakannaKeyProperties = Properties()
+if (sakannaKeyPropertiesFile.exists()) {
+    sakannaKeyProperties.load(FileInputStream(sakannaKeyPropertiesFile))
 }
 
 android {
@@ -25,11 +37,24 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        if (sakannaKeyPropertiesFile.exists()) {
+            create("release") {
+                keyAlias = sakannaKeyProperties.getProperty("keyAlias")
+                keyPassword = sakannaKeyProperties.getProperty("keyPassword")
+                storeFile = file(sakannaKeyProperties.getProperty("storeFile"))
+                storePassword = sakannaKeyProperties.getProperty("storePassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (sakannaKeyPropertiesFile.exists()) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 }
