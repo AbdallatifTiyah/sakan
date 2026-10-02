@@ -9,6 +9,7 @@ import '../widgets/verification_ribbon.dart';
 import '../widgets/approx_radius_badge.dart';
 import 'listing_detail_screen.dart';
 import 'add_listing_flow.dart';
+import 'seeker_request_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -92,6 +93,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         actions: [
+          IconButton(
+            tooltip: 'سجّل طلب بحث',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SeekerRequestScreen()),
+            ),
+            icon: const Icon(Icons.person_search_outlined),
+          ),
           IconButton(
             tooltip: 'الإشعارات',
             onPressed: () {},
