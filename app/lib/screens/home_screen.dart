@@ -10,6 +10,7 @@ import '../widgets/approx_radius_badge.dart';
 import 'listing_detail_screen.dart';
 import 'add_listing_flow.dart';
 import 'seeker_request_screen.dart';
+import 'account_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -104,6 +105,13 @@ class _HomeScreenState extends State<HomeScreen> {
             tooltip: 'الإشعارات',
             onPressed: () {},
             icon: const Icon(Icons.notifications_outlined),
+          ),
+          IconButton(
+            tooltip: 'حسابي',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const AccountScreen()),
+            ),
+            icon: const Icon(Icons.account_circle_outlined),
           ),
         ],
       ),
