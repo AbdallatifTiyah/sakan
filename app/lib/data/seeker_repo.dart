@@ -42,4 +42,9 @@ class SeekerRepo {
     });
     return ref as String;
   }
+
+  /// طلب حذف — يراجعه الطاقم، ما بيحذف فوراً (الحذف الفعلي عبر مركز التحكم).
+  static Future<void> requestDeletion(String requestId) async {
+    await supabase.rpc('my_request_seeker_deletion', params: {'p_request_id': requestId});
+  }
 }

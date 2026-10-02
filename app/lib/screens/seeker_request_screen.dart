@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../theme.dart';
+import '../data/account_repo.dart';
 import '../data/locations_repo.dart';
 import '../data/seeker_repo.dart';
+import '../validators.dart';
 
 const _occupations = [
   ('student', 'طالب/ة'),
@@ -27,6 +29,7 @@ class SeekerRequestScreen extends StatefulWidget {
 }
 
 class _SeekerRequestScreenState extends State<SeekerRequestScreen> {
+  final _formKey = GlobalKey<FormState>();
   List<SCity> _cities = [];
   SCity? _city;
   List<SArea> _areas = [];
@@ -44,6 +47,9 @@ class _SeekerRequestScreenState extends State<SeekerRequestScreen> {
   final _phoneCtrl = TextEditingController();
   final _noteCtrl = TextEditingController();
   bool _submitting = false;
+  String? _cityError;
+  String? _areasError;
+  String? _smokerError;
 
   @override
   void initState() {
@@ -54,6 +60,18 @@ class _SeekerRequestScreenState extends State<SeekerRequestScreen> {
     for (final c in [_budgetCtrl, _nameCtrl, _phoneCtrl]) {
       c.addListener(() => mounted ? setState(() {}) : null);
     }
+    _prefillFromAccount();
+  }
+
+  /// مسجّل دخول وله بروفايل (باحث أو مالك)؟ عبّي الاسم والرقم تلقائياً —
+  /// تبقى قابلة للتعديل، بعكس شاشة التواصل اللي بتتخطّى السؤال كلياً.
+  Future<void> _prefillFromAccount() async {
+    final profile = await AccountRepo.findProfile('seeker') ?? await AccountRepo.findProfile('owner');
+    if (!mounted || profile == null) return;
+    final name = (profile['first_name'] as String?)?.trim() ?? '';
+    final phone = (profile['phone'] as String?)?.trim() ?? '';
+    if (name.isNotEmpty) _nameCtrl.text = name;
+    if (phone.isNotEmpty) _phoneCtrl.text = phone;
   }
 
   @override
@@ -68,6 +86,7 @@ class _SeekerRequestScreenState extends State<SeekerRequestScreen> {
   Future<void> _onCityChanged(SCity? city) async {
     setState(() {
       _city = city;
+      _cityError = null;
       _selectedAreas.clear();
       _selectedNeighborhoods.clear();
       _areas = [];
@@ -84,6 +103,7 @@ class _SeekerRequestScreenState extends State<SeekerRequestScreen> {
 
   void _toggleArea(int areaId) {
     setState(() {
+      _areasError = null;
       if (_selectedAreas.contains(areaId)) {
         _selectedAreas.remove(areaId);
         _selectedNeighborhoods.removeWhere(
@@ -94,16 +114,21 @@ class _SeekerRequestScreenState extends State<SeekerRequestScreen> {
     });
   }
 
-  bool get _canSubmit =>
-      _nameCtrl.text.trim().isNotEmpty &&
-      _phoneCtrl.text.trim().isNotEmpty &&
-      _city != null &&
-      _selectedAreas.isNotEmpty &&
-      _budgetCtrl.text.trim().isNotEmpty &&
-      num.tryParse(_budgetCtrl.text.trim()) != null &&
-      _smoker != null;
+  /// يملأ أخطاء الحقول اللي ما إلها TextFormField (المدينة/المناطق/التدخين
+  /// اختيارات chips، مش فورم) ويرجّع صحة الفورم كامل — بدل تعطيل الزر بصمت،
+  /// الزر بيضل مفعّل ويوضّح الحقل الناقص عند الضغط (قاعدة التحقّق الظاهر).
+  bool _validate() {
+    setState(() {
+      _cityError = _city == null ? 'اختر مدينة' : null;
+      _areasError = _selectedAreas.isEmpty ? 'اختر منطقة واحدة على الأقل' : null;
+      _smokerError = _smoker == null ? 'اختر إجابة' : null;
+    });
+    final formOk = _formKey.currentState?.validate() ?? false;
+    return formOk && _cityError == null && _areasError == null && _smokerError == null;
+  }
 
   Future<void> _submit() async {
+    if (!_validate()) return;
     setState(() => _submitting = true);
     try {
       final ref = await SeekerRepo.submitRequest(
@@ -150,7 +175,9 @@ class _SeekerRequestScreenState extends State<SeekerRequestScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('سجّل طلب بحث')),
       body: SafeArea(
-        child: ListView(
+        child: Form(
+          key: _formKey,
+          child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
           children: [
             const Text(
@@ -174,6 +201,10 @@ class _SeekerRequestScreenState extends State<SeekerRequestScreen> {
                       ))
                   .toList(),
             ),
+            if (_cityError != null) ...[
+              const SizedBox(height: 6),
+              Text(_cityError!, style: const TextStyle(color: SColors.danger, fontSize: 12)),
+            ],
             if (_areas.isNotEmpty) ...[
               const SizedBox(height: 20),
               const Text('المناطق المفضّلة (تقدر تختار أكثر من وحدة)',
@@ -198,6 +229,10 @@ class _SeekerRequestScreenState extends State<SeekerRequestScreen> {
                         ))
                     .toList(),
               ),
+              if (_areasError != null) ...[
+                const SizedBox(height: 6),
+                Text(_areasError!, style: const TextStyle(color: SColors.danger, fontSize: 12)),
+              ],
             ],
             if (_selectedAreas.isNotEmpty &&
                 _allNeighborhoods.any((n) => _selectedAreas.contains(n.areaId))) ...[
@@ -233,11 +268,12 @@ class _SeekerRequestScreenState extends State<SeekerRequestScreen> {
               ),
             ],
             const SizedBox(height: 20),
-            TextField(
+            TextFormField(
               controller: _budgetCtrl,
               keyboardType: TextInputType.number,
               textAlign: TextAlign.right,
               decoration: const InputDecoration(labelText: 'الميزانية القصوى (شيكل)', border: OutlineInputBorder()),
+              validator: (v) => numericValidator(v, min: 1, label: 'الميزانية القصوى'),
             ),
             const SizedBox(height: 20),
             ListTile(
@@ -281,7 +317,10 @@ class _SeekerRequestScreenState extends State<SeekerRequestScreen> {
                   child: ChoiceChip(
                     label: const Text('لا'),
                     selected: _smoker == false,
-                    onSelected: (_) => setState(() => _smoker = false),
+                    onSelected: (_) => setState(() {
+                      _smoker = false;
+                      _smokerError = null;
+                    }),
                     selectedColor: SColors.blue600,
                     labelStyle: TextStyle(color: _smoker == false ? Colors.white : SColors.navy, fontWeight: FontWeight.w600),
                   ),
@@ -291,13 +330,20 @@ class _SeekerRequestScreenState extends State<SeekerRequestScreen> {
                   child: ChoiceChip(
                     label: const Text('نعم'),
                     selected: _smoker == true,
-                    onSelected: (_) => setState(() => _smoker = true),
+                    onSelected: (_) => setState(() {
+                      _smoker = true;
+                      _smokerError = null;
+                    }),
                     selectedColor: SColors.blue600,
                     labelStyle: TextStyle(color: _smoker == true ? Colors.white : SColors.navy, fontWeight: FontWeight.w600),
                   ),
                 ),
               ],
             ),
+            if (_smokerError != null) ...[
+              const SizedBox(height: 6),
+              Text(_smokerError!, style: const TextStyle(color: SColors.danger, fontSize: 12)),
+            ],
             const SizedBox(height: 20),
             const Text('حالتك', style: TextStyle(fontWeight: FontWeight.bold, color: SColors.navy)),
             const SizedBox(height: 10),
@@ -343,24 +389,27 @@ class _SeekerRequestScreenState extends State<SeekerRequestScreen> {
             const SizedBox(height: 24),
             const Text('معلوماتك', style: TextStyle(fontWeight: FontWeight.bold, color: SColors.navy, fontSize: 16)),
             const SizedBox(height: 12),
-            TextField(
+            TextFormField(
               controller: _nameCtrl,
               textAlign: TextAlign.right,
               decoration: const InputDecoration(labelText: 'اسمك', border: OutlineInputBorder()),
+              validator: (v) => requiredValidator(v, 'اسمك'),
             ),
             const SizedBox(height: 16),
-            TextField(
+            TextFormField(
               controller: _phoneCtrl,
               keyboardType: TextInputType.phone,
               textAlign: TextAlign.right,
               decoration: const InputDecoration(labelText: 'رقم هاتفك', border: OutlineInputBorder()),
+              validator: phoneValidator,
             ),
             const SizedBox(height: 24),
             SPrimaryButton(
               label: _submitting ? 'جارٍ الإرسال...' : 'سجّل طلب البحث',
-              onPressed: (_canSubmit && !_submitting) ? _submit : null,
+              onPressed: _submitting ? null : _submit,
             ),
           ],
+        ),
         ),
       ),
     );

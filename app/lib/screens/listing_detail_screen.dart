@@ -3,7 +3,9 @@ import 'package:share_plus/share_plus.dart' show Share;
 import '../theme.dart';
 import '../models/listing.dart';
 import '../data/listings_repo.dart';
+import '../data/account_repo.dart';
 import '../features.dart';
+import '../validators.dart';
 import '../widgets/listing_photo.dart';
 import '../widgets/verification_ribbon.dart';
 import '../widgets/approx_radius_badge.dart';
@@ -57,11 +59,91 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
     }
   }
 
+  /// مسجّل دخول وله بروفايل باحث مكتمل (اسم ورقم)؟ صفر سؤال عن معلومات
+  /// موجودة أصلاً بالحساب — تأكيد سريع بدل فورم كامل (قاعدة: ما تطلب معلومات
+  /// الشخص وهو مسجّل دخول أصلاً). غير ذلك: نفس الفورم القديم.
   Future<void> _openContactSheet() async {
     final listing = _listing;
     if (listing == null) return;
-    final nameCtrl = TextEditingController();
-    final phoneCtrl = TextEditingController();
+    final profile = await AccountRepo.findProfile('seeker');
+    final name = (profile?['first_name'] as String?)?.trim() ?? '';
+    final phone = (profile?['phone'] as String?)?.trim() ?? '';
+    if (!mounted) return;
+    if (name.isNotEmpty && phone.isNotEmpty) {
+      await _confirmContactWithProfile(listing, name, phone);
+    } else {
+      await _openContactFormSheet(listing);
+    }
+  }
+
+  Future<void> _confirmContactWithProfile(Listing listing, String name, String phone) async {
+    var sending = false;
+    String? inlineError;
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(SRadius.md)),
+          title: const Text('اطلب التواصل'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'بنوصلك مع المالك باسم "$name" ورقم "$phone".',
+                style: const TextStyle(color: SColors.mut, height: 1.6),
+              ),
+              if (inlineError != null) ...[
+                const SizedBox(height: 10),
+                Text(inlineError!, style: const TextStyle(color: SColors.danger, fontSize: 13)),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: sending
+                  ? null
+                  : () {
+                      Navigator.pop(dialogContext);
+                      _openContactFormSheet(listing, initialName: name, initialPhone: phone);
+                    },
+              child: const Text('تعديل المعلومات'),
+            ),
+            TextButton(
+              onPressed: sending
+                  ? null
+                  : () async {
+                      setDialogState(() {
+                        sending = true;
+                        inlineError = null;
+                      });
+                      try {
+                        await ListingsRepo.submitContactRequest(listingId: listing.id, name: name, phone: phone);
+                        if (!dialogContext.mounted) return;
+                        Navigator.pop(dialogContext);
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('تم إرسال طلب التواصل')),
+                        );
+                      } catch (e) {
+                        setDialogState(() {
+                          sending = false;
+                          inlineError = 'تعذّر إرسال الطلب. حاول مرة ثانية.';
+                        });
+                      }
+                    },
+              child: Text(sending ? 'جارٍ الإرسال...' : 'أرسل طلب التواصل'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openContactFormSheet(Listing listing, {String? initialName, String? initialPhone}) async {
+    final formKey = GlobalKey<FormState>();
+    final nameCtrl = TextEditingController(text: initialName ?? '');
+    final phoneCtrl = TextEditingController(text: initialPhone ?? '');
     var sending = false;
     String? inlineError;
 
@@ -80,73 +162,73 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
             20,
             20 + MediaQuery.of(sheetContext).viewInsets.bottom,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'اطلب التواصل',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: SColors.navy),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'بنوصلك مع المالك بأسرع وقت.',
-                style: TextStyle(color: SColors.mut, fontSize: 13),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: nameCtrl,
-                textAlign: TextAlign.right,
-                decoration: const InputDecoration(labelText: 'اسمك', border: OutlineInputBorder()),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: phoneCtrl,
-                textAlign: TextAlign.right,
-                keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(labelText: 'رقم هاتفك', border: OutlineInputBorder()),
-              ),
-              if (inlineError != null) ...[
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'اطلب التواصل',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: SColors.navy),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'بنوصلك مع المالك بأسرع وقت.',
+                  style: TextStyle(color: SColors.mut, fontSize: 13),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: nameCtrl,
+                  textAlign: TextAlign.right,
+                  decoration: const InputDecoration(labelText: 'اسمك', border: OutlineInputBorder()),
+                  validator: (v) => requiredValidator(v, 'اسمك'),
+                ),
                 const SizedBox(height: 12),
-                Text(inlineError!, style: const TextStyle(color: SColors.danger, fontSize: 13)),
-              ],
-              const SizedBox(height: 20),
-              SPrimaryButton(
-                label: sending ? 'جارٍ الإرسال...' : 'أرسل طلب التواصل',
-                onPressed: sending
-                    ? null
-                    : () async {
-                        if (nameCtrl.text.trim().isEmpty || phoneCtrl.text.trim().isEmpty) {
-                          // SnackBar هون بيختفي وراء الـbottom sheet نفسه (ترتيب
-                          // طبقات Flutter الافتراضي) — نص داخلي بدل SnackBar.
-                          setSheetState(() => inlineError = 'الاسم ورقم الهاتف مطلوبان');
-                          return;
-                        }
-                        setSheetState(() {
-                          inlineError = null;
-                          sending = true;
-                        });
-                        try {
-                          await ListingsRepo.submitContactRequest(
-                            listingId: listing.id,
-                            name: nameCtrl.text.trim(),
-                            phone: phoneCtrl.text.trim(),
-                          );
-                          if (!sheetContext.mounted) return;
-                          Navigator.pop(sheetContext);
-                          if (!mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('تم إرسال طلب التواصل')),
-                          );
-                        } catch (e) {
+                TextFormField(
+                  controller: phoneCtrl,
+                  textAlign: TextAlign.right,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(labelText: 'رقم هاتفك', border: OutlineInputBorder()),
+                  validator: phoneValidator,
+                ),
+                if (inlineError != null) ...[
+                  const SizedBox(height: 12),
+                  Text(inlineError!, style: const TextStyle(color: SColors.danger, fontSize: 13)),
+                ],
+                const SizedBox(height: 20),
+                SPrimaryButton(
+                  label: sending ? 'جارٍ الإرسال...' : 'أرسل طلب التواصل',
+                  onPressed: sending
+                      ? null
+                      : () async {
+                          if (!(formKey.currentState?.validate() ?? false)) return;
                           setSheetState(() {
-                            sending = false;
-                            inlineError = 'تعذّر إرسال الطلب. حاول مرة ثانية.';
+                            inlineError = null;
+                            sending = true;
                           });
-                        }
-                      },
-              ),
-            ],
+                          try {
+                            await ListingsRepo.submitContactRequest(
+                              listingId: listing.id,
+                              name: nameCtrl.text.trim(),
+                              phone: phoneCtrl.text.trim(),
+                            );
+                            if (!sheetContext.mounted) return;
+                            Navigator.pop(sheetContext);
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('تم إرسال طلب التواصل')),
+                            );
+                          } catch (e) {
+                            setSheetState(() {
+                              sending = false;
+                              inlineError = 'تعذّر إرسال الطلب. حاول مرة ثانية.';
+                            });
+                          }
+                        },
+                ),
+              ],
+            ),
           ),
         ),
       ),

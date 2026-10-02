@@ -80,4 +80,9 @@ class OwnerRepo {
     });
     return ref as String;
   }
+
+  /// طلب حذف — يراجعه الطاقم، ما بيحذف فوراً (الحذف الفعلي عبر مركز التحكم).
+  static Future<void> requestListingDeletion(String listingId) async {
+    await supabase.rpc('my_request_listing_deletion', params: {'p_listing_id': listingId});
+  }
 }

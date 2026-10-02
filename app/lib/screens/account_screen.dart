@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../theme.dart';
 import '../main.dart';
 import '../data/account_repo.dart';
+import '../validators.dart';
+import 'listing_tracking_screen.dart';
+import 'request_tracking_screen.dart';
 
 /// حسابي — طبقة اختيارية فوق التصفّح بدون تسجيل (قاعدة: الحساب اختياري
 /// وإضافي، مش شرط). نفس Supabase Auth المستخدم بـaccount.html بالموقع.
@@ -36,6 +39,7 @@ class _AuthForm extends StatefulWidget {
 }
 
 class _AuthFormState extends State<_AuthForm> {
+  final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   bool _isSignUp = false;
@@ -57,9 +61,8 @@ class _AuthFormState extends State<_AuthForm> {
     super.dispose();
   }
 
-  bool get _canSubmit => _emailCtrl.text.trim().isNotEmpty && _passCtrl.text.length >= 6;
-
   Future<void> _submit() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() {
       _loading = true;
       _error = null;
@@ -80,47 +83,57 @@ class _AuthFormState extends State<_AuthForm> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          Text(
-            _isSignUp ? 'إنشاء حساب' : 'تسجيل الدخول',
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: SColors.navy),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'الحساب اختياري — بيعطيك متابعة لإعلاناتك وطلباتك وإشعارات. التصفّح والإضافة شغّالة بدونه.',
-            style: TextStyle(color: SColors.mut, fontSize: 13, height: 1.6),
-          ),
-          const SizedBox(height: 24),
-          TextField(
-            controller: _emailCtrl,
-            keyboardType: TextInputType.emailAddress,
-            textAlign: TextAlign.right,
-            decoration: const InputDecoration(labelText: 'البريد الإلكتروني', border: OutlineInputBorder()),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _passCtrl,
-            obscureText: true,
-            textAlign: TextAlign.right,
-            decoration: const InputDecoration(labelText: 'كلمة السر (٦ أحرف على الأقل)', border: OutlineInputBorder()),
-          ),
-          if (_error != null) ...[
+      child: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            Text(
+              _isSignUp ? 'إنشاء حساب' : 'تسجيل الدخول',
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: SColors.navy),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'الحساب اختياري — بيعطيك متابعة لإعلاناتك وطلباتك وإشعارات. التصفّح والإضافة شغّالة بدونه.',
+              style: TextStyle(color: SColors.mut, fontSize: 13, height: 1.6),
+            ),
+            const SizedBox(height: 24),
+            TextFormField(
+              controller: _emailCtrl,
+              keyboardType: TextInputType.emailAddress,
+              textAlign: TextAlign.right,
+              decoration: const InputDecoration(labelText: 'البريد الإلكتروني', border: OutlineInputBorder()),
+              validator: (v) {
+                final t = (v ?? '').trim();
+                if (t.isEmpty) return 'البريد الإلكتروني مطلوب';
+                if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(t)) return 'بريد إلكتروني غير صحيح';
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _passCtrl,
+              obscureText: true,
+              textAlign: TextAlign.right,
+              decoration: const InputDecoration(labelText: 'كلمة السر (٦ أحرف على الأقل)', border: OutlineInputBorder()),
+              validator: (v) => (v ?? '').length < 6 ? 'كلمة السر لازم تكون ٦ أحرف على الأقل' : null,
+            ),
+            if (_error != null) ...[
+              const SizedBox(height: 12),
+              Text(_error!, style: const TextStyle(color: SColors.danger, fontSize: 13)),
+            ],
+            const SizedBox(height: 20),
+            SPrimaryButton(
+              label: _loading ? 'جارٍ التحقّق...' : (_isSignUp ? 'إنشاء الحساب' : 'دخول'),
+              onPressed: _loading ? null : _submit,
+            ),
             const SizedBox(height: 12),
-            Text(_error!, style: const TextStyle(color: SColors.danger, fontSize: 13)),
+            TextButton(
+              onPressed: () => setState(() => _isSignUp = !_isSignUp),
+              child: Text(_isSignUp ? 'عندك حساب؟ سجّل دخول' : 'ما عندك حساب؟ أنشئ وحد'),
+            ),
           ],
-          const SizedBox(height: 20),
-          SPrimaryButton(
-            label: _loading ? 'جارٍ التحقّق...' : (_isSignUp ? 'إنشاء الحساب' : 'دخول'),
-            onPressed: (_canSubmit && !_loading) ? _submit : null,
-          ),
-          const SizedBox(height: 12),
-          TextButton(
-            onPressed: () => setState(() => _isSignUp = !_isSignUp),
-            child: Text(_isSignUp ? 'عندك حساب؟ سجّل دخول' : 'ما عندك حساب؟ أنشئ وحد'),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -232,18 +245,11 @@ class _LinkRoleCard extends StatefulWidget {
 }
 
 class _LinkRoleCardState extends State<_LinkRoleCard> {
+  final _formKey = GlobalKey<FormState>();
   String? _role;
   final _nameCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
   bool _submitting = false;
-
-  @override
-  void initState() {
-    super.initState();
-    for (final c in [_nameCtrl, _phoneCtrl]) {
-      c.addListener(() => mounted ? setState(() {}) : null);
-    }
-  }
 
   @override
   void dispose() {
@@ -252,7 +258,22 @@ class _LinkRoleCardState extends State<_LinkRoleCard> {
     super.dispose();
   }
 
+  /// لو الحساب عنده صفة أخرى أصلاً (مالك مثلاً وعم يفعّل باحث)، نفس الاسم
+  /// والرقم غالباً — نعبّيهم تلقائياً، يبقوا قابلين للتعديل.
+  Future<void> _selectRole(String role) async {
+    setState(() => _role = role);
+    if (_nameCtrl.text.trim().isNotEmpty || _phoneCtrl.text.trim().isNotEmpty) return;
+    final otherRole = role == 'owner' ? 'seeker' : 'owner';
+    final profile = await AccountRepo.findProfile(otherRole);
+    if (!mounted || profile == null) return;
+    setState(() {
+      _nameCtrl.text = (profile['first_name'] as String?)?.trim() ?? '';
+      _phoneCtrl.text = (profile['phone'] as String?)?.trim() ?? '';
+    });
+  }
+
   Future<void> _link() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _submitting = true);
     try {
       await AccountRepo.linkRole(role: _role!, name: _nameCtrl.text.trim(), phone: _phoneCtrl.text.trim());
@@ -274,7 +295,9 @@ class _LinkRoleCardState extends State<_LinkRoleCard> {
         color: SColors.blue050,
         borderRadius: BorderRadius.circular(SRadius.md),
       ),
-      child: Column(
+      child: Form(
+        key: _formKey,
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('فعّل صفة جديدة على حسابك', style: TextStyle(fontWeight: FontWeight.bold, color: SColors.navy)),
@@ -286,7 +309,7 @@ class _LinkRoleCardState extends State<_LinkRoleCard> {
                   child: ChoiceChip(
                     label: const Text('مالك'),
                     selected: _role == 'owner',
-                    onSelected: (_) => setState(() => _role = 'owner'),
+                    onSelected: (_) => _selectRole('owner'),
                     selectedColor: SColors.blue600,
                     labelStyle: TextStyle(color: _role == 'owner' ? Colors.white : SColors.navy),
                   ),
@@ -297,7 +320,7 @@ class _LinkRoleCardState extends State<_LinkRoleCard> {
                   child: ChoiceChip(
                     label: const Text('باحث عن سكن'),
                     selected: _role == 'seeker',
-                    onSelected: (_) => setState(() => _role = 'seeker'),
+                    onSelected: (_) => _selectRole('seeker'),
                     selectedColor: SColors.blue600,
                     labelStyle: TextStyle(color: _role == 'seeker' ? Colors.white : SColors.navy),
                   ),
@@ -306,27 +329,28 @@ class _LinkRoleCardState extends State<_LinkRoleCard> {
           ),
           if (_role != null) ...[
             const SizedBox(height: 12),
-            TextField(
+            TextFormField(
               controller: _nameCtrl,
               textAlign: TextAlign.right,
               decoration: const InputDecoration(labelText: 'اسمك', border: OutlineInputBorder(), filled: true, fillColor: Colors.white),
+              validator: (v) => requiredValidator(v, 'اسمك'),
             ),
             const SizedBox(height: 10),
-            TextField(
+            TextFormField(
               controller: _phoneCtrl,
               keyboardType: TextInputType.phone,
               textAlign: TextAlign.right,
               decoration: const InputDecoration(labelText: 'رقم هاتفك', border: OutlineInputBorder(), filled: true, fillColor: Colors.white),
+              validator: phoneValidator,
             ),
             const SizedBox(height: 12),
             SPrimaryButton(
               label: _submitting ? 'جارٍ التفعيل...' : 'تفعيل',
-              onPressed: (_nameCtrl.text.trim().isNotEmpty && _phoneCtrl.text.trim().isNotEmpty && !_submitting)
-                  ? _link
-                  : null,
+              onPressed: _submitting ? null : _link,
             ),
           ],
         ],
+        ),
       ),
     );
   }
@@ -345,27 +369,44 @@ class _OwnerDashboard extends StatelessWidget {
         }
         return Column(
           children: listings.map((l) {
-            return Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: SColors.card,
+            final listing = (l as Map).cast<String, dynamic>();
+            final deletionPending = listing['deletion_requested_at'] != null;
+            return Material(
+              color: SColors.card,
+              borderRadius: BorderRadius.circular(SRadius.md),
+              child: InkWell(
                 borderRadius: BorderRadius.circular(SRadius.md),
-                border: Border.all(color: SColors.line),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(l['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, color: SColors.navy)),
-                        Text('${l['ref']} · ${l['status']}', style: const TextStyle(color: SColors.mut, fontSize: 12)),
-                      ],
-                    ),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => ListingTrackingScreen(listing: listing)),
+                ),
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(SRadius.md),
+                    border: Border.all(color: SColors.line),
                   ),
-                  Text('${l['view_count'] ?? 0} مشاهدة', style: const TextStyle(color: SColors.mut, fontSize: 12)),
-                ],
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(listing['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, color: SColors.navy)),
+                            Text('${listing['ref']} · ${listing['status']}', style: const TextStyle(color: SColors.mut, fontSize: 12)),
+                            if (deletionPending) ...[
+                              const SizedBox(height: 4),
+                              const Text('طلب الحذف قيد المراجعة', style: TextStyle(color: SColors.warn, fontSize: 11)),
+                            ],
+                          ],
+                        ),
+                      ),
+                      Text('${listing['view_count'] ?? 0} مشاهدة', style: const TextStyle(color: SColors.mut, fontSize: 12)),
+                      const SizedBox(width: 6),
+                      const Icon(Icons.chevron_left, color: SColors.mut, size: 18),
+                    ],
+                  ),
+                ),
               ),
             );
           }).toList(),
@@ -388,21 +429,43 @@ class _SeekerDashboard extends StatelessWidget {
         }
         return Column(
           children: requests.map((r) {
-            return Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: SColors.card,
+            final request = (r as Map).cast<String, dynamic>();
+            final deletionPending = request['deletion_requested_at'] != null;
+            return Material(
+              color: SColors.card,
+              borderRadius: BorderRadius.circular(SRadius.md),
+              child: InkWell(
                 borderRadius: BorderRadius.circular(SRadius.md),
-                border: Border.all(color: SColors.line),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text('${r['city']} · ${r['status']}', style: const TextStyle(color: SColors.navy)),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => RequestTrackingScreen(request: request)),
+                ),
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(SRadius.md),
+                    border: Border.all(color: SColors.line),
                   ),
-                  Text('${r['budget_max']} شيكل', style: const TextStyle(color: SColors.blue700, fontWeight: FontWeight.bold)),
-                ],
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('${request['city']} · ${request['status']}', style: const TextStyle(color: SColors.navy)),
+                            if (deletionPending) ...[
+                              const SizedBox(height: 4),
+                              const Text('طلب الحذف قيد المراجعة', style: TextStyle(color: SColors.warn, fontSize: 11)),
+                            ],
+                          ],
+                        ),
+                      ),
+                      Text('${request['budget_max']} شيكل', style: const TextStyle(color: SColors.blue700, fontWeight: FontWeight.bold)),
+                      const SizedBox(width: 6),
+                      const Icon(Icons.chevron_left, color: SColors.mut, size: 18),
+                    ],
+                  ),
+                ),
               ),
             );
           }).toList(),

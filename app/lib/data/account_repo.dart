@@ -19,6 +19,21 @@ class AccountRepo {
     return res as List<dynamic>;
   }
 
+  static bool get isLoggedIn => supabase.auth.currentSession != null;
+
+  /// بروفايل مسجَّل بصفة [role] على الحساب الحالي، أو null لو ما في. يُستخدم
+  /// لتفادي سؤال المستخدم عن اسمه ورقمه من جديد وهو مسجّل دخول أصلاً
+  /// (قاعدة "الحساب اختياري وإضافي" — صفر طلب تسجيل، بس ما لازم نكرر سؤال
+  /// معلومات موجودة أصلاً بالحساب).
+  static Future<Map<String, dynamic>?> findProfile(String role) async {
+    if (!isLoggedIn) return null;
+    final profiles = await myProfile();
+    for (final p in profiles) {
+      if (p is Map && p['role'] == role) return p.cast<String, dynamic>();
+    }
+    return null;
+  }
+
   static Future<void> linkRole({
     required String role,
     required String name,

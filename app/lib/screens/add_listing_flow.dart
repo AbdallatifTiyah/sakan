@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../theme.dart';
 import '../features.dart';
+import '../data/account_repo.dart';
 import '../data/locations_repo.dart';
 import '../data/owner_repo.dart';
 import '../data/storage_repo.dart';
+import '../validators.dart';
 
 const _kinds = [
   ('apartment', 'شقة كاملة'),
@@ -73,15 +75,47 @@ class _AddListingFlowState extends State<AddListingFlow> {
   String? _promoMessage;
   bool _checkingPromo = false;
 
+  // أخطاء حقول الاختيار (chips) اللي ما إلها TextFormField — المدينة
+  // والمنطقة والصور. بتُعرض بس عند الضغط على "التالي" بخطوتها (قاعدة
+  // التحقّق الظاهر: زر مفعّل دايماً، والحقل الناقص يوضَّح عند المحاولة).
+  String? _cityError;
+  String? _areaError;
+  String? _photosError;
+  final Map<int, GlobalKey<FormState>> _formKeys = {
+    2: GlobalKey<FormState>(),
+    3: GlobalKey<FormState>(),
+    7: GlobalKey<FormState>(),
+  };
+
+  /// بروفايل مالك على الحساب المسجَّل دخوله، لو موجود — يُستخدم لتعبئة
+  /// الاسم والرقم تلقائياً وإخفاء خطوة "معلوماتك" (قاعدة: ما تسأل معلومات
+  /// موجودة أصلاً بالحساب).
+  bool get _hasOwnerPrefill => _nameCtrl.text.trim().isNotEmpty && _phoneCtrl.text.trim().isNotEmpty && _ownerPrefilled;
+  bool _ownerPrefilled = false;
+
   @override
   void initState() {
     super.initState();
     _loadCities();
-    // بدون هالـlisteners، الكتابة بالحقول ما بتعيد تقييم _canProceed —
-    // زر "التالي" بيضل معطّل حتى لو الحقل اتعبّى (باگ حي اكتُشف بفحص المحاكي).
+    _prefillFromAccount();
+    // بدون هالـlisteners، الكتابة بالحقول ما بتعيد تقييم الواجهة —
+    // بعض الخطوات بتعرض معاينة فورية (رسم النجاح، اسم افتراضي للإعلان).
     for (final c in [_priceCtrl, _nameCtrl, _phoneCtrl]) {
       c.addListener(_onFormFieldChanged);
     }
+  }
+
+  Future<void> _prefillFromAccount() async {
+    final profile = await AccountRepo.findProfile('owner');
+    if (!mounted || profile == null) return;
+    final name = (profile['first_name'] as String?)?.trim() ?? '';
+    final phone = (profile['phone'] as String?)?.trim() ?? '';
+    if (name.isEmpty || phone.isEmpty) return;
+    setState(() {
+      _nameCtrl.text = name;
+      _phoneCtrl.text = phone;
+      _ownerPrefilled = true;
+    });
   }
 
   void _onFormFieldChanged() {
@@ -173,26 +207,25 @@ class _AddListingFlowState extends State<AddListingFlow> {
     }
   }
 
-  bool get _canProceed {
-    switch (_step) {
+  /// تحقّق ظاهر بدل تعطيل صامت: الزر مفعّل دايماً، وهاي بترجع false وتعرض
+  /// سبب الرفض تحت الحقل الناقص لو الخطوة الحالية غير مكتملة.
+  bool _validateStep(int step) {
+    switch (step) {
       case 0:
+        setState(() => _cityError = _city == null ? 'اختر مدينة' : null);
         return _city != null;
       case 1:
+        setState(() => _areaError = _area == null ? 'اختر منطقة' : null);
         return _area != null;
       case 2:
-        return _priceCtrl.text.trim().isNotEmpty && num.tryParse(_priceCtrl.text.trim()) != null;
       case 3:
-        return true;
-      case 4:
-        return true;
-      case 5:
-        return true;
-      case 6:
-        return _photos.isNotEmpty;
       case 7:
-        return _nameCtrl.text.trim().isNotEmpty && _phoneCtrl.text.trim().isNotEmpty;
+        return _formKeys[step]?.currentState?.validate() ?? true;
+      case 6:
+        setState(() => _photosError = _photos.isEmpty ? 'أضف صورة واحدة على الأقل' : null);
+        return _photos.isNotEmpty;
       default:
-        return false;
+        return true;
     }
   }
 
@@ -266,6 +299,7 @@ class _AddListingFlowState extends State<AddListingFlow> {
   }
 
   void _next() {
+    if (!_validateStep(_step)) return;
     if (_step == 1) _loadFeeQuote();
     if (_step < _totalSteps - 1) {
       setState(() => _step++);
@@ -314,7 +348,7 @@ class _AddListingFlowState extends State<AddListingFlow> {
                               ? 'أرسل للمراجعة'
                               : 'التالي',
                       icon: _step == _totalSteps - 1 ? null : Icons.arrow_back,
-                      onPressed: (_canProceed && !_submitting) ? _next : null,
+                      onPressed: _submitting ? null : _next,
                     ),
                   ),
                 ],
@@ -329,7 +363,7 @@ class _AddListingFlowState extends State<AddListingFlow> {
   Widget _buildStep() {
     switch (_step) {
       case 0:
-        return _CityStep(cities: _cities, selected: _city, onSelect: _onCitySelected);
+        return _CityStep(cities: _cities, selected: _city, onSelect: _onCitySelected, error: _cityError);
       case 1:
         return _AreaKindStep(
           areas: _areas,
@@ -340,24 +374,31 @@ class _AddListingFlowState extends State<AddListingFlow> {
           onNeighborhoodSelected: (n) => setState(() => _neighborhood = (_neighborhood?.id == n.id) ? null : n),
           kind: _kind,
           onKindChanged: (k) => setState(() => _kind = k),
+          error: _areaError,
         );
       case 2:
-        return _PriceStep(
-          priceCtrl: _priceCtrl,
-          depositCtrl: _depositCtrl,
-          currency: _currency,
-          onCurrencyChanged: (c) => setState(() => _currency = c),
+        return Form(
+          key: _formKeys[2],
+          child: _PriceStep(
+            priceCtrl: _priceCtrl,
+            depositCtrl: _depositCtrl,
+            currency: _currency,
+            onCurrencyChanged: (c) => setState(() => _currency = c),
+          ),
         );
       case 3:
-        return _DetailsStep(
-          roomsCtrl: _roomsCtrl,
-          minStayCtrl: _minStayCtrl,
-          availableFrom: _availableFrom,
-          onDateChanged: (d) => setState(() => _availableFrom = d),
-          furnished: _furnished,
-          onFurnishedChanged: (v) => setState(() => _furnished = v),
-          genderPol: _genderPol,
-          onGenderChanged: (g) => setState(() => _genderPol = g),
+        return Form(
+          key: _formKeys[3],
+          child: _DetailsStep(
+            roomsCtrl: _roomsCtrl,
+            minStayCtrl: _minStayCtrl,
+            availableFrom: _availableFrom,
+            onDateChanged: (d) => setState(() => _availableFrom = d),
+            furnished: _furnished,
+            onFurnishedChanged: (v) => setState(() => _furnished = v),
+            genderPol: _genderPol,
+            onGenderChanged: (g) => setState(() => _genderPol = g),
+          ),
         );
       case 4:
         return _BillsFeaturesStep(
@@ -385,17 +426,26 @@ class _AddListingFlowState extends State<AddListingFlow> {
           occupantsNoteCtrl: _occupantsNoteCtrl,
         );
       case 6:
-        return _PhotosStep(photos: _photos, onAdd: _pickPhotos, onRemove: (i) => setState(() => _photos.removeAt(i)));
+        return _PhotosStep(
+          photos: _photos,
+          onAdd: _pickPhotos,
+          onRemove: (i) => setState(() => _photos.removeAt(i)),
+          error: _photosError,
+        );
       case 7:
-        return _ContactPromoStep(
-          nameCtrl: _nameCtrl,
-          phoneCtrl: _phoneCtrl,
-          promoCtrl: _promoCtrl,
-          feeBefore: _feeBefore,
-          feeAfter: _feeAfter,
-          promoMessage: _promoMessage,
-          checkingPromo: _checkingPromo,
-          onApplyPromo: _applyPromo,
+        return Form(
+          key: _formKeys[7],
+          child: _ContactPromoStep(
+            nameCtrl: _nameCtrl,
+            phoneCtrl: _phoneCtrl,
+            promoCtrl: _promoCtrl,
+            feeBefore: _feeBefore,
+            feeAfter: _feeAfter,
+            promoMessage: _promoMessage,
+            checkingPromo: _checkingPromo,
+            onApplyPromo: _applyPromo,
+            showContactFields: !_hasOwnerPrefill,
+          ),
         );
       default:
         return const SizedBox.shrink();
@@ -494,7 +544,8 @@ class _CityStep extends StatelessWidget {
   final List<SCity> cities;
   final SCity? selected;
   final ValueChanged<SCity> onSelect;
-  const _CityStep({required this.cities, required this.selected, required this.onSelect});
+  final String? error;
+  const _CityStep({required this.cities, required this.selected, required this.onSelect, this.error});
 
   @override
   Widget build(BuildContext context) {
@@ -506,6 +557,10 @@ class _CityStep extends StatelessWidget {
       children: [
         const _StepTitle(title: 'وين شقتك؟', subtitle: 'سؤال واحد بس عشان نبدأ — باقي التفاصيل بالخطوات الجاية.'),
         for (final c in cities) _ChoiceRow(label: c.nameAr, selected: selected?.id == c.id, onTap: () => onSelect(c)),
+        if (error != null) ...[
+          const SizedBox(height: 8),
+          Text(error!, style: const TextStyle(color: SColors.danger, fontSize: 13)),
+        ],
       ],
     );
   }
@@ -520,6 +575,7 @@ class _AreaKindStep extends StatelessWidget {
   final ValueChanged<SNeighborhood> onNeighborhoodSelected;
   final String kind;
   final ValueChanged<String> onKindChanged;
+  final String? error;
   const _AreaKindStep({
     required this.areas,
     required this.selectedArea,
@@ -529,6 +585,7 @@ class _AreaKindStep extends StatelessWidget {
     required this.onNeighborhoodSelected,
     required this.kind,
     required this.onKindChanged,
+    this.error,
   });
 
   @override
@@ -560,6 +617,10 @@ class _AreaKindStep extends StatelessWidget {
                     ))
                 .toList(),
           ),
+        if (error != null) ...[
+          const SizedBox(height: 8),
+          Text(error!, style: const TextStyle(color: SColors.danger, fontSize: 13)),
+        ],
         if (neighborhoods.isNotEmpty) ...[
           const SizedBox(height: 24),
           const Text('الموقع (اختياري)', style: TextStyle(fontWeight: FontWeight.bold, color: SColors.navy)),
@@ -626,18 +687,20 @@ class _PriceStep extends StatelessWidget {
               .toList(),
         ),
         const SizedBox(height: 20),
-        TextField(
+        TextFormField(
           controller: priceCtrl,
           keyboardType: TextInputType.number,
           textAlign: TextAlign.right,
           decoration: const InputDecoration(labelText: 'السعر الشهري', border: OutlineInputBorder()),
+          validator: (v) => numericValidator(v, min: 1, label: 'السعر الشهري'),
         ),
         const SizedBox(height: 16),
-        TextField(
+        TextFormField(
           controller: depositCtrl,
           keyboardType: TextInputType.number,
           textAlign: TextAlign.right,
           decoration: const InputDecoration(labelText: 'مبلغ التأمين (اختياري)', border: OutlineInputBorder()),
+          validator: (v) => numericValidator(v, required: false, min: 0, label: 'مبلغ التأمين'),
         ),
       ],
     );
@@ -672,20 +735,22 @@ class _DetailsStep extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: TextField(
+              child: TextFormField(
                 controller: roomsCtrl,
                 keyboardType: TextInputType.number,
                 textAlign: TextAlign.right,
                 decoration: const InputDecoration(labelText: 'عدد الغرف', border: OutlineInputBorder()),
+                validator: (v) => integerValidator(v, min: 1, label: 'عدد الغرف'),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: TextField(
+              child: TextFormField(
                 controller: minStayCtrl,
                 keyboardType: TextInputType.number,
                 textAlign: TextAlign.right,
                 decoration: const InputDecoration(labelText: 'أقل مدة (أشهر)', border: OutlineInputBorder()),
+                validator: (v) => integerValidator(v, min: 1, label: 'أقل مدة'),
               ),
             ),
           ],
@@ -849,7 +914,8 @@ class _PhotosStep extends StatelessWidget {
   final List<XFile> photos;
   final VoidCallback onAdd;
   final ValueChanged<int> onRemove;
-  const _PhotosStep({required this.photos, required this.onAdd, required this.onRemove});
+  final String? error;
+  const _PhotosStep({required this.photos, required this.onAdd, required this.onRemove, this.error});
 
   @override
   Widget build(BuildContext context) {
@@ -903,6 +969,10 @@ class _PhotosStep extends StatelessWidget {
             );
           },
         ),
+        if (error != null) ...[
+          const SizedBox(height: 8),
+          Text(error!, style: const TextStyle(color: SColors.danger, fontSize: 13)),
+        ],
       ],
     );
   }
@@ -914,6 +984,7 @@ class _ContactPromoStep extends StatelessWidget {
   final String? promoMessage;
   final bool checkingPromo;
   final VoidCallback onApplyPromo;
+  final bool showContactFields;
   const _ContactPromoStep({
     required this.nameCtrl,
     required this.phoneCtrl,
@@ -923,6 +994,7 @@ class _ContactPromoStep extends StatelessWidget {
     required this.promoMessage,
     required this.checkingPromo,
     required this.onApplyPromo,
+    this.showContactFields = true,
   });
 
   @override
@@ -931,18 +1003,41 @@ class _ContactPromoStep extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const _StepTitle(title: 'معلوماتك'),
-        TextField(
-          controller: nameCtrl,
-          textAlign: TextAlign.right,
-          decoration: const InputDecoration(labelText: 'اسمك', border: OutlineInputBorder()),
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          controller: phoneCtrl,
-          keyboardType: TextInputType.phone,
-          textAlign: TextAlign.right,
-          decoration: const InputDecoration(labelText: 'رقم هاتفك', border: OutlineInputBorder()),
-        ),
+        if (showContactFields) ...[
+          TextFormField(
+            controller: nameCtrl,
+            textAlign: TextAlign.right,
+            decoration: const InputDecoration(labelText: 'اسمك', border: OutlineInputBorder()),
+            validator: (v) => requiredValidator(v, 'اسمك'),
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: phoneCtrl,
+            keyboardType: TextInputType.phone,
+            textAlign: TextAlign.right,
+            decoration: const InputDecoration(labelText: 'رقم هاتفك', border: OutlineInputBorder()),
+            validator: phoneValidator,
+          ),
+        ] else
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: SColors.blue050,
+              borderRadius: BorderRadius.circular(SRadius.md),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.verified_user_outlined, color: SColors.blue600, size: 20),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'بنستخدم معلوماتك المسجّلة: ${nameCtrl.text} · ${phoneCtrl.text}',
+                    style: const TextStyle(color: SColors.navy, fontWeight: FontWeight.w600, fontSize: 13),
+                  ),
+                ),
+              ],
+            ),
+          ),
         const SizedBox(height: 20),
         Row(
           children: [
