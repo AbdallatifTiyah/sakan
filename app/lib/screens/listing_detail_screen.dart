@@ -1,18 +1,185 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart' show Share;
 import '../theme.dart';
-import '../mock_data.dart';
+import '../models/listing.dart';
+import '../data/listings_repo.dart';
 import '../features.dart';
-import '../widgets/mock_photo.dart';
+import '../widgets/listing_photo.dart';
 import '../widgets/verification_ribbon.dart';
 import '../widgets/approx_radius_badge.dart';
 
-class ListingDetailScreen extends StatelessWidget {
-  const ListingDetailScreen({super.key});
+class ListingDetailScreen extends StatefulWidget {
+  final String listingId;
+  const ListingDetailScreen({super.key, required this.listingId});
+
+  @override
+  State<ListingDetailScreen> createState() => _ListingDetailScreenState();
+}
+
+class _ListingDetailScreenState extends State<ListingDetailScreen> {
+  Listing? _listing;
+  bool _loading = true;
+  String? _error;
+  int _photoIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final listing = await ListingsRepo.fetchListingById(widget.listingId);
+      if (!mounted) return;
+      if (listing == null) {
+        setState(() {
+          _error = 'هذا الإعلان لم يعد متاحاً.';
+          _loading = false;
+        });
+        return;
+      }
+      setState(() {
+        _listing = listing;
+        _loading = false;
+      });
+      ListingsRepo.bumpView(widget.listingId);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = 'تعذّر تحميل البيانات. تأكد من الاتصال وحاول مرة ثانية.';
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _openContactSheet() async {
+    final listing = _listing;
+    if (listing == null) return;
+    final nameCtrl = TextEditingController();
+    final phoneCtrl = TextEditingController();
+    var sending = false;
+    String? inlineError;
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: SColors.card,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(SRadius.lg)),
+      ),
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (sheetContext, setSheetState) => Padding(
+          padding: EdgeInsets.fromLTRB(
+            20,
+            20,
+            20,
+            20 + MediaQuery.of(sheetContext).viewInsets.bottom,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'اطلب التواصل',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: SColors.navy),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'بنوصلك مع المالك بأسرع وقت.',
+                style: TextStyle(color: SColors.mut, fontSize: 13),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: nameCtrl,
+                textAlign: TextAlign.right,
+                decoration: const InputDecoration(labelText: 'اسمك', border: OutlineInputBorder()),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: phoneCtrl,
+                textAlign: TextAlign.right,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(labelText: 'رقم هاتفك', border: OutlineInputBorder()),
+              ),
+              if (inlineError != null) ...[
+                const SizedBox(height: 12),
+                Text(inlineError!, style: const TextStyle(color: SColors.danger, fontSize: 13)),
+              ],
+              const SizedBox(height: 20),
+              SPrimaryButton(
+                label: sending ? 'جارٍ الإرسال...' : 'أرسل طلب التواصل',
+                onPressed: sending
+                    ? null
+                    : () async {
+                        if (nameCtrl.text.trim().isEmpty || phoneCtrl.text.trim().isEmpty) {
+                          // SnackBar هون بيختفي وراء الـbottom sheet نفسه (ترتيب
+                          // طبقات Flutter الافتراضي) — نص داخلي بدل SnackBar.
+                          setSheetState(() => inlineError = 'الاسم ورقم الهاتف مطلوبان');
+                          return;
+                        }
+                        setSheetState(() {
+                          inlineError = null;
+                          sending = true;
+                        });
+                        try {
+                          await ListingsRepo.submitContactRequest(
+                            listingId: listing.id,
+                            name: nameCtrl.text.trim(),
+                            phone: phoneCtrl.text.trim(),
+                          );
+                          if (!sheetContext.mounted) return;
+                          Navigator.pop(sheetContext);
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('تم إرسال طلب التواصل')),
+                          );
+                        } catch (e) {
+                          setSheetState(() {
+                            sending = false;
+                            inlineError = 'تعذّر إرسال الطلب. حاول مرة ثانية.';
+                          });
+                        }
+                      },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final listing = mockListingDetail;
+    if (_loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (_error != null || _listing == null) {
+      return Scaffold(
+        appBar: AppBar(leading: IconButton(icon: const Icon(Icons.arrow_forward), onPressed: () => Navigator.pop(context))),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error_outline, size: 40, color: SColors.mut),
+                const SizedBox(height: 12),
+                Text(_error ?? '', textAlign: TextAlign.center, style: const TextStyle(color: SColors.mut)),
+                const SizedBox(height: 16),
+                SSecondaryButton(label: 'إعادة المحاولة', onPressed: _load),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
+    final listing = _listing!;
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -22,7 +189,10 @@ class ListingDetailScreen extends StatelessWidget {
             expandedHeight: 260,
             leading: _CircleIconButton(icon: Icons.arrow_forward, onTap: () => Navigator.pop(context)),
             actions: [
-              _CircleIconButton(icon: Icons.share_outlined, onTap: () {}),
+              _CircleIconButton(
+                icon: Icons.share_outlined,
+                onTap: () => Share.share('شوف هاد السكن على سكنّا: https://sakanna.ps/?l=${listing.ref}'),
+              ),
               const SizedBox(width: 8),
               _CircleIconButton(icon: Icons.favorite_border, onTap: () {}),
               const SizedBox(width: 8),
@@ -31,27 +201,32 @@ class ListingDetailScreen extends StatelessWidget {
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  const MockPhoto(),
-                  Positioned(
-                    left: 16,
-                    bottom: 16,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.55),
-                        borderRadius: BorderRadius.circular(SRadius.pill),
-                      ),
-                      // Directionality صريحة: "1 / 2" سلسلة أرقام ضعيفة الاتجاه،
-                      // والفقرة المحيطة RTL بتعكس ترتيبها البصري بدون هالإجبار.
-                      child: Directionality(
-                        textDirection: TextDirection.ltr,
-                        child: Text(
-                          '1 / ${listing.images.length}',
-                          style: const TextStyle(color: Colors.white, fontSize: 12),
+                  PageView.builder(
+                    itemCount: listing.images.isEmpty ? 1 : listing.images.length,
+                    onPageChanged: (i) => setState(() => _photoIndex = i),
+                    itemBuilder: (context, i) => ListingPhoto(
+                      url: listing.images.isNotEmpty ? listing.images[i] : null,
+                    ),
+                  ),
+                  if (listing.images.length > 1)
+                    Positioned(
+                      left: 16,
+                      bottom: 16,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.55),
+                          borderRadius: BorderRadius.circular(SRadius.pill),
+                        ),
+                        child: Directionality(
+                          textDirection: TextDirection.ltr,
+                          child: Text(
+                            '${_photoIndex + 1} / ${listing.images.length}',
+                            style: const TextStyle(color: Colors.white, fontSize: 12),
+                          ),
                         ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -68,7 +243,7 @@ class ListingDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '${listing.price} ${listing.currencySymbol} / شهر',
+                    '${listing.price.toStringAsFixed(0)} ${listing.currencySymbol} / ${listing.rentalPeriodLabel}',
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: SColors.blue700),
                   ),
                   const SizedBox(height: 12),
@@ -79,7 +254,7 @@ class ListingDetailScreen extends StatelessWidget {
                       Expanded(
                         child: Text(
                           '${listing.area}، ${listing.city}'
-                          '${listing.landmark != null ? " — ${listing.landmark}" : ""}',
+                          '${listing.landmark != null && listing.landmark!.isNotEmpty ? " — ${listing.landmark}" : ""}',
                           style: const TextStyle(color: SColors.mut),
                         ),
                       ),
@@ -90,14 +265,15 @@ class ListingDetailScreen extends StatelessWidget {
                   if (listing.verification != SVerification.none)
                     VerificationRibbon(
                       level: listing.verification,
-                      date: listing.verifiedDate,
+                      date: listing.verifiedAt,
                       playEntranceAnimation: true,
                     ),
                   const SizedBox(height: 20),
                   Row(
                     children: [
-                      _StatBox(icon: Icons.bed_outlined, label: 'الغرف', value: '${listing.rooms}'),
-                      const SizedBox(width: 12),
+                      if (listing.roomsTotal != null)
+                        _StatBox(icon: Icons.bed_outlined, label: 'الغرف', value: '${listing.roomsTotal}'),
+                      if (listing.roomsTotal != null) const SizedBox(width: 12),
                       _StatBox(
                         icon: Icons.checkroom_outlined,
                         label: 'الفرش',
@@ -105,6 +281,16 @@ class ListingDetailScreen extends StatelessWidget {
                       ),
                     ],
                   ),
+                  if (listing.minStayMonths != null) ...[
+                    const SizedBox(height: 12),
+                    Text('أقل مدة إيجار: ${listing.minStayMonths} شهر', style: const TextStyle(color: SColors.mut)),
+                  ],
+                  if (listing.description != null && listing.description!.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    const Text('الوصف', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: SColors.navy)),
+                    const SizedBox(height: 10),
+                    Text(listing.description!, style: const TextStyle(color: SColors.navy, height: 1.6)),
+                  ],
                   const SizedBox(height: 24),
                   const Text('الفواتير', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: SColors.navy)),
                   const SizedBox(height: 10),
@@ -117,24 +303,26 @@ class ListingDetailScreen extends StatelessWidget {
                       _BillChip(label: 'إنترنت', included: listing.billsInternet),
                     ],
                   ),
-                  const SizedBox(height: 24),
-                  const Text('المواصفات', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: SColors.navy)),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: listing.features
-                        .map((f) => Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: SColors.blue050,
-                                borderRadius: BorderRadius.circular(SRadius.sm),
-                                border: Border.all(color: SColors.line),
-                              ),
-                              child: Text(featureLabel(f), style: const TextStyle(fontSize: 13, color: SColors.navy)),
-                            ))
-                        .toList(),
-                  ),
+                  if (listing.features.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    const Text('المواصفات', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: SColors.navy)),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: listing.features
+                          .map((f) => Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: SColors.blue050,
+                                  borderRadius: BorderRadius.circular(SRadius.sm),
+                                  border: Border.all(color: SColors.line),
+                                ),
+                                child: Text(featureLabel(f), style: const TextStyle(fontSize: 13, color: SColors.navy)),
+                              ))
+                          .toList(),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -147,7 +335,7 @@ class ListingDetailScreen extends StatelessWidget {
           child: SPrimaryButton(
             label: 'أرسل طلب التواصل',
             icon: Icons.chat_bubble_outline,
-            onPressed: () {},
+            onPressed: _openContactSheet,
           ),
         ),
       ),

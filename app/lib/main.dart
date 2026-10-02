@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'theme.dart';
+import 'supabase_config.dart';
 import 'screens/home_screen.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Supabase.initialize(url: sSupabaseUrl, publishableKey: sSupabaseAnonKey);
   runApp(const SakannaApp());
 }
+
+final supabase = Supabase.instance.client;
 
 class SakannaApp extends StatelessWidget {
   const SakannaApp({super.key});

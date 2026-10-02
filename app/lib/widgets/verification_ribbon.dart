@@ -53,12 +53,19 @@ class _VerificationRibbonState extends State<VerificationRibbon>
 
   @override
   Widget build(BuildContext context) {
-    if (widget.level == SVerification.none || widget.level == SVerification.desk) {
+    if (widget.level == SVerification.none) {
       return const SizedBox.shrink();
     }
     final isField = widget.level == SVerification.field;
-    final label = isField ? 'موثّق بزيارة ميدانية' : 'موثّق بمكالمة فيديو';
-    final dateStr = widget.date != null ? ' — ${_formatDate(widget.date!)}' : '';
+    final isDesk = widget.level == SVerification.desk;
+    // نص desk طبق الأصل عن VER.desk بـindex.html — شارة قديمة بلا تاريخ لصفوف
+    // تاريخية فقط (صفر صفوف desk حالياً بالقاعدة الحية، تحقّق ٢٠٢٦-١٠-٠٢).
+    final label = isField
+        ? 'موثّق بزيارة ميدانية'
+        : isDesk
+            ? '✓ موثّق هاتفياً'
+            : 'موثّق بمكالمة فيديو';
+    final dateStr = !isDesk && widget.date != null ? ' — ${_formatDate(widget.date!)}' : '';
 
     final content = Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -71,7 +78,11 @@ class _VerificationRibbonState extends State<VerificationRibbon>
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            isField ? Icons.check_circle : Icons.play_circle_outline,
+            isField
+                ? Icons.check_circle
+                : isDesk
+                    ? Icons.phone_outlined
+                    : Icons.play_circle_outline,
             size: 18,
             color: isField ? SColors.amberInk : SColors.blue600,
           ),
