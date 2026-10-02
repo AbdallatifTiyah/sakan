@@ -2,6 +2,13 @@ import '../main.dart';
 
 /// استدعاء submit_request() حرفياً — صفر منطق عمل بالتطبيق.
 class SeekerRepo {
+  /// طلبات الباحثين المنشورة — نفس v_requests_public المستخدمة بالموقع، قراءة
+  /// عامة بمفتاح anon (قاعدة ٢). تُستخدم بشاشة "الباحثين" لعرض الطلب الفعلي.
+  static Future<List<Map<String, dynamic>>> fetchPublicRequests() async {
+    final rows = await supabase.from('v_requests_public').select().order('created_at', ascending: false).limit(30);
+    return (rows as List).map((r) => (r as Map).cast<String, dynamic>()).toList();
+  }
+
   static Future<String> submitRequest({
     required String name,
     required String phone,
