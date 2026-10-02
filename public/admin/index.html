@@ -733,7 +733,7 @@ function renderQueue(f){
     ${rows.map(r=>`<tr data-id="${r.id}">
       <td class="ref">${esc(r.ref)}</td>
       <td>${esc(r.title)}</td>
-      <td>${esc(r.area)}</td>
+      <td>${esc(r.area)}${r.neighborhood?" — "+esc(r.neighborhood):""}</td>
       <td class="num">${priceStr(r.price,r.currency)}</td>
       <td class="num">${r.rooms_total||"—"}</td>
       <td class="num">${r.min_stay_months?r.min_stay_months+" شهر":"—"}</td>
@@ -776,7 +776,7 @@ function rentedFlow(r){
     <h3>تعليم مؤجّر</h3>
     <dl class="dl" style="grid-template-columns:82px 1fr">
       <dt>الإعلان</dt><dd><span class="ref">${esc(r.ref)}</span> ${esc(r.title)}</dd>
-      <dt>الموقع</dt><dd>${esc(r.city)} — ${esc(r.area)}</dd>
+      <dt>الموقع</dt><dd>${esc(r.city)} — ${esc(r.area)}${r.neighborhood?" — "+esc(r.neighborhood):""}</dd>
       <dt>السعر</dt><dd class="num">${priceStr(r.price,r.currency)}</dd>
       <dt>المالك</dt><dd>${esc(r.owner_name)} · <span class="phone">${esc(r.owner_phone)}</span></dd>
     </dl>
@@ -888,7 +888,7 @@ async function loadListings(f){
     ${rows.map(r=>`<tr data-id="${r.id}">
       <td class="ref">${esc(r.ref)}</td>
       <td>${esc(r.title)}${r.open_reports>0?' <span class="tag t-open">'+r.open_reports+' بلاغ</span>':""}</td>
-      <td>${esc(r.area)}</td>
+      <td>${esc(r.area)}${r.neighborhood?" — "+esc(r.neighborhood):""}</td>
       <td class="num">${priceStr(r.price,r.currency)}</td>
       <td>${esc(L_PERIOD[r.rental_period]||r.rental_period)}</td>
       <td>${tag(r.status, L_STATUS)}</td>
@@ -958,7 +958,7 @@ async function drawListing(id){
     <dt>فاتورة المياه</dt><dd>${yn(r.bills_water)}</dd>
     <dt>فاتورة الكهرباء</dt><dd>${yn(r.bills_electricity)}</dd>
     <dt>فاتورة الإنترنت</dt><dd>${yn(r.bills_internet)}</dd>
-    <dt>الموقع</dt><dd>${esc(r.city)} — ${esc(r.area)}${r.landmark?" · "+esc(r.landmark):""}</dd>
+    <dt>الموقع</dt><dd>${esc(r.city)} — ${esc(r.area)}${r.neighborhood?" — "+esc(r.neighborhood):""}${r.landmark?" · "+esc(r.landmark):""}</dd>
     <dt>العنوان الدقيق</dt><dd>${esc(r.exact_address)||'<span style="color:var(--mute)">غير مسجّل</span>'}</dd>
     <dt>السياسة</dt><dd>${esc(L_POL[r.gender_pol]||r.gender_pol)} · ${r.furnished?"مفروش":"غير مفروش"}</dd>
     <dt>الساكنون</dt><dd>${esc(r.occupants_note)||"—"}</dd>
@@ -1004,6 +1004,7 @@ async function drawListing(id){
       <div class="field"><label>الساكنون حالياً</label><input id="elOcc"></div>
       <div class="field"><label>المدينة</label><select id="elCity"></select></div>
       <div class="field"><label>المنطقة</label><select id="elArea"></select></div>
+      <div class="field"><label>الموقع (الحي)</label><select id="elNeigh"></select></div>
       <div class="field"><label>مواصفات السكن</label><div id="elFeats">
         ${Object.entries(FEATURE_LABELS_AR).map(([slug,label],i)=>
           `<div class="chk"><input type="checkbox" id="ef${i}" data-slug="${slug}"><label for="ef${i}">${label}</label></div>`).join("")}
@@ -1168,15 +1169,25 @@ async function drawListing(id){
     });
     const cities = S.cache.cities || (S.cache.cities = await get("/cities?select=id,name_ar&order=id"));
     const areas = S.cache.areas || (S.cache.areas = await get("/areas?select=id,name_ar,city_id&order=city_id,sort_order"));
+    const neighs = S.cache.neighs || (S.cache.neighs = await get("/neighborhoods?select=id,name_ar,area_id&order=area_id,sort_order"));
     $("#elCity").innerHTML = cities.map(c=>`<option value="${c.id}">${esc(c.name_ar)}</option>`).join("");
     $("#elCity").value = r.city_id;
+    const paintNeighs = () => {
+      const aid = Number($("#elArea").value);
+      const list = neighs.filter(n=>n.area_id===aid);
+      $("#elNeigh").innerHTML = `<option value="">بدون تحديد</option>` +
+        list.map(n=>`<option value="${n.id}">${esc(n.name_ar)}</option>`).join("");
+      $("#elNeigh").value = r.neighborhood_id || "";
+    };
     const paintAreas = () => {
       const cid = Number($("#elCity").value);
       $("#elArea").innerHTML = areas.filter(a=>a.city_id===cid).map(a=>`<option value="${a.id}">${esc(a.name_ar)}</option>`).join("");
       $("#elArea").value = r.area_id;
+      paintNeighs();
     };
     paintAreas();
     $("#elCity").onchange = paintAreas;
+    $("#elArea").onchange = paintNeighs;
   }
   const saveListingEdit = $("#saveListingEdit");
   if(saveListingEdit) saveListingEdit.onclick = async () => {
@@ -1203,7 +1214,8 @@ async function drawListing(id){
         p_landmark: $("#elLand").value.trim() || null,
         p_occ: $("#elOcc").value.trim() || null,
         p_features: feats,
-        p_area: Number($("#elArea").value)
+        p_area: Number($("#elArea").value),
+        p_neighborhood: $("#elNeigh").value ? Number($("#elNeigh").value) : null
       });
       toast("انحفظت تعديلات الإعلان.", "ok");
       openDrawer("listing", r.id); go(S.view);
@@ -1512,7 +1524,7 @@ async function vPipeline(){
         <td>${esc(r.seeker_profile_name||r.seeker_name)} ${lvl(r.seeker_level)}</td>
         <td class="phone">${esc(r.seeker_profile_phone||r.seeker_phone)}</td>
         <td><div class="ref">${esc(r.listing_ref)}</div>${esc(r.listing_title)}</td>
-        <td>${esc(r.city)} — ${esc(r.area)}</td>
+        <td>${esc(r.city)} — ${esc(r.area)}${r.neighborhood?" — "+esc(r.neighborhood):""}</td>
         <td class="num">${priceStr(r.price,r.currency)}</td>
         <td>${tag(r.status,C_STATUS)}</td>
         <td>${r.fee_id?tag(r.fee_status,F_STATUS):"—"}</td>
@@ -1578,7 +1590,7 @@ async function drawContact(id){
       <dt>رقم الباحث</dt><dd class="phone">${esc(phone)}</dd>
       <dt>الإعلان</dt><dd><span class="ref">${esc(r.listing_ref)}</span> ${esc(r.listing_title)}
         ${tag(r.listing_status,L_STATUS)} ${tag(r.listing_verification,L_VERIF)}</dd>
-      <dt>الموقع</dt><dd>${esc(r.city)} — ${esc(r.area)}</dd>
+      <dt>الموقع</dt><dd>${esc(r.city)} — ${esc(r.area)}${r.neighborhood?" — "+esc(r.neighborhood):""}</dd>
       <dt>السعر</dt><dd class="num">${priceStr(r.price,r.currency)}</dd>
       <dt id="listingMoreDt" style="display:none">تفاصيل أكتر</dt><dd id="listingMore" style="display:none"></dd>
       <dt>المالك</dt><dd>${esc(r.owner_name)} ${lvl(r.owner_level)} · <span class="phone">${esc(r.owner_phone)}</span></dd>
@@ -1694,7 +1706,7 @@ async function vVerify(){
       ${pend.length?`<div class="tw" style="max-height:340px;margin-bottom:20px"><table><thead><tr>
         <th>الرمز</th><th>العنوان</th><th>المنطقة</th><th>الحالة</th><th>التوثيق</th><th>المالك</th><th>الرقم</th>
       </tr></thead><tbody>${pend.map(r=>`<tr data-id="${r.id}">
-        <td class="ref">${esc(r.ref)}</td><td>${esc(r.title)}</td><td>${esc(r.area)}</td>
+        <td class="ref">${esc(r.ref)}</td><td>${esc(r.title)}</td><td>${esc(r.area)}${r.neighborhood?" — "+esc(r.neighborhood):""}</td>
         <td>${tag(r.status,L_STATUS)}</td><td>${tag(r.verification,L_VERIF)}</td>
         <td>${esc(r.owner_name)}</td><td class="phone">${esc(r.owner_phone)}</td>
       </tr>`).join("")}</tbody></table></div>`
@@ -2001,6 +2013,7 @@ async function drawRequest(id){
       <dt>الجنس</dt><dd>${r.gender==="female"?"أنثى":r.gender==="male"?"ذكر":"—"}</dd>
       <dt>المدينة</dt><dd>${esc(r.city||"—")}</dd>
       <dt>المناطق</dt><dd>${esc(r.areas_ar||"مرن — أي منطقة")}</dd>
+      ${r.neighborhoods_ar?`<dt>المواقع</dt><dd>${esc(r.neighborhoods_ar)}</dd>`:""}
       <dt>الميزانية</dt><dd class="num">حتى ${money(r.budget_max)}</dd>
       <dt>نوع السكن</dt><dd>${esc(L_KIND[r.kind_pref]||"مرن")}</dd>
       ${r.rooms_pref?`<dt>عدد الغرف المفضّل</dt><dd>${r.rooms_pref}</dd>`:""}
@@ -2039,6 +2052,7 @@ async function drawRequest(id){
           <option value="">غير محدد</option><option value="false">لا</option><option value="true">نعم</option></select></div>
         <div class="field"><label>المدينة</label><select id="erCity"></select></div>
         <div class="field"><label>المناطق المفضّلة</label><div id="erAreas"></div></div>
+        <div class="field"><label>المواقع المفضّلة (أحياء)</label><div id="erNeighs"></div></div>
         <div class="field"><label>صفاته كساكن</label><div id="erTags">
           ${Object.entries(TAG_LABELS_AR).map(([slug,label],i)=>
             `<div class="chk"><input type="checkbox" id="et${i}" data-slug="${slug}"><label for="et${i}">${label}</label></div>`).join("")}
@@ -2114,13 +2128,24 @@ async function drawRequest(id){
     });
     const cities = S.cache.cities || (S.cache.cities = await get("/cities?select=id,name_ar&order=id"));
     const areas = S.cache.areas || (S.cache.areas = await get("/areas?select=id,name_ar,city_id&order=city_id,sort_order"));
+    const neighs = S.cache.neighs || (S.cache.neighs = await get("/neighborhoods?select=id,name_ar,area_id&order=area_id,sort_order"));
     $("#erCity").innerHTML = cities.map(c=>`<option value="${c.id}">${esc(c.name_ar)}</option>`).join("");
     $("#erCity").value = r.city_id;
+    const paintNeighs = () => {
+      const pickedAreas = [...$("#erAreas").querySelectorAll("[data-area]:checked")].map(el=>Number(el.dataset.area));
+      const nsel = new Set(r.neighborhood_ids||[]);
+      const list = neighs.filter(n=>pickedAreas.includes(n.area_id));
+      $("#erNeighs").innerHTML = list.length ? list.map((n,i)=>
+        `<div class="chk"><input type="checkbox" id="en${i}" data-neigh="${n.id}" ${nsel.has(n.id)?"checked":""}><label for="en${i}">${esc(n.name_ar)}</label></div>`).join("")
+        : `<div class="hint">لا أحياء مسجّلة ضمن المناطق المختارة.</div>`;
+    };
     const paintAreas = () => {
       const cid = Number($("#erCity").value);
       const sel = new Set(r.area_ids||[]);
       $("#erAreas").innerHTML = areas.filter(a=>a.city_id===cid).map((a,i)=>
         `<div class="chk"><input type="checkbox" id="ea${i}" data-area="${a.id}" ${sel.has(a.id)?"checked":""}><label for="ea${i}">${esc(a.name_ar)}</label></div>`).join("");
+      $("#erAreas").querySelectorAll("[data-area]").forEach(el => el.onchange = paintNeighs);
+      paintNeighs();
     };
     paintAreas();
     $("#erCity").onchange = paintAreas;
@@ -2130,6 +2155,7 @@ async function drawRequest(id){
     $("#erErr").textContent = "";
     const tags = [...$("#editRequestBox").querySelectorAll("[data-slug]:checked")].map(el=>el.dataset.slug);
     const areaIds = [...$("#erAreas").querySelectorAll("[data-area]:checked")].map(el=>Number(el.dataset.area));
+    const neighIds = [...$("#erNeighs").querySelectorAll("[data-neigh]:checked")].map(el=>Number(el.dataset.neigh));
     const tri = id => { const v = $(id).value; return v==="" ? null : v==="true"; };
     try{
       await rpc("admin_request_update", {
@@ -2146,7 +2172,8 @@ async function drawRequest(id){
         p_city: Number($("#erCity").value),
         p_areas: areaIds,
         p_rental_period_pref: $("#erPeriod").value || null,
-        p_rooms_pref: $("#erRooms").value === "" ? null : Number($("#erRooms").value)
+        p_rooms_pref: $("#erRooms").value === "" ? null : Number($("#erRooms").value),
+        p_neighborhoods: neighIds
       });
       toast("انحفظت تعديلات الطلب.", "ok");
       openDrawer("request", r.id); go(S.view);
@@ -2426,6 +2453,7 @@ async function vMatchCompare(score, listingId, requestId){
       ["الهاتف", '<span class="phone">'+esc(l.owner_phone||"—")+'</span>', '<span class="phone">'+esc(r.phone||"—")+'</span>'],
       ["المدينة", esc(l.city||"—"), esc(r.city||"—")],
       ["المنطقة", esc(l.area||"—"), esc(r.areas_ar||"مرن — أي منطقة")],
+      ["الموقع/الحي", esc(l.neighborhood||"—"), esc(r.neighborhoods_ar||"مرن — أي موقع")],
       ["نوع السكن", esc(L_KIND[l.kind]||l.kind), esc(L_KIND[r.kind_pref]||"مرن")],
       ["مدة الإيجار", esc(L_PERIOD[l.rental_period]||l.rental_period), r.rental_period_pref?esc(L_PERIOD[r.rental_period_pref]):"مرن"],
       ["السعر / الميزانية", priceStr(l.price,l.currency), "حتى "+money(r.budget_max)],
@@ -2633,11 +2661,12 @@ async function vAudit(){
 async function vSettings(){
   loading("الإعدادات");
   try{
-    const [setts, promos, cities, areas] = await Promise.all([
+    const [setts, promos, cities, areas, neighs] = await Promise.all([
       get("/settings?select=*&order=key"),
       get("/promo_codes?select=*&order=code"),
       get("/cities?select=*&order=id"),
-      get("/areas?select=*&order=city_id,sort_order")
+      get("/areas?select=*&order=city_id,sort_order"),
+      get("/neighborhoods?select=*&order=area_id,sort_order")
     ]);
     $("#main").innerHTML = `
       <div class="head"><h2>الإعدادات</h2>
@@ -2715,8 +2744,11 @@ async function vSettings(){
         <table><thead><tr><th>المنطقة</th><th>بالإنجليزي</th><th>المدينة</th><th>الترتيب</th><th>الحالة</th><th></th></tr></thead>
         <tbody>${areas.map(a=>{
           const c = cities.find(x=>x.id===a.city_id) || {};
+          const n = neighs.filter(x=>x.area_id===a.id);
           return `<tr style="cursor:default">
-            <td>${esc(a.name_ar)} <span class="ref">${esc(a.slug)}</span></td>
+            <td>${esc(a.name_ar)} <span class="ref">${esc(a.slug)}</span>
+              <div style="color:var(--text-2);font-size:12px;margin-top:2px">
+                ${n.length?n.map(x=>esc(x.name_ar)+(x.is_active?"":" (معطّل)")).join(" · "):"ما في أحياء بعد"}</div></td>
             <td><div class="bars" style="flex-wrap:nowrap">
               <input class="enn" data-en-area="${a.id}" value="${esc(a.name_en||"")}"
                 placeholder="English name" style="width:140px;padding:5px 9px">
@@ -2741,10 +2773,41 @@ async function vSettings(){
           <button class="btn sm primary" id="addArea">إضافة منطقة</button>
         </div>
 
+        <h3 style="margin-top:18px">الأحياء (الموقع)</h3>
+        <table><thead><tr><th>الحي</th><th>بالإنجليزي</th><th>المنطقة</th><th>الترتيب</th><th>الحالة</th><th></th></tr></thead>
+        <tbody>${neighs.map(n=>{
+          const a = areas.find(x=>x.id===n.area_id) || {};
+          return `<tr style="cursor:default">
+            <td>${esc(n.name_ar)} <span class="ref">${esc(n.slug)}</span></td>
+            <td><div class="bars" style="flex-wrap:nowrap">
+              <input class="enn" data-en-neigh="${n.id}" value="${esc(n.name_en||"")}"
+                placeholder="English name" style="width:140px;padding:5px 9px">
+              <button class="btn sm" data-save-en-neigh="${n.id}">حفظ</button>
+            </div></td>
+            <td>${esc(a.name_ar||"—")}</td>
+            <td class="num">${n.sort_order}</td>
+            <td>${n.is_active!==false?'<span class="tag t-published">مفعّل</span>':'<span class="tag t-expired">معطّل</span>'}</td>
+            <td><button class="btn sm" data-nt="${n.id}" data-area="${n.area_id}"
+                  data-nm="${esc(n.name_ar)}" data-sl="${esc(n.slug)}" data-nmen="${esc(n.name_en||"")}"
+                  data-so="${n.sort_order}" data-on="${n.is_active!==false}">
+                  ${n.is_active!==false?"تعطيل":"تفعيل"}</button></td>
+          </tr>`;}).join("")}</tbody></table>
+
+        <div class="bars" style="margin-top:12px">
+          <select id="nna" style="width:170px">
+            ${areas.map(a=>`<option value="${a.id}">${esc((cities.find(c=>c.id===a.city_id)||{}).name_ar||"")} — ${esc(a.name_ar)}</option>`).join("")}</select>
+          <input id="nnn" placeholder="اسم الحي بالعربي" style="width:190px">
+          <input id="nns" placeholder="slug بالإنجليزي" style="width:150px">
+          <input id="nno" type="number" placeholder="ترتيب" style="width:90px">
+          <input id="nnnEn" placeholder="الاسم بالإنجليزي (اختياري)" style="width:180px">
+          <button class="btn sm primary" id="addNeigh">إضافة حي</button>
+        </div>
+
         <div class="warnbox" style="margin:12px 0 0">
-          تفعيل مدينة أو منطقة بيفتحها فوراً بالموقع العام وبنموذج الإعلان.
+          تفعيل مدينة أو منطقة أو حي بيفتحه فوراً بالموقع العام وبنموذج الإعلان.
           لا تفعّل مدينة قبل ما يكون فيها مندوب يقدر يزور.
           التعطيل ما بيمسح الإعلانات القديمة — بس بيمنع إعلانات جديدة عليها.
+          الحي طبقة اختيارية فوق المنطقة — إعلان من دون حي محدّد يبقى صحيحاً.
           الاسم بالإنجليزي اختياري — الموقع بيرجع للعربي لو فاضي.
         </div>
       </div>`;
@@ -2836,6 +2899,28 @@ async function vSettings(){
       } catch(e){ toast(e.message, "bad"); }
     });
 
+    $("#main").querySelectorAll("[data-nt]").forEach(b => b.onclick = async () => {
+      const on = b.dataset.on !== "true";
+      if(!on && !confirm("تعطيل الحي بيمنع إعلانات جديدة عليه. متأكد؟")) return;
+      try{
+        await rpc("admin_neighborhood_save", {p_id:+b.dataset.nt, p_area:+b.dataset.area,
+          p_name:b.dataset.nm, p_slug:b.dataset.sl, p_sort:+b.dataset.so,
+          p_active:on, p_name_en:b.dataset.nmen || null});
+        toast("تحدّث الحي.", "ok"); vSettings();
+      } catch(e){ toast(e.message, "bad"); }
+    });
+
+    $("#main").querySelectorAll("[data-save-en-neigh]").forEach(b => b.onclick = async () => {
+      const id = +b.dataset.saveEnNeigh;
+      const n = neighs.find(x=>x.id===id); if(!n) return;
+      const en = $("#main").querySelector(`[data-en-neigh="${id}"]`).value.trim();
+      try{
+        await rpc("admin_neighborhood_save", {p_id:id, p_area:n.area_id, p_name:n.name_ar,
+          p_slug:n.slug, p_sort:n.sort_order, p_active:n.is_active!==false, p_name_en:en || null});
+        toast("انحفظ الاسم بالإنجليزي.", "ok"); vSettings();
+      } catch(e){ toast(e.message, "bad"); }
+    });
+
     $("#addCity").onclick = async () => {
       const n = $("#ncn").value.trim(), s = $("#ncs").value.trim().toLowerCase();
       if(n.length < 2) return toast("اكتب اسم المدينة.", "bad");
@@ -2857,6 +2942,19 @@ async function vSettings(){
         await rpc("admin_area_save", {p_id:null, p_city:city, p_name:n, p_slug:s,
           p_sort:so, p_active:true, p_name_en:$("#nanEn").value.trim() || null});
         toast("انضافت المنطقة.", "ok"); vSettings();
+      } catch(e){ toast(e.message, "bad"); }
+    };
+
+    $("#addNeigh").onclick = async () => {
+      const n = $("#nnn").value.trim(), s = $("#nns").value.trim().toLowerCase();
+      const area = +$("#nna").value, so = $("#nno").value ? +$("#nno").value : 100;
+      if(!area) return toast("اختر المنطقة.", "bad");
+      if(n.length < 2) return toast("اكتب اسم الحي.", "bad");
+      if(!slugOk(s)) return toast("الـslug لازم يكون حروف إنجليزية صغيرة وأرقام وشرطات.", "bad");
+      try{
+        await rpc("admin_neighborhood_save", {p_id:null, p_area:area, p_name:n, p_slug:s,
+          p_sort:so, p_active:true, p_name_en:$("#nnnEn").value.trim() || null});
+        toast("انضاف الحي.", "ok"); vSettings();
       } catch(e){ toast(e.message, "bad"); }
     };
   } catch(e){ fail(e); }

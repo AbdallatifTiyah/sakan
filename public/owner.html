@@ -236,7 +236,7 @@ function listingCard(l, requests){
       <div>
         <div class="ltitle">${esc(l.title)}</div>
         <div class="lref">${esc(l.ref)}</div>
-        <div class="lloc">${esc(l.city)} — ${esc(l.area)}</div>
+        <div class="lloc">${esc(l.city)} — ${esc(l.area)}${l.neighborhood?" — "+esc(l.neighborhood):""}</div>
       </div>
       <div class="lprice">${priceMoney(l.price,l.currency)}<span style="font-weight:400;color:var(--mut);font-size:12px"> / شهر</span></div>
     </div>

@@ -335,7 +335,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 /* المدن والمناطق بتنقرأ من القاعدة عند التحميل — ممنوع تثبيتها هون.
    أي إضافة من مركز التحكم بتظهر هون تلقائياً. أسماؤها بالعربي فقط حالياً —
    لا يوجد عمود name_en بالقاعدة بعد، فبتضل عربي حتى بوضع الإنجليزي. */
-let CITIES = [], AREAS = [];
+let CITIES = [], AREAS = [], NEIGHBORHOODS = [];
 
 /* رمز الدولة + عدد الخانات المسموح للرقم المحلي (بدون صفر البداية) */
 const DIAL = LANG === "en" ? [
@@ -498,6 +498,8 @@ const localeName = o => o ? tt(o.name_ar, o.name_en || o.name_ar) : "—";
 const areaName = id => localeName(AREAS.find(a=>a.id===Number(id)));
 const areaCity = id => (AREAS.find(a=>a.id===Number(id))||{}).city_id || null;
 const cityName = id => localeName(CITIES.find(c=>c.id===Number(id)));
+const neighName = id => localeName(NEIGHBORHOODS.find(n=>n.id===Number(id)));
+const neighsForAreas = areaIds => NEIGHBORHOODS.filter(n => areaIds.map(String).includes(String(n.area_id)));
 
 /* ═══════════════ الهاتف ═══════════════ */
 function telHTML(idSel, idNum){
@@ -593,10 +595,29 @@ function areaOptsFor(cityId, sel){
   return `<option value="">${cityId?tt("كل مناطق المدينة","All areas in city"):tt("كل المناطق","All areas")}</option>` +
     list.map(a=>`<option value="${a.id}"${String(sel)===String(a.id)?" selected":""}>${esc(localeName(a))}</option>`).join("");
 }
+/* الحي (الموقع) بيتفلتر حسب المنطقة المختارة — طبقة ثالثة اختيارية، تظهر فقط لو عند المنطقة أحياء */
+function neighOptsFor(areaId, sel){
+  const list = NEIGHBORHOODS.filter(n => String(n.area_id)===String(areaId));
+  if(!areaId || !list.length) return "";
+  return `<option value="">${tt("كل أحياء المنطقة","All neighborhoods in area")}</option>` +
+    list.map(n=>`<option value="${n.id}"${String(sel)===String(n.id)?" selected":""}>${esc(localeName(n))}</option>`).join("");
+}
+function neighFilterWrapHTML(){
+  const neighOpts = neighOptsFor(F.area, F.neigh);
+  return neighOpts ? `<label>${tt("الموقع","Location")}</label>
+      <select id="fNeigh" onchange="F.neigh=this.value;render()">${neighOpts}</select>` : "";
+}
 function onCityFilter(v){
   F.city = v || "";
-  F.area = "";                                  // تصفير المنطقة عند تغيير المدينة
+  F.area = ""; F.neigh = "";                    // تصفير المنطقة والحي عند تغيير المدينة
   $("fArea").innerHTML = areaOptsFor(F.city, "");
+  $("fNeighWrap").innerHTML = neighFilterWrapHTML();
+  render();
+}
+function onAreaFilter(v){
+  F.area = v || "";
+  F.neigh = "";                                 // تصفير الحي عند تغيير المنطقة
+  $("fNeighWrap").innerHTML = neighFilterWrapHTML();
   render();
 }
 function renderFilters(){
@@ -604,7 +625,8 @@ function renderFilters(){
     <div><label>${tt("المدينة","City")}</label>
       <select id="fCity" onchange="onCityFilter(this.value)">${cityOpts(F.city)}</select></div>
     <div><label>${tt("المنطقة","Area")}</label>
-      <select id="fArea" onchange="F.area=this.value;render()">${areaOptsFor(F.city,F.area)}</select></div>`;
+      <select id="fArea" onchange="onAreaFilter(this.value)">${areaOptsFor(F.city,F.area)}</select></div>
+    <div id="fNeighWrap">${neighFilterWrapHTML()}</div>`;
 
   $("filters").innerHTML = TAB==="L" ? `
     <div style="grid-column:1/-1"><label>${tt("ابحث بالعنوان أو الوصف","Search by title or description")}</label>
@@ -634,6 +656,7 @@ function render(){
     const d = L.filter(x =>
       (!F.city || String(x.city_id)===String(F.city)) &&
       (!F.area || String(x.area_id)===String(F.area)) &&
+      (!F.neigh || String(x.neighborhood_id)===String(F.neigh)) &&
       (!F.kind || x.kind===F.kind) &&
       (!F.pol  || x.gender_pol===F.pol) &&
       (!F.max  || Number(x.price) <= Number(toEN(F.max))) &&
@@ -646,6 +669,7 @@ function render(){
     const d = R.filter(x =>
       (!F.city || String(x.city_id)===String(F.city)) &&
       (!F.area || (x.area_ids||[]).includes(Number(F.area))) &&
+      (!F.neigh || (x.neighborhood_ids||[]).includes(Number(F.neigh))) &&
       (!F.g    || x.gender===F.g) &&
       (!F.occ  || x.occupation===F.occ));
     count.textContent = d.length ? tt(`${d.length} باحث عن سكن`, `${d.length} people looking for housing`) : "";
@@ -666,7 +690,7 @@ function cardL(x){
     ${thumb}
     <div class="b">
       <h3>${esc(x.ref)}</h3>
-      <div class="meta">${esc(x.city)} · ${esc(x.area)}${x.landmark?" · "+esc(x.landmark):""}</div>
+      <div class="meta">${esc(x.city)} · ${esc(x.area)}${x.neighborhood?" · "+esc(x.neighborhood):""}${x.landmark?" · "+esc(x.landmark):""}</div>
       <div class="price">${price(x.price,x.currency)}<small> / ${PERIOD_UNIT[x.rental_period]||PERIOD_UNIT.monthly}${x.bills_included?tt(" — شامل الفواتير"," — bills included"):""}</small></div>
       <div class="tags">${v}${rating}<span class="t">${KIND[x.kind]||""}</span>
         <span class="t">${POL[x.gender_pol]||""}</span>
@@ -677,10 +701,11 @@ function cardL(x){
 }
 function cardR(x){
   const areas = (x.area_ids||[]).map(areaName).filter(a=>a!=="—");
+  const neighs = (x.neighborhood_ids||[]).map(neighName).filter(a=>a!=="—");
   return `<div class="card" onclick="openR('${x.id}')">
     <div class="b">
       <h3>${esc(x.ref)} — ${OCC[x.occupation]||""}</h3>
-      <div class="meta">${esc(x.city||"")}${areas.length?" · "+areas.join(" · "):""}</div>
+      <div class="meta">${esc(x.city||"")}${areas.length?" · "+areas.join(" · "):""}${neighs.length?" · "+neighs.join(" · "):""}</div>
       <div class="price">${tt("حتى","Up to")} ${nis(x.budget_max)}<small> / ${x.rental_period_pref?(PERIOD_UNIT[x.rental_period_pref]||PERIOD_UNIT.monthly):PERIOD_UNIT.monthly}</small></div>
       <div class="tags">
         <span class="t">${POL[x.gender]||""}</span>
@@ -780,6 +805,7 @@ function openL(id){
         <p style="margin:0 0 12px">${esc(x.description||"")}</p>
         <div class="row"><span>${tt("المدينة","City")}</span><span>${esc(x.city)}</span></div>
         <div class="row"><span>${tt("المنطقة","Area")}</span><span>${esc(x.area)}</span></div>
+        ${x.neighborhood?`<div class="row"><span>${tt("الموقع","Location")}</span><span>${esc(x.neighborhood)}</span></div>`:""}
         ${x.landmark?`<div class="row"><span>${tt("علامة مميزة","Landmark")}</span><span>${esc(x.landmark)}</span></div>`:""}
         <div class="row"><span>${tt("متاح من","Available from")}</span><span>${dt(x.available_from)}</span></div>
         <div class="row"><span>${tt("مدة الإيجار","Rental period")}</span><span>${PERIOD[x.rental_period]||PERIOD.monthly}</span></div>
@@ -858,6 +884,7 @@ async function sendContact(id, ref){
 function openR(id){
   const x = R.find(a=>a.id===id); if(!x) return;
   const areas = (x.area_ids||[]).map(areaName).filter(a=>a!=="—");
+  const neighs = (x.neighborhood_ids||[]).map(neighName).filter(a=>a!=="—");
   $("modal").innerHTML = `
     <div class="mh"><h2>${esc(x.ref)} — ${OCC[x.occupation]||""}</h2>
       <button class="x" onclick="closeAll()">×</button></div>
@@ -865,6 +892,7 @@ function openR(id){
       <div class="row"><span>${tt("الميزانية","Budget")}</span><span>${tt("حتى","Up to")} ${nis(x.budget_max)} / ${x.rental_period_pref?(PERIOD_UNIT[x.rental_period_pref]||PERIOD_UNIT.monthly):PERIOD_UNIT.monthly}</span></div>
       <div class="row"><span>${tt("المدينة","City")}</span><span>${esc(x.city||"—")}</span></div>
       <div class="row"><span>${tt("المناطق المفضّلة","Preferred areas")}</span><span>${areas.join(" · ")||tt("مرن — أي منطقة","Flexible — any area")}</span></div>
+      ${neighs.length?`<div class="row"><span>${tt("المواقع المفضّلة","Preferred locations")}</span><span>${neighs.join(" · ")}</span></div>`:""}
       <div class="row"><span>${tt("نوع السكن","Housing type")}</span><span>${KIND[x.kind_pref]||tt("مرن","Flexible")}</span></div>
       ${x.rooms_pref?`<div class="row"><span>${tt("عدد الغرف المفضّل","Preferred rooms")}</span><span>${x.rooms_pref}</span></div>`:""}
       <div class="row"><span>${tt("مدة الإيجار المطلوبة","Rental period sought")}</span><span>${x.rental_period_pref?PERIOD[x.rental_period_pref]:tt("مرن","Flexible")}</span></div>
@@ -954,7 +982,7 @@ function citySelect(id, onchange){
     <option value="">${tt("اختر المدينة","Choose a city")}</option>
     ${CITIES.map(c=>`<option value="${c.id}">${esc(localeName(c))}</option>`).join("")}</select>`;
 }
-/* نموذج الإعلان: مدينة ← منطقة واحدة */
+/* نموذج الإعلان: مدينة ← منطقة واحدة ← حي واحد (اختياري) */
 function onFormCity(){
   const cid = $("lCity").value;
   const list = AREAS.filter(a=>String(a.city_id)===String(cid));
@@ -962,16 +990,37 @@ function onFormCity(){
     ? `<option value="">${tt("اختر المنطقة","Choose an area")}</option>` +
       list.map(a=>`<option value="${a.id}">${esc(localeName(a))}</option>`).join("")
     : `<option value="">${tt("اختر المدينة أولاً","Choose a city first")}</option>`;
+  onFormArea();
 }
-/* نموذج الباحث: مدينة ← شرائح مناطق (بدل الـmultiple select و«0 item») */
+function onFormArea(){
+  const aid = $("lArea").value;
+  const list = NEIGHBORHOODS.filter(n=>String(n.area_id)===String(aid));
+  $("lNeighWrap").innerHTML = list.length
+    ? `<label>${tt("الموقع (اختياري)","Location (optional)")}</label>
+       <select id="lNeigh"><option value="">${tt("كل أحياء المنطقة","Any location in the area")}</option>
+       ${list.map(n=>`<option value="${n.id}">${esc(localeName(n))}</option>`).join("")}</select>`
+    : "";
+}
+/* نموذج الباحث: مدينة ← شرائح مناطق (بدل الـmultiple select و«0 item») ← شرائح أحياء (اختياري) */
 function onReqCity(){
   const cid = $("rCity").value;
   const list = AREAS.filter(a=>String(a.city_id)===String(cid));
   $("rAreasBox").innerHTML = cid
     ? (list.length
-        ? chipsHTML("rAreas", list, {val:a=>a.id, lbl:localeName})
+        ? chipsHTML("rAreas", list, {val:a=>a.id, lbl:localeName, onchange:"onReqAreasChange()"})
         : `<div class="hint">${tt("لا توجد مناطق مسجّلة لهذه المدينة بعد.","No areas registered for this city yet.")}</div>`)
     : `<div class="hint">${tt("اختر المدينة أولاً.","Choose a city first.")}</div>`;
+  onReqAreasChange();
+}
+function onReqAreasChange(){
+  const box = $("rNeighsBox"); if(!box) return;
+  const picked = chipsValue("rAreas");
+  const list = neighsForAreas(picked);
+  box.innerHTML = !picked.length
+    ? ""
+    : list.length
+      ? chipsHTML("rNeighs", list, {val:n=>n.id, lbl:localeName})
+      : `<div class="hint">${tt("لا أحياء مسجّلة ضمن المناطق المختارة.","No neighborhoods registered within the chosen areas.")}</div>`;
 }
 
 /* ═══════════════ صور الإعلان ═══════════════ */
@@ -1087,7 +1136,8 @@ function openForm(kind){
       <div class="f2">
         <div class="fg"><label>${tt("المدينة","City")}</label>${citySelect("lCity","onFormCity()")}</div>
         <div class="fg"><label>${tt("المنطقة","Area")}</label>
-          <select id="lArea"><option value="">${tt("اختر المدينة أولاً","Choose a city first")}</option></select></div>
+          <select id="lArea" onchange="onFormArea()"><option value="">${tt("اختر المدينة أولاً","Choose a city first")}</option></select></div>
+        <div class="fg" id="lNeighWrap"></div>
         <div class="fg"><label>${tt("السعر الشهري","Monthly price")}</label>
           <input id="lPrice" data-num inputmode="numeric" placeholder="${tt("مثلاً ٨٠٠","e.g. 800")}"></div>
         <div class="fg"><label>${tt("العملة","Currency")}</label><select id="lCur">
@@ -1193,6 +1243,8 @@ function openForm(kind){
         <div class="chips-box" id="rAreasBox">
           <div class="hint">${tt("اختر المدينة أولاً.","Choose a city first.")}</div></div>
         <div class="hint">${tt("اختر منطقة أو أكثر، أو اترك الحقل فارغاً إذا كانت أي منطقة في المدينة تناسبك.","Pick one or more areas, or leave empty if any area in the city works.")}</div></div>
+      <div class="fg"><label>${tt("المواقع المفضّلة (اختياري)","Preferred locations (optional)")}</label>
+        <div class="chips-box" id="rNeighsBox"></div></div>
 
       <div class="fg"><label>${tt("صفاتك كساكن","Your traits as a housemate")}</label>
         ${chipsHTML("rTags", TAGS, {val:t=>t.slug, lbl:t=>tt(t.ar,t.en)})}
@@ -1220,6 +1272,7 @@ function saveDraft(){
   try{
     const d = {}; DRAFT_FIELDS.forEach(id => d[id] = $(id).value);
     d.lFeat = chipsValue("lFeat");
+    d.lNeigh = $("lNeigh") ? $("lNeigh").value : "";
     localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
   }catch(e){ /* التخزين معطّل — المسودة مش لازمة تعطّل الفورم */ }
 }
@@ -1234,6 +1287,8 @@ function restoreDraftIfAny(){
   telSync("lDial","lPhone");
   onFormCity();
   if(d.lArea) $("lArea").value = d.lArea;
+  onFormArea();
+  if(d.lNeigh && $("lNeigh")) $("lNeigh").value = d.lNeigh;
   syncRoomChip("lRooms");
   (d.lFeat||[]).forEach(v => {
     const el = document.querySelector(`input[name="lFeat"][value="${CSS.escape(v)}"]`);
@@ -1300,7 +1355,8 @@ async function subListing(){
     p_rooms: num("lRooms"),
     p_min_stay: num("lMin"),
     p_promo_code: $("lPromo").value.trim() || null,
-    p_rental_period: $("lPeriod").value
+    p_rental_period: $("lPeriod").value,
+    p_neighborhood: $("lNeigh") && $("lNeigh").value ? Number($("lNeigh").value) : null
   };
   const bad = m => { $("lErr").innerHTML = `<div class="err">${m}</div>`; return null; };
   if(v.p_name.length < 2)  return bad(tt("اكتب اسمك.","Enter your name."));
@@ -1353,7 +1409,8 @@ async function subRequest(){
     p_min_stay: num("rMin"),
     p_smoker: tri("rSmoke"),
     p_rental_period_pref: $("rPeriod").value || null,
-    p_rooms_pref: $("rKind").value === "apartment" ? num("rRooms") : null
+    p_rooms_pref: $("rKind").value === "apartment" ? num("rRooms") : null,
+    p_neighborhoods: chipsValue("rNeighs").map(Number)
   };
   const bad = m => { $("rErr").innerHTML = `<div class="err">${m}</div>`; return null; };
   if(v.p_name.length < 2) return bad(tt("اكتب اسمك.","Enter your name."));
@@ -1525,17 +1582,18 @@ function openSharedListing(){
 (async () => {
   paintChrome();
   try{
-    /* المدن والمناطق أولاً — الفلاتر والنماذج كلها بتعتمد عليهم */
-    [CITIES, AREAS] = await Promise.all([
+    /* المدن والمناطق والأحياء أولاً — الفلاتر والنماذج كلها بتعتمد عليهم */
+    [CITIES, AREAS, NEIGHBORHOODS] = await Promise.all([
       api("cities?select=id,name_ar,name_en,slug&is_active=eq.true&order=id"),
-      api("areas?select=id,city_id,name_ar,name_en,slug,sort_order&is_active=eq.true&order=city_id,sort_order")
+      api("areas?select=id,city_id,name_ar,name_en,slug,sort_order&is_active=eq.true&order=city_id,sort_order"),
+      api("neighborhoods?select=id,area_id,name_ar,name_en,slug,sort_order&is_active=eq.true&order=area_id,sort_order")
     ]);
     if(!CITIES.length){
       console.error("Sakanna: cities returned empty — تحقق من سياسات RLS على cities/areas");
     }
   }catch(e){
     console.error("Sakanna: تعذّر تحميل المدن والمناطق", e);
-    CITIES = []; AREAS = [];
+    CITIES = []; AREAS = []; NEIGHBORHOODS = [];
   }
 
   renderFilters();

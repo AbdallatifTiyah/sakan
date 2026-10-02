@@ -340,7 +340,10 @@ class _ListingCard extends StatelessWidget {
                           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: SColors.blue700),
                         ),
                         const Spacer(),
-                        Text('${listing.area} · ${listing.city}',
+                        Text(
+                            listing.neighborhood != null
+                                ? '${listing.neighborhood} · ${listing.area} · ${listing.city}'
+                                : '${listing.area} · ${listing.city}',
                             style: const TextStyle(color: SColors.mut, fontSize: 12)),
                       ],
                     ),

@@ -50,6 +50,7 @@ class OwnerRepo {
     required bool billsInternet,
     String? promoCode,
     required String rentalPeriod,
+    int? neighborhood,
   }) async {
     final ref = await supabase.rpc('submit_listing', params: {
       'p_name': name,
@@ -75,6 +76,7 @@ class OwnerRepo {
       'p_bills_internet': billsInternet,
       'p_promo_code': promoCode,
       'p_rental_period': rentalPeriod,
+      'p_neighborhood': neighborhood,
     });
     return ref as String;
   }

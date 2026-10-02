@@ -7,6 +7,8 @@ class Listing {
   final String? description, landmark, occupantsNote;
   final String city, citySlug, area;
   final int? areaId, cityId;
+  final String? neighborhood;
+  final int? neighborhoodId;
   final String kind; // listing_kind: room_shared/bed_shared/studio/apartment/family
   final num price;
   final String currency;
@@ -41,6 +43,8 @@ class Listing {
     required this.area,
     this.areaId,
     this.cityId,
+    this.neighborhood,
+    this.neighborhoodId,
     required this.kind,
     required this.price,
     required this.currency,
@@ -101,6 +105,8 @@ class Listing {
       area: j['area'] as String? ?? '',
       areaId: j['area_id'] as int?,
       cityId: j['city_id'] as int?,
+      neighborhood: j['neighborhood'] as String?,
+      neighborhoodId: j['neighborhood_id'] as int?,
       kind: j['kind'] as String? ?? 'apartment',
       price: j['price'] as num? ?? 0,
       currency: j['currency'] as String? ?? 'ILS',

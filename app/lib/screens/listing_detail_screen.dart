@@ -253,7 +253,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          '${listing.area}، ${listing.city}'
+                          '${listing.neighborhood != null ? "${listing.neighborhood}، " : ""}${listing.area}، ${listing.city}'
                           '${listing.landmark != null && listing.landmark!.isNotEmpty ? " — ${listing.landmark}" : ""}',
                           style: const TextStyle(color: SColors.mut),
                         ),

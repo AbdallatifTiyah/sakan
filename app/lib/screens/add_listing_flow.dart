@@ -41,6 +41,8 @@ class _AddListingFlowState extends State<AddListingFlow> {
   SCity? _city;
   List<SArea> _areas = [];
   SArea? _area;
+  List<SNeighborhood> _neighborhoods = [];
+  SNeighborhood? _neighborhood;
   String _kind = 'apartment';
 
   final _priceCtrl = TextEditingController();
@@ -120,6 +122,17 @@ class _AddListingFlowState extends State<AddListingFlow> {
     final areas = await LocationsRepo.fetchAreas(city.id);
     if (!mounted) return;
     setState(() => _areas = areas);
+  }
+
+  Future<void> _onAreaSelected(SArea area) async {
+    setState(() {
+      _area = area;
+      _neighborhood = null;
+      _neighborhoods = [];
+    });
+    final neighs = await LocationsRepo.fetchNeighborhoods(area.id);
+    if (!mounted) return;
+    setState(() => _neighborhoods = neighs);
   }
 
   Future<void> _loadFeeQuote() async {
@@ -223,6 +236,7 @@ class _AddListingFlowState extends State<AddListingFlow> {
         billsInternet: _billsInternet,
         promoCode: _promoCtrl.text.trim().isEmpty ? null : _promoCtrl.text.trim(),
         rentalPeriod: 'monthly',
+        neighborhood: _neighborhood?.id,
       );
       if (!mounted) return;
       await showDialog<void>(
@@ -320,7 +334,10 @@ class _AddListingFlowState extends State<AddListingFlow> {
         return _AreaKindStep(
           areas: _areas,
           selectedArea: _area,
-          onAreaSelected: (a) => setState(() => _area = a),
+          onAreaSelected: _onAreaSelected,
+          neighborhoods: _neighborhoods,
+          selectedNeighborhood: _neighborhood,
+          onNeighborhoodSelected: (n) => setState(() => _neighborhood = (_neighborhood?.id == n.id) ? null : n),
           kind: _kind,
           onKindChanged: (k) => setState(() => _kind = k),
         );
@@ -498,12 +515,18 @@ class _AreaKindStep extends StatelessWidget {
   final List<SArea> areas;
   final SArea? selectedArea;
   final ValueChanged<SArea> onAreaSelected;
+  final List<SNeighborhood> neighborhoods;
+  final SNeighborhood? selectedNeighborhood;
+  final ValueChanged<SNeighborhood> onNeighborhoodSelected;
   final String kind;
   final ValueChanged<String> onKindChanged;
   const _AreaKindStep({
     required this.areas,
     required this.selectedArea,
     required this.onAreaSelected,
+    required this.neighborhoods,
+    required this.selectedNeighborhood,
+    required this.onNeighborhoodSelected,
     required this.kind,
     required this.onKindChanged,
   });
@@ -537,6 +560,29 @@ class _AreaKindStep extends StatelessWidget {
                     ))
                 .toList(),
           ),
+        if (neighborhoods.isNotEmpty) ...[
+          const SizedBox(height: 24),
+          const Text('الموقع (اختياري)', style: TextStyle(fontWeight: FontWeight.bold, color: SColors.navy)),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: neighborhoods
+                .map((n) => ChoiceChip(
+                      label: Text(n.nameAr),
+                      selected: selectedNeighborhood?.id == n.id,
+                      onSelected: (_) => onNeighborhoodSelected(n),
+                      selectedColor: SColors.blue600,
+                      labelStyle: TextStyle(
+                        color: selectedNeighborhood?.id == n.id ? Colors.white : SColors.navy,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      backgroundColor: SColors.card,
+                      side: BorderSide(color: selectedNeighborhood?.id == n.id ? SColors.blue600 : SColors.line),
+                    ))
+                .toList(),
+          ),
+        ],
         const SizedBox(height: 24),
         const Text('نوع السكن', style: TextStyle(fontWeight: FontWeight.bold, color: SColors.navy)),
         const SizedBox(height: 10),

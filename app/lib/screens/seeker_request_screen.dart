@@ -31,6 +31,8 @@ class _SeekerRequestScreenState extends State<SeekerRequestScreen> {
   SCity? _city;
   List<SArea> _areas = [];
   final Set<int> _selectedAreas = {};
+  List<SNeighborhood> _allNeighborhoods = [];
+  final Set<int> _selectedNeighborhoods = {};
   String? _gender;
   String _occupation = 'other';
   final _budgetCtrl = TextEditingController();
@@ -67,12 +69,29 @@ class _SeekerRequestScreenState extends State<SeekerRequestScreen> {
     setState(() {
       _city = city;
       _selectedAreas.clear();
+      _selectedNeighborhoods.clear();
       _areas = [];
+      _allNeighborhoods = [];
     });
     if (city == null) return;
     final areas = await LocationsRepo.fetchAreas(city.id);
     if (!mounted) return;
     setState(() => _areas = areas);
+    final lists = await Future.wait(areas.map((a) => LocationsRepo.fetchNeighborhoods(a.id)));
+    if (!mounted) return;
+    setState(() => _allNeighborhoods = lists.expand((l) => l).toList());
+  }
+
+  void _toggleArea(int areaId) {
+    setState(() {
+      if (_selectedAreas.contains(areaId)) {
+        _selectedAreas.remove(areaId);
+        _selectedNeighborhoods.removeWhere(
+            (nid) => _allNeighborhoods.firstWhere((n) => n.id == nid).areaId == areaId);
+      } else {
+        _selectedAreas.add(areaId);
+      }
+    });
   }
 
   bool get _canSubmit =>
@@ -100,6 +119,7 @@ class _SeekerRequestScreenState extends State<SeekerRequestScreen> {
         kind: _kind,
         furnished: _furnished,
         smoker: _smoker!,
+        neighborhoods: _selectedNeighborhoods.toList(),
       );
       if (!mounted) return;
       await showDialog<void>(
@@ -166,13 +186,7 @@ class _SeekerRequestScreenState extends State<SeekerRequestScreen> {
                     .map((a) => FilterChip(
                           label: Text(a.nameAr),
                           selected: _selectedAreas.contains(a.id),
-                          onSelected: (_) => setState(() {
-                            if (_selectedAreas.contains(a.id)) {
-                              _selectedAreas.remove(a.id);
-                            } else {
-                              _selectedAreas.add(a.id);
-                            }
-                          }),
+                          onSelected: (_) => _toggleArea(a.id),
                           selectedColor: SColors.blue100,
                           checkmarkColor: SColors.blue700,
                           labelStyle: TextStyle(
@@ -181,6 +195,39 @@ class _SeekerRequestScreenState extends State<SeekerRequestScreen> {
                           ),
                           backgroundColor: SColors.card,
                           side: BorderSide(color: _selectedAreas.contains(a.id) ? SColors.blue600 : SColors.line),
+                        ))
+                    .toList(),
+              ),
+            ],
+            if (_selectedAreas.isNotEmpty &&
+                _allNeighborhoods.any((n) => _selectedAreas.contains(n.areaId))) ...[
+              const SizedBox(height: 20),
+              const Text('المواقع المفضّلة (اختياري)',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: SColors.navy)),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _allNeighborhoods
+                    .where((n) => _selectedAreas.contains(n.areaId))
+                    .map((n) => FilterChip(
+                          label: Text(n.nameAr),
+                          selected: _selectedNeighborhoods.contains(n.id),
+                          onSelected: (_) => setState(() {
+                            if (_selectedNeighborhoods.contains(n.id)) {
+                              _selectedNeighborhoods.remove(n.id);
+                            } else {
+                              _selectedNeighborhoods.add(n.id);
+                            }
+                          }),
+                          selectedColor: SColors.blue100,
+                          checkmarkColor: SColors.blue700,
+                          labelStyle: TextStyle(
+                            color: _selectedNeighborhoods.contains(n.id) ? SColors.blue700 : SColors.navy,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          backgroundColor: SColors.card,
+                          side: BorderSide(color: _selectedNeighborhoods.contains(n.id) ? SColors.blue600 : SColors.line),
                         ))
                     .toList(),
               ),

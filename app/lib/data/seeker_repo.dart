@@ -19,6 +19,7 @@ class SeekerRepo {
     required bool smoker,
     String? rentalPeriodPref,
     int? roomsPref,
+    List<int> neighborhoods = const [],
   }) async {
     final ref = await supabase.rpc('submit_request', params: {
       'p_name': name,
@@ -37,6 +38,7 @@ class SeekerRepo {
       'p_smoker': smoker,
       'p_rental_period_pref': rentalPeriodPref,
       'p_rooms_pref': roomsPref,
+      'p_neighborhoods': neighborhoods,
     });
     return ref as String;
   }
