@@ -373,6 +373,8 @@ const KIND = LANG === "en" ? {room_shared:"Shared room",
 const ICON = {room_shared:"🛏", bed_shared:"🛌", studio:"🏠", apartment:"🏢"};
 const POL  = LANG === "en" ? {female:"Women only", male:"Men only", mixed:"Families"}
                             : {female:"إناث فقط", male:"ذكور فقط", mixed:"عائلات"};
+/* الآن مصفوفة — إعلان واحد ممكن يستهدف أكثر من فئة بنفس الوقت. */
+const polLabel = arr => (Array.isArray(arr) ? arr : [arr]).map(k => POL[k] || k).join("، ");
 const OCC  = LANG === "en" ? {student:"Student", employee:"Employee", family:"Family", visitor:"Visitor", other:"Other"}
                             : {student:"طالب/ة", employee:"موظف/ة", family:"عائلة", visitor:"زائر/ة", other:"غير ذلك"};
 const VER  = LANG === "en" ? {field:"Field-verified", desk:"Phone-verified", none:"Not verified"}
@@ -658,7 +660,7 @@ function render(){
       (!F.area || String(x.area_id)===String(F.area)) &&
       (!F.neigh || String(x.neighborhood_id)===String(F.neigh)) &&
       (!F.kind || x.kind===F.kind) &&
-      (!F.pol  || x.gender_pol===F.pol) &&
+      (!F.pol  || (x.gender_pol||[]).includes(F.pol)) &&
       (!F.max  || Number(x.price) <= Number(toEN(F.max))) &&
       (!q || (x.ref||"").toLowerCase().includes(q) || (x.description||"").toLowerCase().includes(q)));
     count.textContent = d.length ? tt(`${d.length} سكن متاح`, `${d.length} homes available`) : "";
@@ -693,7 +695,7 @@ function cardL(x){
       <div class="meta">${esc(x.city)} · ${esc(x.area)}${x.neighborhood?" · "+esc(x.neighborhood):""}${x.landmark?" · "+esc(x.landmark):""}</div>
       <div class="price">${price(x.price,x.currency)}<small> / ${PERIOD_UNIT[x.rental_period]||PERIOD_UNIT.monthly}${x.bills_included?tt(" — شامل الفواتير"," — bills included"):""}</small></div>
       <div class="tags">${v}${rating}<span class="t">${KIND[x.kind]||""}</span>
-        <span class="t">${POL[x.gender_pol]||""}</span>
+        <span class="t">${polLabel(x.gender_pol)}</span>
         ${x.rental_period && x.rental_period!=="monthly"?`<span class="t">${PERIOD[x.rental_period]}</span>`:""}
         ${x.furnished?`<span class="t">${tt("مفروش","Furnished")}</span>`:""}
         <span class="t">${tt("متاح","Available")} ${dt(x.available_from)}</span></div>
@@ -800,7 +802,7 @@ function openL(id){
         <div class="price" style="font-size:26px">${price(x.price,x.currency)}<small> / ${PERIOD_UNIT[x.rental_period]||PERIOD_UNIT.monthly}</small></div>
         <div class="tags" style="margin:10px 0 14px">
           ${verifBadge(x)}
-          <span class="t">${KIND[x.kind]||""}</span><span class="t">${POL[x.gender_pol]||""}</span>
+          <span class="t">${KIND[x.kind]||""}</span><span class="t">${polLabel(x.gender_pol)}</span>
           ${x.furnished?`<span class="t">${tt("مفروش","Furnished")}</span>`:""}</div>
         <p style="margin:0 0 12px">${esc(x.description||"")}</p>
         <div class="row"><span>${tt("المدينة","City")}</span><span>${esc(x.city)}</span></div>
@@ -1149,9 +1151,8 @@ function openForm(kind){
         <div class="fg"><label>${tt("النوع","Type")}</label><select id="lKind">
           ${Object.entries(KIND).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}
         </select></div>
-        <div class="fg"><label>${tt("السكن لـ","Housing for")}</label><select id="lPol">
-          <option value="female">${POL.female}</option><option value="male">${POL.male}</option>
-          <option value="mixed">${POL.mixed}</option></select></div>
+        <div class="fg"><label>${tt("السكن لـ (تقدر تختار أكثر من فئة)","Housing for (choose one or more)")}</label>
+          ${chipsHTML("lPol", [["mixed",POL.mixed],["male",POL.male],["female",POL.female]], {val:p=>p[0], lbl:p=>p[1]})}</div>
         <div class="fg"><label>${tt("مفروش؟","Furnished?")}</label><select id="lFurn">
           <option value="true">${tt("مفروش","Furnished")}</option><option value="false">${tt("غير مفروش","Unfurnished")}</option></select></div>
         <div class="fg"><label>${tt("فاتورة المياه","Water bill")}</label><select id="lBillsWater">
@@ -1265,13 +1266,14 @@ function openForm(kind){
 /* ═══════════════ مسودة الإعلان (محلياً — النموذج طويل) ═══════════════ */
 const DRAFT_KEY = "sakanna_listing_draft";
 const DRAFT_FIELDS = ["lName","lDial","lPhone","lTitle","lCity","lArea","lPrice","lCur","lDep",
-  "lKind","lPol","lFurn","lBillsWater","lBillsElec","lBillsNet","lRooms","lPeriod","lMin","lFrom","lLand","lOcc","lDesc","lPromo"];
+  "lKind","lFurn","lBillsWater","lBillsElec","lBillsNet","lRooms","lPeriod","lMin","lFrom","lLand","lOcc","lDesc","lPromo"];
 
 function saveDraft(){
   if(!$("lTitle")) return;
   try{
     const d = {}; DRAFT_FIELDS.forEach(id => d[id] = $(id).value);
     d.lFeat = chipsValue("lFeat");
+    d.lPol = chipsValue("lPol");
     d.lNeigh = $("lNeigh") ? $("lNeigh").value : "";
     localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
   }catch(e){ /* التخزين معطّل — المسودة مش لازمة تعطّل الفورم */ }
@@ -1292,6 +1294,10 @@ function restoreDraftIfAny(){
   syncRoomChip("lRooms");
   (d.lFeat||[]).forEach(v => {
     const el = document.querySelector(`input[name="lFeat"][value="${CSS.escape(v)}"]`);
+    if(el) el.checked = true;
+  });
+  (d.lPol||[]).forEach(v => {
+    const el = document.querySelector(`input[name="lPol"][value="${CSS.escape(v)}"]`);
     if(el) el.checked = true;
   });
   $("draftBanner").innerHTML = `<div class="note">${tt("استرجعنا مسودة كنت تعبّئها سابقاً.","We restored a draft you were filling in before.")}
@@ -1340,7 +1346,7 @@ async function subListing(){
     p_area: Number($("lArea").value),
     p_price: num("lPrice"),
     p_kind: $("lKind").value,
-    p_pol: $("lPol").value,
+    p_pol: chipsValue("lPol"),
     p_furnished: $("lFurn").value === "true",
     p_from: $("lFrom").value || null,
     p_occ: $("lOcc").value.trim() || null,
@@ -1365,6 +1371,7 @@ async function subListing(){
   if(!$("lCity").value)    return bad(tt("اختر المدينة.","Choose a city."));
   if(!v.p_area)            return bad(tt("اختر المنطقة.","Choose an area."));
   if(!v.p_price)           return bad(tt("اكتب السعر الشهري.","Enter the monthly price."));
+  if(!v.p_pol.length)      return bad(tt("اختر فئة واحدة على الأقل لـ«السكن لـ».","Choose at least one housing-for category."));
   const btn = $("lWrap").querySelector("button");
   if(btn){ btn.disabled = true; btn.textContent = (selectedImages.length || selectedVideo) ? tt("جارِ رفع الصور والفيديو…","Uploading photos and video…") : tt("جارِ الإرسال…","Sending…"); }
   try{

@@ -55,7 +55,8 @@ class _AddListingFlowState extends State<AddListingFlow> {
   final _minStayCtrl = TextEditingController();
   DateTime _availableFrom = DateTime.now();
   bool _furnished = true;
-  String _genderPol = 'mixed';
+  final Set<String> _genderPols = {'mixed'};
+  String? _genderPolError;
 
   bool _billsWater = false, _billsElectricity = false, _billsInternet = false;
   final Set<String> _features = {};
@@ -218,9 +219,12 @@ class _AddListingFlowState extends State<AddListingFlow> {
         setState(() => _areaError = _area == null ? 'اختر منطقة' : null);
         return _area != null;
       case 2:
-      case 3:
       case 7:
         return _formKeys[step]?.currentState?.validate() ?? true;
+      case 3:
+        final formOk = _formKeys[3]?.currentState?.validate() ?? true;
+        setState(() => _genderPolError = _genderPols.isEmpty ? 'اختر فئة واحدة على الأقل' : null);
+        return formOk && _genderPols.isNotEmpty;
       case 6:
         setState(() => _photosError = _photos.isEmpty ? 'أضف صورة واحدة على الأقل' : null);
         return _photos.isNotEmpty;
@@ -252,7 +256,7 @@ class _AddListingFlowState extends State<AddListingFlow> {
         area: _area!.id,
         price: num.parse(_priceCtrl.text.trim()),
         kind: _kind,
-        genderPol: _genderPol,
+        genderPols: _genderPols.toList(),
         furnished: _furnished,
         availableFrom: _availableFrom,
         occupantsNote: _occupantsNoteCtrl.text.trim().isEmpty ? null : _occupantsNoteCtrl.text.trim(),
@@ -396,8 +400,16 @@ class _AddListingFlowState extends State<AddListingFlow> {
             onDateChanged: (d) => setState(() => _availableFrom = d),
             furnished: _furnished,
             onFurnishedChanged: (v) => setState(() => _furnished = v),
-            genderPol: _genderPol,
-            onGenderChanged: (g) => setState(() => _genderPol = g),
+            genderPols: _genderPols,
+            onGenderToggled: (g) => setState(() {
+              _genderPolError = null;
+              if (_genderPols.contains(g)) {
+                _genderPols.remove(g);
+              } else {
+                _genderPols.add(g);
+              }
+            }),
+            genderPolError: _genderPolError,
           ),
         );
       case 4:
@@ -713,8 +725,9 @@ class _DetailsStep extends StatelessWidget {
   final ValueChanged<DateTime> onDateChanged;
   final bool furnished;
   final ValueChanged<bool> onFurnishedChanged;
-  final String genderPol;
-  final ValueChanged<String> onGenderChanged;
+  final Set<String> genderPols;
+  final ValueChanged<String> onGenderToggled;
+  final String? genderPolError;
   const _DetailsStep({
     required this.roomsCtrl,
     required this.minStayCtrl,
@@ -722,8 +735,9 @@ class _DetailsStep extends StatelessWidget {
     required this.onDateChanged,
     required this.furnished,
     required this.onFurnishedChanged,
-    required this.genderPol,
-    required this.onGenderChanged,
+    required this.genderPols,
+    required this.onGenderToggled,
+    this.genderPolError,
   });
 
   @override
@@ -779,22 +793,31 @@ class _DetailsStep extends StatelessWidget {
           onChanged: onFurnishedChanged,
         ),
         const SizedBox(height: 12),
-        const Text('مناسبة لـ', style: TextStyle(fontWeight: FontWeight.bold, color: SColors.navy)),
+        const Text('مناسبة لـ (تقدر تختار أكثر من فئة)', style: TextStyle(fontWeight: FontWeight.bold, color: SColors.navy)),
         const SizedBox(height: 10),
         Wrap(
           spacing: 8,
+          runSpacing: 8,
           children: _genders
-              .map((g) => ChoiceChip(
+              .map((g) => FilterChip(
                     label: Text(g.$2),
-                    selected: genderPol == g.$1,
-                    onSelected: (_) => onGenderChanged(g.$1),
-                    selectedColor: SColors.blue600,
-                    labelStyle: TextStyle(color: genderPol == g.$1 ? Colors.white : SColors.navy, fontWeight: FontWeight.w600),
+                    selected: genderPols.contains(g.$1),
+                    onSelected: (_) => onGenderToggled(g.$1),
+                    selectedColor: SColors.blue100,
+                    checkmarkColor: SColors.blue700,
+                    labelStyle: TextStyle(
+                      color: genderPols.contains(g.$1) ? SColors.blue700 : SColors.navy,
+                      fontWeight: FontWeight.w600,
+                    ),
                     backgroundColor: SColors.card,
-                    side: BorderSide(color: genderPol == g.$1 ? SColors.blue600 : SColors.line),
+                    side: BorderSide(color: genderPols.contains(g.$1) ? SColors.blue600 : SColors.line),
                   ))
               .toList(),
         ),
+        if (genderPolError != null) ...[
+          const SizedBox(height: 8),
+          Text(genderPolError!, style: const TextStyle(color: SColors.danger, fontSize: 13)),
+        ],
       ],
     );
   }

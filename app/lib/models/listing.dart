@@ -14,7 +14,7 @@ class Listing {
   final String currency;
   final bool billsIncluded, billsWater, billsElectricity, billsInternet;
   final num? deposit;
-  final String genderPol; // gender_policy: female/male/mixed
+  final List<String> genderPols; // gender_policy[]: female/male/mixed — إعلان ممكن يستهدف أكثر من فئة
   final bool furnished;
   final int? roomsTotal, occupantsNow;
   final DateTime? availableFrom;
@@ -53,7 +53,7 @@ class Listing {
     required this.billsElectricity,
     required this.billsInternet,
     this.deposit,
-    required this.genderPol,
+    required this.genderPols,
     required this.furnished,
     this.roomsTotal,
     this.occupantsNow,
@@ -93,6 +93,12 @@ class Listing {
       return (v as List).map((e) => e.toString()).toList();
     }
 
+    List<String> parseGenderPols(dynamic v) {
+      if (v == null) return const ['mixed'];
+      if (v is List) return v.map((e) => e.toString()).toList();
+      return [v.toString()];
+    }
+
     return Listing(
       id: j['id'] as String,
       ref: j['ref'] as String,
@@ -115,7 +121,7 @@ class Listing {
       billsElectricity: j['bills_electricity'] as bool? ?? false,
       billsInternet: j['bills_internet'] as bool? ?? false,
       deposit: j['deposit'] as num?,
-      genderPol: j['gender_pol'] as String? ?? 'mixed',
+      genderPols: parseGenderPols(j['gender_pol']),
       furnished: j['furnished'] as bool? ?? false,
       roomsTotal: j['rooms_total'] as int?,
       occupantsNow: j['occupants_now'] as int?,
@@ -147,6 +153,14 @@ class Listing {
         'daily' => 'يوم',
         _ => 'شهر',
       };
+
+  static String _polLabel(String g) => switch (g) {
+        'female' => 'إناث فقط',
+        'male' => 'ذكور فقط',
+        _ => 'عائلات',
+      };
+
+  String get genderPolLabel => genderPols.map(_polLabel).join('، ');
 
   /// نفس منطق dt(x.visit_date)/dt(x.video_verified_at) بـverifBadge() —
   /// desk بدون تاريخ عمداً (شارة قديمة، قاعدة ٢٤).

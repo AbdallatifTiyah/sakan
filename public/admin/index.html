@@ -364,6 +364,8 @@ const L_VERIF  = {none:"غير موثّق",desk:"توثيق مكتبي",video:"�
 const L_KIND   = {room_shared:"غرفة بسكن مشترك",bed_shared:"سرير بغرفة مشتركة",
                   studio:"ستوديو",apartment:"شقة"};
 const L_POL    = {female:"إناث فقط",male:"ذكور فقط",mixed:"عائلات"};
+/* الآن مصفوفة — إعلان واحد ممكن يستهدف أكثر من فئة بنفس الوقت. */
+const polLabel = arr => (Array.isArray(arr) ? arr : [arr]).map(k => L_POL[k] || k).join("، ");
 const L_PERIOD      = {monthly:"شهري",weekly:"أسبوعي",daily:"يومي"};
 const L_PERIOD_UNIT = {monthly:"شهر",weekly:"أسبوع",daily:"يوم"};
 const C_STATUS = {new:"جديد",forwarded:"محوّل للمالك",owner_responded:"المالك ردّ",
@@ -960,7 +962,7 @@ async function drawListing(id){
     <dt>فاتورة الإنترنت</dt><dd>${yn(r.bills_internet)}</dd>
     <dt>الموقع</dt><dd>${esc(r.city)} — ${esc(r.area)}${r.neighborhood?" — "+esc(r.neighborhood):""}${r.landmark?" · "+esc(r.landmark):""}</dd>
     <dt>العنوان الدقيق</dt><dd>${esc(r.exact_address)||'<span style="color:var(--mute)">غير مسجّل</span>'}</dd>
-    <dt>السياسة</dt><dd>${esc(L_POL[r.gender_pol]||r.gender_pol)} · ${r.furnished?"مفروش":"غير مفروش"}</dd>
+    <dt>السياسة</dt><dd>${esc(polLabel(r.gender_pol))} · ${r.furnished?"مفروش":"غير مفروش"}</dd>
     <dt>الساكنون</dt><dd>${esc(r.occupants_note)||"—"}</dd>
     <dt>متاح من</dt><dd>${dt(r.available_from)}</dd>
     <dt>نُشر</dt><dd>${dt(r.published_at,true)}</dd>
@@ -985,8 +987,10 @@ async function drawListing(id){
       <div class="field"><label>التأمين</label><input id="elDep" type="number"></div>
       <div class="field"><label>النوع</label><select id="elKind">
         ${Object.entries(L_KIND).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select></div>
-      <div class="field"><label>السكن لـ</label><select id="elPol">
-        ${Object.entries(L_POL).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select></div>
+      <div class="field"><label>السكن لـ (أكثر من فئة ممكن)</label><div id="elPols">
+        ${Object.entries(L_POL).map(([k,v],i)=>
+          `<div class="chk"><input type="checkbox" id="epol${i}" data-pol="${k}"><label for="epol${i}">${v}</label></div>`).join("")}
+      </div></div>
       <div class="field"><label>مفروش؟</label><select id="elFurn">
         <option value="true">مفروش</option><option value="false">غير مفروش</option></select></div>
       <div class="field"><label>فاتورة المياه</label><select id="elBillsWater">
@@ -1152,7 +1156,10 @@ async function drawListing(id){
     $("#elCur").value = r.currency||"ILS";
     $("#elDep").value = r.deposit??"";
     $("#elKind").value = r.kind;
-    $("#elPol").value = r.gender_pol;
+    (r.gender_pol||[]).forEach(k => {
+      const el = $("#editListingBox").querySelector(`[data-pol="${CSS.escape(k)}"]`);
+      if(el) el.checked = true;
+    });
     $("#elFurn").value = r.furnished ? "true" : "false";
     $("#elBillsWater").value = r.bills_water ? "true" : "false";
     $("#elBillsElec").value = r.bills_electricity ? "true" : "false";
@@ -1193,6 +1200,8 @@ async function drawListing(id){
   if(saveListingEdit) saveListingEdit.onclick = async () => {
     $("#elErr").textContent = "";
     const feats = [...$("#editListingBox").querySelectorAll("[data-slug]:checked")].map(el=>el.dataset.slug);
+    const pols = [...$("#editListingBox").querySelectorAll("[data-pol]:checked")].map(el=>el.dataset.pol);
+    if(!pols.length){ $("#elErr").textContent = "اختر فئة واحدة على الأقل لـ«السكن لـ»."; return; }
     try{
       await rpc("admin_listing_update", {
         p_id: r.id,
@@ -1202,7 +1211,7 @@ async function drawListing(id){
         p_currency: $("#elCur").value,
         p_deposit: $("#elDep").value === "" ? null : Number($("#elDep").value),
         p_kind: $("#elKind").value,
-        p_pol: $("#elPol").value,
+        p_pol: pols,
         p_furnished: $("#elFurn").value === "true",
         p_bills_water: $("#elBillsWater").value === "true",
         p_bills_electricity: $("#elBillsElec").value === "true",
@@ -1663,7 +1672,7 @@ async function drawContact(id){
       $("#listingMoreDt").style.display = "";
       const lm = $("#listingMore");
       lm.style.display = "";
-      lm.innerHTML = esc(L_KIND[l.kind]||l.kind) + " · " + esc(L_POL[l.gender_pol]||l.gender_pol) +
+      lm.innerHTML = esc(L_KIND[l.kind]||l.kind) + " · " + esc(polLabel(l.gender_pol)) +
         " · " + (l.furnished?"مفروش":"غير مفروش") +
         (l.rooms_total?" · "+l.rooms_total+" غرف":"") +
         (l.deposit!=null?" · تأمين "+priceStr(l.deposit,r.currency):"") +
@@ -2461,7 +2470,7 @@ async function vMatchCompare(score, listingId, requestId){
       ["مفروش", l.furnished?"نعم":"لا", yn(r.furnished_pref)],
       ["أقل مدة إيجار", l.min_stay_months?l.min_stay_months+" شهر":"—", r.min_stay_months?r.min_stay_months+" شهر":"—"],
       ["تاريخ التوفر / الانتقال", dt(l.available_from), dt(r.move_in_date)],
-      ["السياسة / الجنس", esc(L_POL[l.gender_pol]||l.gender_pol), r.gender==="female"?"أنثى":r.gender==="male"?"ذكر":"—"],
+      ["السياسة / الجنس", esc(polLabel(l.gender_pol)), r.gender==="female"?"أنثى":r.gender==="male"?"ذكر":"—"],
     ];
     $("#main").innerHTML = `
       <div class="head">

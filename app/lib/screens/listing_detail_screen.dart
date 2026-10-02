@@ -361,6 +361,12 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                         label: 'الفرش',
                         value: listing.furnished ? 'مفروشة' : 'غير مفروشة',
                       ),
+                      const SizedBox(width: 12),
+                      _StatBox(
+                        icon: Icons.people_outline_rounded,
+                        label: 'مناسبة لـ',
+                        value: listing.genderPolLabel,
+                      ),
                     ],
                   ),
                   if (listing.minStayMonths != null) ...[
@@ -462,7 +468,12 @@ class _StatBox extends StatelessWidget {
           children: [
             Icon(icon, color: SColors.blue600, size: 20),
             const SizedBox(height: 8),
-            Text(value, style: const TextStyle(fontWeight: FontWeight.bold, color: SColors.navy)),
+            Text(
+              value,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontWeight: FontWeight.bold, color: SColors.navy),
+            ),
             Text(label, style: const TextStyle(color: SColors.mut, fontSize: 12)),
           ],
         ),
