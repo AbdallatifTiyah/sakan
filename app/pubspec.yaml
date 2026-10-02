@@ -44,6 +44,11 @@ dependencies:
   # (قاعدة ١ و٥). بديل عن استدعاءات REST يدوية لكل RPC.
   supabase_flutter: ^2.8.0
 
+  # firebase_core/firebase_messaging: إشعارات Push — حزم Firebase الرسمية
+  # (FlutterFire). firebase_core إلزامية لتهيئة أي خدمة Firebase أخرى.
+  firebase_core: ^3.15.2
+  firebase_messaging: ^15.2.10
+
   # image_picker: اختيار صور من المعرض/الكاميرا لنموذج "أضف شقتك" — حزمة Flutter
   # الرسمية (فريق Flutter)، بديل التقاط الملفات اليدوي بـindex.html بالموقع.
   image_picker: ^1.1.2

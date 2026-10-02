@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "746972101130",
+    "project_id": "sakanna-2026",
+    "storage_bucket": "sakanna-2026.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:746972101130:android:da516b19f6726fbdc67df3",
+        "android_client_info": {
+          "package_name": "ps.sakanna.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3ftWUIWgOC3lHvBwJN_yo5BvfXvLtGOE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
